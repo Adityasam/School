@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead">Fee Collection</div>
+        <div class="col-2 my-auto">
+            <div class="custom_dropdown">
+                <input type="text" data-id="{{activesessionid}}" id="sessionfilter"
+                    value="{{activesession}}"
+                    class="class search_input shadow br-30 form-control f-12 OP EXC"
+                    placeholder="Session..." />
+                <div class="optionblock">
+                    {% for s in sessions %}
+                    <div class="option_item" data-fun="load_data" data-id="{{ s.id }}">
+                        {{s.Title}}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-3 my-auto">
+            <div class="bg-white shadow br-30" style="padding:5px 10px;display: inline-block;">
+                <input type="text" placeholder="Search..." id="srch" class="search_input" />
+            </div>
+            <div class="search_icon text-center shadow" onclick="search_page()">
+                <i class="fas fa-search p-n"></i>
+            </div>
+        </div>
+        <div class="col-4 text-end my-auto">
+            <div class="mybtn shadow blue" onclick="feeModal()">
+                <i class="fas fa-plus mr-10 p-n"></i>
+                <span class="p-n">Collect</span>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3" id="card_container">
+
+    </div>
+</div>
+
+<!--Card temp-->
+<div class="col-12 mb-4 main_card" id="card_temp" hidden style="white-space: nowrap;">
+    <div class="bg-white shadow pd-10 br-30">
+        <div class="row">
+            <div class="col-3 my-auto">
+                <div class="fwb name ps-2" style="font-size:18px"></div>
+                <div style="font-size:12px" class="class ps-2">Class : 2nd</div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Doc. No</div>
+                <div class="fwb docno"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Fee Type</div>
+                <div class="fwb feetype"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Date</div>
+                <div class="fwb collectiondate"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Amount</div>
+                <div class="fwb amount"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Discount</div>
+                <div class="fwb discount"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Fine</div>
+                <div class="fwb fine"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Mode</div>
+                <div class="fwb mode"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Total Paid</div>
+                <div class="fwb totalpaid"></div>
+            </div>
+            <div class="col-1 text-end my-auto">
+                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)"></i>
+                <br>
+                <i class="fas fa-edit me-3 cur" style="color:var(--my_green)" onclick="edit_student()"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="feeModal" data-id="" style="width:70%;left: 15%;padding: 20px;" tabindex="-1"
+    aria-labelledby="feeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" style="width:100%;">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="feeModalLabel">Collect Fee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Student</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="student"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Student..." />
+                                        <div class="optionblock" id="student_drop">
+                                            {% for student in students %}
+                                            <div class="option_item" data-class="{{student.Class}}" data-fun="select_student" data-id="{{ student.StudentCode }}">
+                                                {{student.StudentCode}} - {{ student.FirstName }} {{student.MiddleName}}
+                                                {{student.LastName}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Fee Type</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="feetype"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Fee Type..." />
+                                        <div class="optionblock" id="type_drop">
+                                            {% for type in feetype %}
+                                            <div class="option_item" data-id="{{type.id}}">{{type.Title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Session</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="{{activesessionid}}" id="modalsession"
+                                            value="{{activesession}}"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Session..." />
+                                        <div class="optionblock">
+                                            {% for s in sessions %}
+                                            <div class="option_item" data-id="{{ s.id }}">
+                                                {{s.Title}}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Month-Year</div>
+                                    <input type="month" class="form-control f-12 br-30 shadow INP" id="monthyear" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Collection Date</div>
+                                    <input type="date" value="" class="form-control f-12 br-30 shadow INP"
+                                        id="collectdate" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Amount</div>
+                                    <input type="number" class="form-control f-12 br-30 shadow INP"
+                                        onkeyup="cal_total()" id="amount" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Discount</div>
+                                    <input type="number" class="form-control f-12 br-30 shadow INP"
+                                        onkeyup="cal_total()" id="discount" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Fine</div>
+                                    <input type="number" class="form-control f-12 br-30 shadow INP"
+                                        onkeyup="cal_total()" id="fine" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Total Amount</div>
+                                    <input type="number" class="form-control f-12 br-30 shadow INP" id="total"
+                                        disabled />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Payment Mode</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="mode"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Payment Mode..." />
+                                        <div class="optionblock" id="mode_drop">
+                                            {% for mode in modes %}
+                                            <div class="option_item" data-id="{{ mode.id }}">{{ mode.Title }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Referenece No</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP" id="refno" />
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <div class="mb-1 f-10">Remarks</div>
+                                    <textarea id="remarks" rows="5"
+                                        class="form-control f-12 br-10 shadow INP"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div hidden class="row">
+                        <div class="col-6 fwb my-auto">Item List</div>
+                        <div class="col-6 text-end my-auto">
+                            <div class="mybtn blue shadow f-12">Add Item</div>
+                        </div>
+                    </div>
+                    <div hidden>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="mb-1 f-10">Fee Type</div>
+                                <div class="custom_dropdown">
+                                    <input type="text" data-id=""
+                                        class="feetype search_input shadow br-30 form-control f-12"
+                                        placeholder="Fee Type..." />
+                                    <div class="optionblock" id="type_drop">
+                                        {% for type in feetype %}
+                                        <div class="option_item" data-id="{{type.id}}">{{type.Title}}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-1 f-10">Month-Year</div>
+                                <input type="month" class="form-control f-12 br-30 shadow monthyear" />
+                            </div>
+                            <div class="col">
+                                <div class="mb-1 f-10">Amount</div>
+                                <input type="number" class="form-control f-12 br-30 shadow amount" />
+                            </div>
+                            <div class="col">
+                                <div class="mb-1 f-10">Discount</div>
+                                <input type="number" class="form-control f-12 br-30 shadow discount" />
+                            </div>
+                            <div class="col">
+                                <div class="mb-1 f-10">Net Amount</div>
+                                <input type="number" class="form-control f-12 br-30 shadow net" />
+                            </div>
+                            <div class="col-1 my-auto text-end">
+                                <div class="mb-1 f-10" style="opacity: 0;">View</div>
+                                <i class="fas fa-trash cl-r"></i>   
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deletebtn" onclick="start_delete()">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="submit_data()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function start_delete(){
+        $("#feeModal").modal("hide");
+        ask_confirm("Are you sure you want to delete this fee collection?", "delete_fee", "hide_confirm");
+    }
+
+    function delete_fee(){
+        var id = $("#feeModalLabel").attr("data-id");
+        delete_item(id, "Fee");
+        hide_confirm();
+        load_data();
+    }
+
+    function select_student(){
+        var cls = event.target.getAttribute("data-class");
+        var data = new FormData();
+        data.append("classid", cls);
+        var fee = load_ajax_data("get_class_fee", data);
+        $("#amount").val(fee);
+        $("#discount").val("0");
+        $("#fine").val("0");
+        $("#total").val(fee);
+    }
+
+    function cal_total() {
+        var amount = parseFloat(document.getElementById("amount").value);
+        if (isNaN(amount)) {
+            amount = 0;
+        }
+
+        var discount = parseFloat(document.getElementById("discount").value);
+        if (isNaN(discount)) {
+            discount = 0;
+        }
+
+        var fine = parseFloat(document.getElementById("fine").value);
+        if (isNaN(fine)) {
+            fine = 0;
+        }
+
+        document.getElementById("total").value = (amount + fine - discount).toFixed(2);
+    }
+
+    function edit_student() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = parent.getAttribute("data-id");
+        $("#feeModalLabel").html("Edit Fee");
+        $("#feeModalLabel").attr("data-id", id);
+
+        var data = new FormData();
+        data.append("feeid", id);
+        var detail = load_ajax_data("get_fee_detail", data);
+        detail = detail.data;
+
+        $("#modalsession").attr("data-id", detail["sessionid"]);
+        $("#student").attr("data-id", detail["studentcode"]);
+        $("#feetype").attr("data-id", detail["type"]);
+        $("#monthyear").val(detail["monthyear"]);
+        $("#collectdate").val(detail["documentdate"]);
+        $("#amount").val(detail["amount"]);
+        $("#discount").val(detail["discount"]);
+        $("#fine").val(detail["fine"]);
+        $("#total").val(detail["totalamount"]);
+        $("#refno").val(detail["referenceno"]);
+        $("#remarks").val(detail["remarks"]);
+        $("#mode").attr("data-id", detail["mode"]);
+
+        $("#deletebtn").attr("hidden", false);
+
+        set_drop_default();
+        $("#feeModal").modal("show");
+    }
+
+    function submit_data() {
+        var feeid = $("#feeModalLabel").attr("data-id");
+        var ops = document.getElementsByClassName("OP");
+        var inps = document.getElementsByClassName("INP");
+        var sessionid = $("#modalsession").attr("data-id");
+
+        var data = new FormData();
+        data.append("sessionid", sessionid);
+        if (feeid != "") {
+            data.append("feeid", feeid);
+        }
+
+        for (var i = 0; i < ops.length; i++) {
+            data.append(ops[i].id, ops[i].getAttribute("data-id"));
+        }
+        for (var i = 0; i < inps.length; i++) {
+            if (inps[i].value != "") {
+                data.append(inps[i].id, inps[i].value);
+            }
+        }
+
+        var code = send_ajax_data("save_fee", data);
+
+        if (feeid == "") {
+            var message = "Fee Collected";
+            success_modal(message);
+        }else{
+            var message = "Fee Details Updated";
+            success_modal(message);
+        }
+        load_data();
+        $("#feeModal").modal("hide");
+    }
+
+    function feeModal() {
+        $("#feeModal").find("input").val("");
+        $("#feeModal").find("input").attr("data-id", "");
+        $("#feeModalLabel").attr("data-id", "");
+        $("#feeModalLabel").html("Collect Fee");
+        $("#feeModal").modal("show");
+        $("#modalsession").val("{{activesession}}")
+        $("#modalsession").attr("data-id", "{{activesession}}")
+        $("#collectdate").val($("#currentdate").val());
+
+        $("#deletebtn").attr("hidden", true);
+    }
+
+    function load_local() {
+        load_data();
+    }
+
+    function search_page() {
+        load_data();
+    }
+
+    function load_data() {
+        var data = new FormData();
+        var search = $("#srch").val().trim().toLowerCase();
+        data.append("sessionid", $("#sessionfilter").attr("data-id"));
+        data.append("search", search);
+        var list = load_ajax_data("get_fee_list", data);
+        console.log(list);
+        var parent = document.getElementById("card_container");
+        var temp = document.getElementById("card_temp");
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var row = list[i];
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            $(clone).attr("data-id", row["id"]);
+            $(clone).find(".class").html("Class : " + row["classtitle"]);
+            $(clone).find(".name").html(row["studentname"]);
+            $(clone).find(".docno").html(row["documentcode"]);
+            $(clone).find(".feetype").html(row["typetitle"]);
+            $(clone).find(".collectiondate").html(format_date(row["documentdate"]));
+            $(clone).find(".amount").html(INR + " " + row["amount"]);
+            $(clone).find(".discount").html(INR + " " + row["discount"]);
+            $(clone).find(".fine").html(INR + " " + row["fine"]);
+            $(clone).find(".totalpaid").html(INR + " " + row["totalamount"]);
+            $(clone).find(".mode").html(row["modetitle"]);
+
+        }
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

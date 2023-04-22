@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .mark_input {
+        background-color: transparent !important;
+        border: none;
+        pointer-events: none;
+    }
+</style>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-2 fwb pagehead">Attendance</div>
+        <div class="col-2 my-auto">
+            <div class="custom_dropdown">
+                <input type="text" data-id="{{activesessionid}}" id="sessionfilter" value="{{activesession}}"
+                    class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Session..." />
+                <div class="optionblock">
+                    {% for s in sessions %}
+                    <div class="option_item" data-fun="load_data" data-id="{{ s.id }}">
+                        {{s.Title}}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-3 my-auto" id="status_container">
+            <div class="row">
+                <div class="col-6">
+                    <div class="custom_dropdown">
+                        <input type="text" data-id="" id="classfilter"
+                            class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                        <div class="optionblock">
+                            {% for class in classes %}
+                            <div class="option_item" data-fun="change_section" data-id="{{ class.id }}">{{class.Title}}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="custom_dropdown">
+                        <input type="text" data-id="" id="sectionfilter"
+                            class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                        <div class="optionblock" id="sectionfilter_drop">
+                            {% for s in sections %}
+                            <div class="option_item" hidden data-cls="{{s.ClassId}}" data-id="{{ s.id }}">{{s.Title}}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-2 my-auto">
+            <input type="month" value="{% now 'Y-m'%}" data-id="" id="datefilter"
+                class="shadow br-30 form-control f-12" />
+        </div>
+        <div class="col-1 my-auto">
+            <div class="mybtn orange shadow" onclick="load_days()">Load</div>
+        </div>
+        <div class="col-2 text-end my-auto">
+            <div class="mybtn shadow green" hidden id="savebtn" onclick="save_data()">Save</div>
+            <div class="mybtn shadow blue" id="editbtn" onclick="start_edit()">Edit</div>
+        </div>
+    </div>
+    <div class="row mt-3" id="card_container">
+        <div class="col-12">
+            <table class="table f-12">
+                <thead>
+                    <tr id="subjecthead">
+                        <th style="width: 24px;">#</th>
+                        <th style="width: 15%;">Student</th>
+
+                    </tr>
+                </thead>
+                <tbody id="subjectbody">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="studenttemp" style="vertical-align: middle;">
+        <th class="count">1</th>
+        <td class="name br">Shivam Tiwari</td>
+
+    </tr>
+
+    <tr>
+        <td id="attendanceblock" class="text-center pr br"
+            style="padding: 0px;white-space: nowrap;overflow-x: visible;">
+            <div class="attvalue cur" onclick="toggle_option()">O</div>
+            <div class="attop shadow">
+                <div class="di me-2" data-id="P" onclick="change_attendance()"
+                    style="border: 1px solid var(--my_green);">P</div>
+                <div class="di" data-id="A" onclick="change_attendance()" style="border: 1px solid var(--my_red);">A
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<script>
+    // function toggle_option() {
+    //     var parent = event.target.parentElement;
+    //     $(parent).find(".attop").toggleClass("active");
+    // }
+
+    function toggle_option() {
+        var val = event.target.innerHTML;
+        $(event.target).removeClass("absent");
+        $(event.target).removeClass("present");
+
+        if (val == "O") {
+            event.target.innerHTML = "P";
+            event.target.classList.add("present");
+        } else if (val == "P") {
+            event.target.innerHTML = "A";
+            event.target.classList.add("absent");
+        } else if (val == "A") {
+            event.target.innerHTML = "O";
+        }
+    }
+
+    function change_attendance() {
+        var parent = event.target.parentElement.parentElement;
+        var val = event.target.getAttribute("data-id");
+        $(parent).find(".attvalue").html(val);
+
+        $(parent).find(".attvalue").removeClass("present");
+        $(parent).find(".attvalue").removeClass("absent");
+
+        if (val == "P") {
+            $(parent).find(".attvalue").addClass("present");
+        } else if (val == "A") {
+            $(parent).find(".attvalue").addClass("absent");
+        }
+
+        $(event.target.parentElement).removeClass("active");
+    }
+
+    function change_section() {
+        $("#sectionfilter").val("");
+        $("#sectionfilter").attr("data-id", "");
+        var id = event.target.getAttribute("data-id");
+        $("#sectionfilter_drop").find(".option_item").attr("hidden", true);
+        $("#sectionfilter_drop").find("div[data-cls='" + id + "']").attr("hidden", false);
+
+        var total = $("#sectionfilter_drop").find(".option_item").length;
+        var count = $("#sectionfilter_drop").find(".option_item[hidden]").length;
+
+        var active = total - count;
+        if (active == 0) {
+            $("#sectionfilter").val("No Section");
+            $("#sectionfilter").attr("data-id", "");
+        }
+    }
+
+    function start_edit() {
+        $(".attrow").find(".attvalue").removeClass("p-n");
+        $("#editbtn").attr("hidden", true);
+        $("#savebtn").attr("hidden", false);
+    }
+
+    function save_data() {
+        var rows = document.getElementsByClassName("attrow");
+        var sessionid = $("#sessionfilter").attr("data-id");
+
+        var datastring = "";
+        for (var i = 0; i < rows.length; i++) {
+            var code = rows[i].getAttribute("data-code");
+            datastring += code + "#";
+
+            var blocks = rows[i].getElementsByClassName("block");
+            for (var b = 0; b < blocks.length; b++) {
+                datastring += blocks[b].getElementsByClassName("attvalue")[0].innerHTML + "^";
+            }
+            datastring += "!"
+        }
+
+        var month = $("#datefilter").val();
+        var data = new FormData();
+        data.append("datastring", datastring);
+        data.append("sessionid", sessionid);
+        data.append("month", month);
+        send_ajax_data("save_attendance", data);
+
+        $(".attrow").find(".attvalue").addClass("p-n");
+        $("#editbtn").attr("hidden", false);
+        $("#savebtn").attr("hidden", true);
+    }
+
+    function load_days() {
+        var date = $("#datefilter").val();
+        var year = date.split("-")[0];
+        var month = date.split("-")[1];
+
+        var head = document.getElementById("subjecthead");
+        $(head).find(".headitem").remove();
+
+        var days = getDaysInMonth(year, month);
+        for (var i = 0; i < days; i++) {
+            var th = document.createElement("th");
+            th.innerHTML = ("0" + (i + 1)).slice(-2);
+            head.appendChild(th);
+            th.classList.add("text-center");
+            th.classList.add("headitem");
+
+            var newdate = new Date(date + "-" + ("0" + (i + 1)).slice(-2));
+        }
+
+        var totalth = document.createElement("th");
+        totalth.innerHTML = "Total";
+        totalth.classList.add("headitem");
+        head.appendChild(totalth);
+
+        load_students(days);
+    }
+
+    function load_students(days) {
+        var classid = $("#classfilter").attr("data-id");
+        var sectionid = $("#sectionfilter").attr("data-id");
+        var sessionid = $("#sessionfilter").attr("data-id");
+
+        var data = new FormData();
+        data.append("classid", classid);
+        data.append("sectionid", sectionid);
+        data.append("sessionid", sessionid);
+        var list = load_ajax_data("get_student_by_class", data);
+
+        var parent = document.getElementById("subjectbody");
+        var temp = document.getElementById("studenttemp");
+        var attemp = document.getElementById("attendanceblock");
+
+        var month = $("#datefilter").val();
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            var attdata = list[i]["attendancedata"].split("^");
+            
+            $(clone).attr("data-code", list[i]["studentcode"]);
+            $(clone).addClass("attrow");
+            $(clone).find(".count").html(i + 1);
+            $(clone).find(".name").html(list[i]["fullname"]);
+
+            for (var j = 0; j < days; j++) {
+                var aclone = clean_temp(attemp);
+                aclone.classList.add('block');
+                aclone.getElementsByClassName("attvalue")[0].classList.add("p-n");
+                aclone.getElementsByClassName("attvalue")[0].style.padding = "10px";
+                clone.appendChild(aclone);
+
+                for (var a = 0; a < attdata.length; a++) {
+                    var attsplit = attdata[a].split("#");
+
+                    if (attsplit[0] == month + "-" + ("0" + (j + 1)).slice(-2)) {
+                        var status = attsplit[1];
+                        if(status == "P"){
+                            aclone.getElementsByClassName("attvalue")[0].innerHTML = "P";
+                            aclone.getElementsByClassName("attvalue")[0].classList.add("present");
+                        }else if(status == "A"){
+                            aclone.getElementsByClassName("attvalue")[0].innerHTML = "A";
+                            aclone.getElementsByClassName("attvalue")[0].classList.add("absent");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $(window).on("load", function () {
+        load_days();
+    })
+</script>
+
+{% endblock %}

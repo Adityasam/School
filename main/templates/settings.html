@@ -1,0 +1,729 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-12 fwb pagehead">Settings</div>
+    </div>
+    <div class="row mt-3" id="card_container">
+        <div class="col-3">
+            <div class="bg-w shadow pd-20 br-20">
+                <div class="setting_btn active">Class</div>
+                <div class="setting_btn">Section</div>
+                <div class="setting_btn">Subject</div>
+            </div>
+        </div>
+        <div class="col-9">
+            <!--Class STart-->
+            <div class="bg-w shadow pd-20 br-20 BLOCK">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="fwb">Class</div>
+                    </div>
+                    <div class="col-4 text-end my-auto">
+                        <div class="mybtn blue f-12" onclick="add_class()">
+                            <i class="fas fa-plus mr-20 p-n"></i>
+                            <span class="p-n">Add New</span>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div>
+                    <div class="row fwb f-12">
+                        <div class="col-1">#</div>
+                        <div class="col-1">Title</div>
+                        <div class="col-2">Fee</div>
+                        <div class="col-2">Has Sections</div>
+                    </div>
+                </div>
+                <hr>
+                <div id="class_container">
+
+                </div>
+            </div>
+            <!--CLass ENd-->
+            <!--Section-->
+            <div class="bg-w shadow pd-20 br-20 BLOCK" hidden>
+                <div class="row">
+                    <div class="col-8">
+                        <div class="fwb">Section</div>
+                    </div>
+                    <div class="col-4 text-end my-auto">
+                        <div class="mybtn blue f-12" onclick="add_section()">
+                            <i class="fas fa-plus mr-20 p-n"></i>
+                            <span class="p-n">Add New</span>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div>
+                    <div class="row fwb f-12">
+                        <div class="col-1">#</div>
+                        <div class="col-2">Class</div>
+                        <div class="col-2">Section</div>
+                        <div class="col-2">Room No</div>
+                        <div class="col-3">Class Teacher</div>
+                    </div>
+                </div>
+                <hr>
+                <div id="section_container">
+
+                </div>
+            </div>
+            <!--Section End-->
+            <!--Subject-->
+            <div class="bg-w shadow pd-20 br-20 BLOCK" hidden>
+                <div class="row">
+                    <div class="col-8">
+                        <div class="fwb">Subject</div>
+                    </div>
+                    <div class="col-4 text-end my-auto">
+                        <div class="mybtn blue f-12" onclick="add_subject()">
+                            <i class="fas fa-plus mr-20 p-n"></i>
+                            <span class="p-n">Add New</span>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div>
+                    <div class="row fwb f-12">
+                        <div class="col-1">#</div>
+                        <div class="col-6">Title</div>
+                    </div>
+                </div>
+                <hr>
+                <div id="subject_container">
+
+                </div>
+            </div>
+            <!--Subject End-->
+        </div>
+    </div>
+</div>
+
+<!--CLass temp-->
+<div id="class_temp" hidden class="row setting_row mb-3" data-id="">
+    <div class="col-1 my-auto count">1</div>
+    <div class="col-1">
+        <input type="text" placeholder="Class..." class="title form-control f-12 setting_input" />
+    </div>
+    <div class="col-2">
+        <input type="number" placeholder="Fee..." class="fee form-control f-12 setting_input" />
+    </div>
+    <div class="col-2 my-auto">
+        <div class="custom_toggle shadow hassection TOG" data-id="0" data-fun="toggle_teacher">
+            <div class="pos">Yes</div>
+            <div class="neg">No</div>
+            <span></span>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="custom_dropdown teachercol" hidden>
+            <input type="text" data-id="" class="setting_input faculty search_input form-control f-12"
+                placeholder="Class Teacher..." />
+            <div class="optionblock">
+                {% for f in faculty %}
+                <div class="option_item" data-id="{{f.facultycode}}"
+                    data-show="{{f.firstname}} {{f.middlename}} {{f.lastname}}">
+                    {{f.facultycode}} : {{f.firstname}} {{f.middlename}} {{f.lastname}}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-3 my-auto text-end">
+        <i onclick="save_class()" class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
+        <i hidden onclick="edit_class()"
+            class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
+        <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
+            onclick="delete_master('classrow')"></i>
+    </div>
+</div>
+<!--Class temp end-->
+
+<!--Section temp-->
+<div hidden id="section_temp" class="row setting_row mb-3" data-id="">
+    <div class="col-1 my-auto count">1</div>
+    <div class="col-2">
+        <div class="custom_dropdown">
+            <input type="text" data-id="" class="setting_input class search_input form-control f-12"
+                placeholder="Class..." />
+            <div class="optionblock sectionclassdrop">
+                {% for c in classes %}
+                <div class="option_item" data-id="{{c.id}}">{{c.Title}}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-2">
+        <input type="text" placeholder="Section..." class="title form-control f-12 setting_input" />
+    </div>
+    <div class="col-2">
+        <input type="text" placeholder="Room No..." class="roomno form-control f-12 setting_input" />
+    </div>
+    <div class="col-3">
+        <div class="custom_dropdown">
+            <input type="text" data-id="" class="setting_input faculty search_input form-control f-12"
+                placeholder="Class Teacher..." />
+            <div class="optionblock">
+                {% for f in faculty %}
+                <div class="option_item" data-id="{{f.facultycode}}"
+                    data-show="{{f.firstname}} {{f.middlename}} {{f.lastname}}">
+                    {{f.facultycode}} : {{f.firstname}} {{f.middlename}} {{f.lastname}}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-2 my-auto text-end">
+        <i onclick="save_section()"
+            class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
+        <i hidden onclick="edit_section()"
+            class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
+        <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
+            onclick="delete_master('sectionrow')"></i>
+    </div>
+</div>
+<!--Section end -->
+
+<!--Subject temp-->
+<div id="subject_temp" hidden class="row setting_row mb-3" data-id="">
+    <div class="col-1 my-auto count">1</div>
+    <div class="col-6">
+        <input type="text" placeholder="Title..." class="title form-control f-12 setting_input" />
+    </div>
+    <div class="col-5 my-auto text-end">
+        <i onclick="save_subject()"
+            class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
+        <i hidden onclick="edit_subject()"
+            class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
+        <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
+            onclick="delete_master('subjectrow')"></i>
+    </div>
+</div>
+<!--Subject temp end-->
+
+<!-- Modal -->
+<div class="modal fade" id="subjectModal" data-id="" tabindex="-1" aria-labelledby="subjectModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-4">
+                            <h5 class="modal-title fwb" data-id="" id="subjectModalLabel">Add Subject</h5>
+                        </div>
+                        <div class="col-4 my-auto">
+                            <div class="custom_dropdown">
+                                <input type="text" data-id="{{activesessionid}}" id="modalsession"
+                                    value="{{activesession}}"
+                                    class="class search_input shadow br-30 form-control f-12 OP"
+                                    placeholder="Session..." />
+                                <div class="optionblock">
+                                    {% for s in sessions %}
+                                    <div class="option_item" data-fun="change_session" data-id="{{ s.id }}">
+                                        {{s.Title}}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-2 fwb mt-auto">
+                            <span class="f-12">Class</span>
+                            <span class="ps-2 fwb f-18" id="modalclasstitle">2</span>
+                        </div>
+                        <div class="col-2 my-auto text-end">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="fwb f-10">Select Subject</div>
+                            <div class="custom_dropdown">
+                                <input type="text" data-id="" id="modalsubject"
+                                    class="class search_input shadow br-30 form-control f-12 OP"
+                                    placeholder="Subject..." />
+                                <div class="optionblock">
+                                    {% for s in subjects %}
+                                    <div class="option_item" data-id="{{ s.id }}">{{s.Title}}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="fwb f-10">Faculty</div>
+                            <div class="custom_dropdown">
+                                <input type="text" data-id="" id="modalfaculty"
+                                    class="class search_input shadow br-30 form-control f-12 OP"
+                                    placeholder="Faculty..." />
+                                <div class="optionblock">
+                                    {% for s in faculty %}
+                                    <div class="option_item" data-id="{{ s.id }}">{{s.firstname}} {{s.middlename}}
+                                        {{s.lastname}}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-2 my-auto">
+                            <div class="fwb f-10" style="opacity: 0;">Faculty</div>
+                            <div class="mybtn blue shadow" onclick="add_modal_subject()">Add</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div id="modalsubject_container">
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="save_class_subjects()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalsubject_temp" hidden class="bg-white px-3 py-2 shadow br-30 mb-3">
+    <div class="row f-12">
+        <div class="col-4 my-auto br subjectname">Hindi</div>
+        <div class="col-7 facultyname"></div>
+        <div class="col-1 my-auto">
+            <i class="fas fa-trash cl-r"></i>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggle_teacher(){
+        var par = event.target.parentElement.parentElement;
+        if(event.target.classList.contains("active")){
+            par.getElementsByClassName("teachercol")[0].hidden = true;
+        }else{
+            par.getElementsByClassName("teachercol")[0].hidden = false;
+        }
+    }
+
+    function save_class_subjects() {
+        var subs = document.getElementsByClassName("subclass");
+        var session = $("#modalsession").attr("data-id");
+        var datastring = "";
+        for (var i = 0; i < subs.length; i++) {
+            var subid = subs[i].getElementsByClassName("subjectname")[0].getAttribute("data-id");
+            var facid = subs[i].getElementsByClassName("facultyname")[0].getAttribute("data-id");
+
+            datastring += subid + "^" + facid + "#";
+        }
+
+        var classid = $("#subjectModalLabel").attr("data-id");
+
+        var data = new FormData();
+        data.append("classid", classid);
+        data.append("datastring", datastring);
+        data.append("sessionid", session);
+        send_ajax_data("save_class_subject", data);
+
+        $("#subjectModal").modal("hide");
+        load_class();
+        show_toast("Subjects updated for the class " + $("#modalclasstitle").html());
+    }
+
+    function add_modal_subject() {
+        var subject = $("#modalsubject").attr("data-id");
+        var subjecttitle = $("#modalsubject").val();
+
+        var faculty = $("#modalfaculty").attr("data-id");
+        var facultyname = $("#modalfaculty").val();
+
+        var container = document.getElementById("modalsubject_container");
+        var temp = document.getElementById("modalsubject_temp");
+
+        var clone = clean_temp(temp);
+        clone.getElementsByClassName("subjectname")[0].innerHTML = subjecttitle;
+        clone.getElementsByClassName("subjectname")[0].setAttribute("data-id", subject);
+
+        clone.getElementsByClassName("facultyname")[0].innerHTML = facultyname;
+        clone.getElementsByClassName("facultyname")[0].setAttribute("data-id", faculty);
+        container.appendChild(clone);
+
+        clone.classList.add("subclass");
+
+        $("#modalsubject").val("");
+        $("#modalsubject").attr("data-id", "");
+
+        $("#modalfaculty").val("");
+        $("#modalfaculty").attr("data-id", "");
+    }
+
+    function change_session() {
+        var classid = $("#subjectModalLabel").attr("data-id");
+        if (classid != "") {
+            add_subject_modal(classid);
+        }
+    }
+
+    function add_subject_modal(id = "") {
+        if (id == "") {
+            id = event.target.parentElement.parentElement.getAttribute("data-id");
+        }
+        var sessionid = $("#modalsession").attr("data-id");
+
+        var container = document.getElementById("modalsubject_container");
+        var temp = document.getElementById("modalsubject_temp");
+
+        container.innerHTML = "";
+
+        if (sessionid != "") {
+            var data = new FormData();
+            data.append("classid", id);
+            data.append("sessionid", sessionid);
+            var list = load_ajax_data("get_class_subject", data);
+
+            for (var i = 0; i < list.length; i++) {
+                var clone = clean_temp(temp);
+                clone.getElementsByClassName("subjectname")[0].innerHTML = list[i]["subjectname"];
+                clone.getElementsByClassName("subjectname")[0].setAttribute("data-id", list[i]["subjectid"]);
+
+                clone.getElementsByClassName("facultyname")[0].innerHTML = list[i]["facultyname"];
+                clone.getElementsByClassName("facultyname")[0].setAttribute("data-id", list[i]["facultyid"]);
+                container.appendChild(clone);
+
+                clone.classList.add("subclass");
+
+                $("#modalsubject").val("");
+                $("#modalsubject").attr("data-id", "");
+
+                $("#modalfaculty").val("");
+                $("#modalfaculty").attr("data-id", "");
+            }
+        }
+
+        $("#subjectModalLabel").attr("data-id", id);
+        $("#subjectModal").modal("show");
+    }
+
+    function save_class() {
+        var parent = event.target.parentElement.parentElement;
+        var clas = parent.getElementsByClassName("title")[0].value.trim();
+        var faculty = parent.getElementsByClassName("faculty")[0].getAttribute("data-id");
+        var fee = parent.getElementsByClassName("fee")[0].value.trim();
+        var id = parent.getAttribute("data-id");
+        var hassection = parent.getElementsByClassName("hassection")[0].getAttribute("data-id");
+
+        var data = new FormData();
+        if (id != "") {
+            data.append("classid", id);
+        }
+        data.append("faculty", faculty);
+        data.append("title", clas);
+        data.append("fee", fee);
+        data.append("hassection", hassection);
+        var newid = send_ajax_data("save_class", data);
+
+        $(parent).attr("data-id", newid.classid);
+
+        $(parent).find(".savebtn").attr("hidden", true);
+        $(parent).find(".editbtn").attr("hidden", false);
+        $(parent).find("input").attr("disabled", true);
+        $(parent).find(".TOG").addClass("p-n");
+
+        if (id == "") {
+            show_toast("New Class Created", "success");
+        } else {
+            show_toast("Class Updated", "success");
+        }
+    }
+
+    function save_subject() {
+        var parent = event.target.parentElement.parentElement;
+        var clas = parent.getElementsByClassName("title")[0].value.trim();
+        var id = parent.getAttribute("data-id");
+
+        var data = new FormData();
+        if (id != "") {
+            data.append("subjectid", id);
+        }
+
+        data.append("title", clas);
+        var newid = send_ajax_data("save_subject", data);
+
+        $(parent).attr("data-id", newid.subjectid);
+
+        $(parent).find(".savebtn").attr("hidden", true);
+        $(parent).find(".editbtn").attr("hidden", false);
+        $(parent).find("input").attr("disabled", true);
+
+        if (id == "") {
+            show_toast("New Subject Created", "success");
+        } else {
+            show_toast("Subject Updated", "success");
+        }
+    }
+
+    function save_section() {
+        var parent = event.target.parentElement.parentElement;
+        var cls = parent.getElementsByClassName("class")[0].getAttribute("data-id");
+        var section = parent.getElementsByClassName("title")[0].value.trim();
+        var id = parent.getAttribute("data-id");
+        var faculty = parent.getElementsByClassName("faculty")[0].getAttribute("data-id");
+        var roomno = parent.getElementsByClassName("roomno")[0].value.trim();
+
+        var data = new FormData();
+        if (id != "") {
+            data.append("sectionid", id);
+        }
+
+        if (cls == "") {
+            show_toast("Please select the class", "warning");
+            return;
+        }
+        data.append("faculty", faculty);
+        data.append("roomno", roomno);
+        data.append("classid", cls);
+        data.append("title", section);
+        var newid = send_ajax_data("save_section", data);
+
+        $(parent).attr("data-id", newid.sectionid);
+
+        $(parent).find(".savebtn").attr("hidden", true);
+        $(parent).find(".editbtn").attr("hidden", false);
+        $(parent).find("input").attr("disabled", true);
+
+        if (id == "") {
+            show_toast("New Section Created", "success");
+        } else {
+            show_toast("Section Updated", "success");
+        }
+    }
+
+    function edit_class() {
+        var parent = event.target.parentElement.parentElement;
+        $(parent).find(".savebtn").attr("hidden", false);
+        $(parent).find(".editbtn").attr("hidden", true);
+        $(parent).find(".TOG").removeClass("p-n");
+        $(parent).find("input").attr("disabled", false);
+    }
+
+    function edit_subject() {
+        var parent = event.target.parentElement.parentElement;
+        $(parent).find(".savebtn").attr("hidden", false);
+        $(parent).find(".editbtn").attr("hidden", true);
+        $(parent).find("input").attr("disabled", false);
+    }
+
+
+    function edit_section() {
+        var parent = event.target.parentElement.parentElement;
+        $(parent).find(".savebtn").attr("hidden", false);
+        $(parent).find(".editbtn").attr("hidden", true);
+        $(parent).find("input").attr("disabled", false);
+
+        $(parent).find(".search_input").on("focus", function () {
+            var parent = event.target.parentElement;
+            $(parent).addClass("active");
+        });
+    }
+
+    function delete_master(cls) {
+        var parent = event.target.parentElement.parentElement;
+        var id = parent.getAttribute("data-id");
+
+        // var data = new FormData();
+        // if(cls == "classrow"){
+        //     data.append("classid", id);
+        //     send_ajax_data("delete_class", data);    
+        // }
+        parent.remove();
+        recount(cls);
+    }
+
+    function recount(cls) {
+        var rows = document.getElementsByClassName(cls);
+        for (var i = 0; i < rows.length; i++) {
+            rows[i].getElementsByClassName("count")[0].innerHTML = i + 1 + ".";
+        }
+    }
+
+    function add_class() {
+        var parent = document.getElementById("class_container");
+        var temp = document.getElementById("class_temp");
+
+        var clone = clean_temp(temp);
+        clone.classList.add("classrow");
+        parent.appendChild(clone);
+
+        recount("classrow");
+    }
+
+    function add_subject() {
+        var parent = document.getElementById("subject_container");
+        var temp = document.getElementById("subject_temp");
+
+        var clone = clean_temp(temp);
+        clone.classList.add("subjectrow");
+        parent.appendChild(clone);
+
+        recount("subjectrow");
+    }
+
+    function add_section() {
+        var parent = document.getElementById("section_container");
+        var temp = document.getElementById("section_temp");
+
+        var clone = clean_temp(temp);
+        clone.classList.add("sectionrow");
+        parent.appendChild(clone);
+
+        recount("sectionrow");
+
+        $(clone).find(".search_input").on("focus", function () {
+            var parent = event.target.parentElement;
+            $(parent).addClass("active");
+        })
+
+        $(clone).find(".option_item").on("click", function () {
+            click_drop();
+        })
+    }
+</script>
+
+<script>
+    $(".setting_btn").on("click", function () {
+        $(".setting_btn").removeClass("active");
+        $(event.target).addClass("active");
+        $(".BLOCK").attr("hidden", true);
+        var parent = event.target.parentElement;
+        var index = Array.prototype.indexOf.call(parent.children, event.target);
+        $(".BLOCK").eq(index).attr("hidden", false);
+    })
+
+    function load_class() {
+        var data = new FormData();
+        var list = load_ajax_data("get_all_class", data);
+        list = list.data;
+
+        var parent = document.getElementById("class_container");
+        var temp = document.getElementById("class_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+            $(clone).attr("data-id", list[i]["id"]);
+            $(clone).find(".title").val(list[i]["title"]);
+            $(clone).find(".fee").val(list[i]["classfee"]);
+            $(clone).find(".faculty").attr("data-id",list[i]["classteacher"]);
+            $(clone).find(".savebtn").attr("hidden", true);
+            $(clone).find(".editbtn").attr("hidden", false);
+            
+            var hassec = list[i]["hassections"];
+            if(hassec == "0"){
+                $(clone).find(".hassection").attr("data-id", "0");
+                $(clone).find(".hassection").removeClass("active");
+                $(clone).find(".teachercol").attr("hidden", false);
+            }else{
+                $(clone).find(".hassection").attr("data-id", "1");
+                $(clone).find(".hassection").addClass("active");
+                $(clone).find(".teachercol").attr("hidden", true);
+            }
+            $(clone).find("input").attr("disabled", true);
+            $(clone).find(".TOG").addClass("p-n");
+
+            var totalsubjects = parseInt(list[i]["totalsubjects"]);
+            if (totalsubjects > 0) {
+                $(clone).find(".subbtn").html(totalsubjects + " Subjects Added");
+            }
+
+            clone.classList.add("classrow");
+
+            $(clone).find(".option_item").on("click", function () {
+                click_drop();
+            })
+        }
+
+        recount("classrow");
+
+        set_drop_default();
+
+        $(".custom_toggle").on("click", function () {
+            click_toggle();
+        })
+    }
+
+    function load_subject() {
+        var data = new FormData();
+        var list = load_ajax_data("get_all_subject", data);
+        list = list.data;
+
+        var parent = document.getElementById("subject_container");
+        var temp = document.getElementById("subject_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+            $(clone).attr("data-id", list[i]["id"]);
+            $(clone).find("input").val(list[i]["title"]);
+            $(clone).find(".savebtn").attr("hidden", true);
+            $(clone).find(".editbtn").attr("hidden", false);
+            $(clone).find("input").attr("disabled", true);
+            clone.classList.add("subjectrow");
+        }
+
+        recount("subjectrow");
+    }
+
+    function load_section() {
+        var data = new FormData();
+        var list = load_ajax_data("get_all_section", data);
+        list = list.data;
+
+        var parent = document.getElementById("section_container");
+        var temp = document.getElementById("section_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+            $(clone).attr("data-id", list[i]["id"]);
+            $(clone).find(".title").val(list[i]["title"]);
+            $(clone).find(".class").attr("data-id", list[i]["classid"]);
+            $(clone).find(".faculty").attr("data-id", list[i]["classteacher"]);
+            $(clone).find(".roomno").val(list[i]["roomno"]);
+            $(clone).find(".savebtn").attr("hidden", true);
+            $(clone).find(".editbtn").attr("hidden", false);
+            $(clone).find("input").attr("disabled", true);
+            clone.classList.add("sectionrow");
+
+            $(clone).find(".option_item").on("click", function () {
+                click_drop();
+            })
+        }
+
+        recount("sectionrow");
+        set_drop_default();
+    }
+
+    $(window).on("load", function () {
+        load_class();
+        load_section();
+        load_subject();
+
+        $(".search_input").on("focus", function () {
+            var parent = event.target.parentElement;
+            $(parent).addClass("active");
+        });
+
+        $(".search_input").on("keyup", function () {
+            search_drop();
+        })
+    })
+</script>
+
+{% endblock %}

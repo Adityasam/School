@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+</style>
+<script src="https://cdn.ckeditor.com/ckeditor5/35.4.0/classic/ckeditor.js"></script>
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead">Exam Paper</div>
+        <div class="col-2 my-auto">
+        </div>
+        <div class="col-3 my-auto">
+            <div class="bg-white shadow br-30" style="padding:5px 10px;display: inline-block;">
+                <input type="text" placeholder="Search..." id="srch" class="search_input" />
+            </div>
+            <div class="search_icon text-center shadow" onclick="search_page()">
+                <i class="fas fa-search p-n"></i>
+            </div>
+        </div>
+        <div class="col-4 text-end my-auto">
+            <div class="mybtn shadow blue" onclick="paperModal()">
+                <i class="fas fa-plus mr-10 p-n"></i>
+                <span class="p-n">Create Paper</span>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4">
+        <div class="row" id="card_container">
+
+        </div>
+    </div>
+</div>
+
+<!--Card temp-->
+<div id="card_temp" class="col-2" hidden style="opacity: 0;">
+    <div class="bg-w shadow pd-20 br-20 pr item">
+        <div class="ab_dark br-20"></div>
+        <i class="round_i text-center fas fa-trash bg-red" onclick="start_delete()" style="right:40px"></i>
+        <i class="round_i text-center fas fa-edit bg-blue" style="right: 10px;" onclick="edit_paper()"></i>
+        <div class="fwb f-16 mb-1 title">Hindi</div>
+        <div class="date f-12 mb-4 bb"></div>
+        <div class="f-12 class mb-1">Class : 2</div>
+        <div class="f-12 fwb exam cl-b">Quartely Exam</div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="paperModal" data-id="" tabindex="-1" style="width: 80%;left: 10%;"
+    aria-labelledby="paperModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" style="width:100%">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="paperModalLabel">Add Paper</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-3 br">
+                            <div class="row">
+                                <div class="col-12 mb-4">
+                                    <div class="mb-1 f-12">Subject</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="subject"
+                                            class="search_input shadow br-30 form-control f-12"
+                                            placeholder="Subject..." />
+                                        <div class="optionblock">
+                                            {% for s in subjects %}
+                                            <div class="option_item" data-id="{{s.id}}">{{s.Title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <div class="mb-1 f-10">Total Marks</div>
+                                    <input type="number" class="form-control f-12 br-30 shadow" id="totalmarks" />
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <div class="mb-1 f-10">Paper Date</div>
+                                    <input type="date" class="form-control f-12 br-30 shadow" id="paperdate" />
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <div class="mb-1 f-10">Class</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="class"
+                                            class="search_input shadow br-30 form-control f-12"
+                                            placeholder="Class..." />
+                                        <div class="optionblock">
+                                            {% for c in classes %}
+                                            <div class="option_item" data-fun="change_section" data-id="{{c.id}}">
+                                                {{c.Title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <div class="mb-1 f-10">Section</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="section"
+                                            class="search_input shadow br-30 form-control f-12"
+                                            placeholder="Section..." />
+                                        <div class="optionblock multi" id="section_drop">
+                                            {% for c in sections %}
+                                            <div class="option_item" hidden data-class="{{c.ClassId}}"
+                                                data-id="{{c.id}}">
+                                                {{c.Title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <div class="mb-1 f-10">Exam</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="exam"
+                                            class="search_input shadow br-30 form-control f-12" placeholder="Exam..." />
+                                        <div class="optionblock">
+                                            {% for c in exams %}
+                                            <div class="option_item" data-id="{{c.id}}">
+                                                {{c.title}} : {{c.sessiontitle}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-8">
+                                    <div class="mb-1 f-10">Copy From</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="oldpaper"
+                                            class="search_input shadow br-30 form-control f-12"
+                                            placeholder="Search..." />
+                                        <div class="optionblock">
+                                            {% for c in papers %}
+                                            <div class="option_item" data-id="{{c.id}}">
+                                                {{c.subject}} : {{c.examtitle}} - {{c.paperdate|date:"F j,Y"}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <div class="mb-1 f-10" style="opacity: 0;">Copy From</div>
+                                    <div class="mybtn orange shadow di" onclick="load_old_paper()">Load</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <textarea id="editor"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="submit_data()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var delid = "";
+    function start_delete(){
+        var parent = event.target.parentElement.parentElement;
+        delid = parent.getAttribute("data-id");
+        ask_confirm("Are you sure you want to delete this paper?", "delete_paper", "hide_confirm");
+    }
+
+    function delete_paper(){
+        delete_item(delid, "ExamPaper");
+        hide_confirm();
+        load_data();
+    }
+
+    function change_section() {
+        var id = event.target.getAttribute("data-id");
+        $("#section_drop").find(".option_item").attr("hidden", true);
+        $("#section_drop").find("div[data-class='" + id + "']").attr("hidden", false);
+
+        var total = $("#section_drop").find(".option_item").length;
+        var count = $("#section_drop").find(".option_item[hidden]").length;
+
+        var active = total - count;
+        if (active == 0) {
+            $("#section").val("No Section");
+            $("#section").attr("data-id", "");
+        }
+    }
+
+    function load_old_paper() {
+        var oldid = $("#oldpaper").attr("data-id");
+        if (oldid == "") {
+            show_toast("Please select a paper to copy from", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        data.append("paperid", oldid);
+        var detail = load_ajax_data("get_paper_detail", data);
+
+        cleditor.setData(detail["content"]);
+    }
+
+    var editorData = null;
+    var cleditor = null;
+    function starteditor() {
+        ClassicEditor
+            .create(document.querySelector('#editor'))
+            .then(editor => {
+                editor.model.document.on('change:data', () => {
+                    editorData = editor.getData();
+                });
+                cleditor = editor;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }
+</script>
+<script>
+    function edit_paper() {
+        var parent = event.target.parentElement.parentElement;
+        var id = parent.getAttribute("data-id");
+        $("#paperModalLabel").html("Edit Paper");
+        $("#paperModalLabel").attr("data-id", id);
+        var data = new FormData();
+        data.append("paperid", id);
+        var detail = load_ajax_data("get_paper_detail", data);
+
+        $("#subject").attr("data-id", detail["subjectid"]);
+        $("#paperdate").val(detail["paperdate"]);
+        $("#totalmarks").val(detail["totalmarks"]);
+        $("#class").attr("data-id", detail["classid"]);
+        $("#section").attr("data-id", detail["sectionid"]);
+        $("#exam").attr("data-id", detail["examid"]);
+        cleditor.setData(detail["content"]);
+
+        set_drop_default();
+        $("#paperModal").modal("show");
+    }
+
+    function submit_data() {
+        var paperid = $("#paperModalLabel").attr("data-id");
+        var data = new FormData();
+        if (paperid != "") {
+            data.append("paperid", paperid);
+        }
+        data.append("subject", $("#subject").attr("data-id"));
+        if ($("#paperdate").val() != "") {
+            data.append("paperdate", $("#paperdate").val());
+        }
+
+        var totalmarks = parseInt($("#totalmarks").val());
+        if(isNaN(totalmarks)){
+            totalmarks = 0;
+        }
+        data.append("totalmarks", totalmarks);
+        data.append("class", $("#class").attr("data-id"));
+        data.append("section", $("#section").attr("data-id"));
+        data.append("exam", $("#exam").attr("data-id"));
+        data.append("content", editorData.toString());
+        var code = send_ajax_data("save_paper", data);
+
+        var message = "Paper saved";
+        success_modal(message);
+        load_data();
+        $("#paperModal").modal("hide");
+    }
+
+    function paperModal() {
+        $("#paperModal").find("input").val("");
+        $("#paperModal").find("input").attr("data-id", "");
+        $("#paperModalLabel").attr("data-id", "");
+        $("#paperModalLabel").html("Add Paper");
+        cleditor.setData("");
+        $("#paperModal").modal("show");
+    }
+
+    function load_local() {
+        load_data();
+    }
+
+    function search_page() {
+        load_data();
+    }
+
+    function load_data() {
+        var data = new FormData();
+        var list = load_ajax_data("get_paper_list", data);
+
+        var parent = document.getElementById("card_container");
+        var temp = document.getElementById("card_temp");
+        parent.innerHTML = "";
+        for (var j = 0; j < list.length; j++) {
+            var clone = clean_temp(temp);
+            parent.append(clone);
+
+            if (list[j]["finished"] == "1") {
+                $(clone).find(".ab_dark").eq(0).addClass("show");
+            }
+            $(clone).attr("data-id", list[j]["id"]);
+            $(clone).find(".title").html(list[j]["subject"]);
+            if (list[j]["paperdate"] != "") {
+                $(clone).find(".date").html(format_date(list[j]["paperdate"]));
+            }else{
+                $(clone).find(".date").html("No Date");
+            }
+            $(clone).find(".class").html("Class : " + list[j]["class"] + list[j]["section"]);
+            $(clone).find(".exam").html(list[j]["exam"]);
+
+            $(clone).css("animation", "0.5s ease-in-out " + (j * 100) + "ms 1 card_show forwards");
+        }
+    }
+
+    $(window).on("load", function () {
+        starteditor();
+        load_data();
+    })
+</script>
+
+{% endblock %}

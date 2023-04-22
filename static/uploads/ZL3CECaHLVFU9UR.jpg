@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Page not found at /uploads/cEHBcZUyMFV2nCq.jpg</title>
+  <meta name="robots" content="NONE,NOARCHIVE">
+  <style type="text/css">
+    html * { padding:0; margin:0; }
+    body * { padding:10px 20px; }
+    body * * { padding:0; }
+    body { font:small sans-serif; background:#eee; color:#000; }
+    body>div { border-bottom:1px solid #ddd; }
+    h1 { font-weight:normal; margin-bottom:.4em; }
+    h1 span { font-size:60%; color:#666; font-weight:normal; }
+    table { border:none; border-collapse: collapse; width:100%; }
+    td, th { vertical-align:top; padding:2px 3px; }
+    th { width:12em; text-align:right; color:#666; padding-right:.5em; }
+    #info { background:#f6f6f6; }
+    #info ol { margin: 0.5em 4em; }
+    #info ol li { font-family: monospace; }
+    #summary { background: #ffc; }
+    #explanation { background:#eee; border-bottom: 0px none; }
+    pre.exception_value { font-family: sans-serif; color: #575757; font-size: 1.5em; margin: 10px 0 10px 0; }
+  </style>
+</head>
+<body>
+  <div id="summary">
+    <h1>Page not found <span>(404)</span></h1>
+    <pre class="exception_value">“C:\school\uploads\cEHBcZUyMFV2nCq.jpg” does not exist</pre>
+    <table class="meta">
+      <tr>
+        <th>Request Method:</th>
+        <td>GET</td>
+      </tr>
+      <tr>
+        <th>Request URL:</th>
+        <td>http://127.0.0.1:8000/uploads/cEHBcZUyMFV2nCq.jpg</td>
+      </tr>
+      
+      <tr>
+        <th>Raised by:</th>
+        <td>django.views.static.serve</td>
+      </tr>
+      
+    </table>
+  </div>
+  <div id="info">
+    
+      <p>
+      Using the URLconf defined in <code>school.urls</code>,
+      Django tried these URL patterns, in this order:
+      </p>
+      <ol>
+        
+          <li>
+            
+                admin/
+                
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                
+                [name='login']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                faculty_list
+                [name='faculty_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                student_list
+                [name='student_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                settings
+                [name='settings']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                expense
+                [name='expense']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                fee_collection
+                [name='fee_collection']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                class_routine
+                [name='class_routine']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_faculty
+                [name='save_faculty']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_student
+                [name='save_student']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                report_card
+                [name='report_card']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_expense
+                [name='save_expense']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_routine
+                [name='save_routine']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_faculty_list
+                [name='get_faculty_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_student_list
+                [name='get_student_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_fee_list
+                [name='get_fee_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_faculty_detail
+                [name='get_faculty_detail']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_expense_detail
+                [name='get_expense_detail']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_expense_list
+                [name='get_expense_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_fee_detail
+                [name='get_fee_detail']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_student_detail
+                [name='get_student_detail']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_file
+                [name='save_file']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                change_faculty_status
+                [name='change_faculty_status']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                change_student_status
+                [name='change_student_status']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_status
+                [name='get_status']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_class
+                [name='save_class']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_section
+                [name='save_section']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_exam
+                [name='save_exam']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_subject
+                [name='save_subject']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_all_class
+                [name='get_all_class']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_all_section
+                [name='get_all_section']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_all_subject
+                [name='get_all_subject']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_fee
+                [name='save_fee']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_class_fee
+                [name='get_class_fee']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_class_routine
+                [name='get_class_routine']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                exam_list
+                [name='exam_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_exam_list
+                [name='get_exam_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                paper_list
+                [name='paper_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_paper
+                [name='save_paper']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_paper_detail
+                [name='get_paper_detail']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_paper_list
+                [name='get_paper_list']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_report_card
+                [name='get_report_card']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                save_class_subject
+                [name='save_class_subject']
+            
+          </li>
+        
+          <li>
+            
+                
+                
+            
+                get_class_subject
+                [name='get_class_subject']
+            
+          </li>
+        
+          <li>
+            
+                ^(?P&lt;path&gt;.*)$
+                
+            
+          </li>
+        
+      </ol>
+      <p>
+        
+          The current path, <code>uploads/cEHBcZUyMFV2nCq.jpg</code>,
+        
+        matched the last one.
+      </p>
+    
+  </div>
+
+  <div id="explanation">
+    <p>
+      You’re seeing this error because you have <code>DEBUG = True</code> in
+      your Django settings file. Change that to <code>False</code>, and Django
+      will display a standard 404 page.
+    </p>
+  </div>
+</body>
+</html>

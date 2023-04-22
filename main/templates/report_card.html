@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .mark_input {
+        background-color: transparent !important;
+        border: none;
+        pointer-events: none;
+    }
+</style>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-2 fwb pagehead">Report Card</div>
+        <div class="col-3 my-auto">
+            <div class="custom_dropdown">
+                <input type="text" data-id="" id="examfilter"
+                    class="class search_input shadow br-30 form-control f-12 OP" placeholder="Exam..." />
+                <div class="optionblock">
+                    {% for ex in exams %}
+                    <div class="option_item" data-session="{{ex.sessionid}}" data-id="{{ex.id}}" data-fun="change_exam">
+                        {{ex.title}} : {{ex.sessiontitle}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-3 my-auto" id="status_container">
+            <div class="row">
+                <div class="col-6">
+                    <div class="custom_dropdown">
+                        <input type="text" data-id="" id="classfilter"
+                            class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                        <div class="optionblock">
+                            {% for class in classes %}
+                            <div class="option_item" data-fun="change_section" data-id="{{ class.id }}">{{class.Title}}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="custom_dropdown">
+                        <input type="text" data-id="" id="sectionfilter"
+                            class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                        <div class="optionblock" id="sectionfilter_drop">
+                            {% for s in sections %}
+                            <div class="option_item" hidden data-cls="{{s.ClassId}}" data-id="{{ s.id }}">{{s.Title}}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-1 my-auto">
+            <div class="mybtn orange shadow" onclick="load_table()">Load</div>
+        </div>
+        <div class="col-3 text-end my-auto">
+            <div class="mybtn shadow green" hidden id="savebtn" onclick="submit_data()">Save</div>
+            <div class="mybtn shadow blue" id="editbtn" onclick="edit_marks()">Edit</div>
+        </div>
+    </div>
+    <div class="row mt-3" id="card_container">
+        <div class="col-12">
+            <table class="table f-12">
+                <thead>
+                    <tr id="subjecthead">
+                        <th style="width: 24px;">#</th>
+                        <th style="width: 20%;">Student</th>
+                    </tr>
+                </thead>
+                <tbody id="subjectbody">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr style="vertical-align: middle;" id="studenttemp">
+        <th class="count"></th>
+        <td class="fwb f-16 name">Shivam Tiwari</td>
+    </tr>
+
+    <tr>
+        <td id="subitemtemp">
+            <input type="number" step="1" onkeyup="calculate_marks()"
+                class="form-control form-control-sm f-12 mark_input" disabled="disabled" />
+        </td>
+    </tr>
+</table>
+
+<script>
+    function calculate_marks() {
+        var parent = event.target.parentElement.parentElement;
+        var marks = parent.getElementsByClassName("mark");
+        var total = 0;
+        for (var i = 0; i < marks.length - 1; i++) {
+            var m = parseFloat(marks[i].getElementsByTagName("input")[0].value);
+            if (isNaN(m)) {
+                m = 0;
+            }
+
+            total += m;
+        }
+
+        marks[marks.length - 1].innerHTML = total;
+    }
+
+    function change_section() {
+        $("#sectionfilter").val("");
+        $("#sectionfilter").attr("data-id", "");
+        var id = event.target.getAttribute("data-id");
+        $("#sectionfilter_drop").find(".option_item").attr("hidden", true);
+        $("#sectionfilter_drop").find("div[data-cls='" + id + "']").attr("hidden", false);
+
+        var total = $("#sectionfilter_drop").find(".option_item").length;
+        var count = $("#sectionfilter_drop").find(".option_item[hidden]").length;
+
+        var active = total - count;
+        if (active == 0) {
+            $("#sectionfilter").val("No Section");
+            $("#sectionfilter").attr("data-id", "");
+        }
+    }
+
+    function change_exam() {
+        var sess = event.target.getAttribute("data-session");
+        $("#examfilter").attr("data-session", sess);
+    }
+
+    function edit_marks() {
+        $(".studentrow").find(".mark").find("input").removeClass("mark_input");
+        $(".studentrow").find(".mark").find("input").attr("disabled", false);
+        $("#savebtn").attr("hidden", false);
+        $("#editbtn").attr("hidden", true);
+    }
+
+    function submit_data() {
+        var cls = $("#classfilter").attr("data-id");
+        var sec = $("#sectionfilter").attr("data-id");
+        var sessionid = $("#examfilter").attr("data-session");
+        var examid = $("#examfilter").attr("data-id");
+
+        var studentrow = document.getElementsByClassName("studentrow");
+        var datastring = "";
+        for (var i = 0; i < studentrow.length; i++) {
+            datastring += studentrow[i].getAttribute("data-id") + "*";
+            var subs = studentrow[i].getElementsByClassName("mark");
+            for (var s = 0; s < subs.length - 1; s++) {
+                datastring += subs[s].getElementsByTagName("input")[0].getAttribute("data-paper-id") + "/";
+                var num = parseFloat(subs[s].getElementsByTagName("input")[0].value);
+                if (isNaN(num)) {
+                    num = 0;
+                }
+                datastring += num + ">";
+            }
+            datastring += "#";
+        }
+
+        var data = new FormData();
+        data.append("datastring", datastring);
+        data.append("classid", cls);
+        data.append("sectionid", sec);
+        data.append("examid", examid);
+        send_ajax_data("save_report_card", data);
+
+        success_modal("Marks Saved");
+        $("#uploadModal").modal("hide");
+        $("#savebtn").attr("hidden", true);
+        $("#editbtn").attr("hidden", false);
+
+        $(".studentrow").find(".mark").find("input").addClass("mark_input");
+        $(".studentrow").find(".mark").find("input").attr("disabled", true);
+    }
+
+    function load_local() {
+        load_data();
+    }
+
+    function search_page() {
+        load_data();
+    }
+
+    function load_table() {
+        var cls = $("#classfilter").attr("data-id");
+        var sec = $("#sectionfilter").attr("data-id");
+        var sessionid = $("#examfilter").attr("data-session");
+        var examid = $("#examfilter").attr("data-id");
+
+        if (examid == "") {
+            show_toast("Please select the exam", "warning");
+            return;
+        }
+
+        if (cls == "") {
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        data.append("classid", cls);
+        data.append("sectionid", sec);
+        data.append("examid", examid);
+        data.append("sessionid", sessionid);
+        var list = load_ajax_data("get_class_subject", data);
+        var students = list.students;
+        var subjects = list.subs;
+
+        var head = document.getElementById("subjecthead");
+
+        $(head).find(".newhead").remove();
+
+        for (var i = 0; i < subjects.length; i++) {
+            var th = document.createElement("th");
+            th.classList.add("newhead");
+            th.innerHTML = subjects[i]["title"];
+            head.appendChild(th);
+        }
+
+        //total column
+        var totalcol = document.createElement("th");
+        totalcol.innerHTML = "Total";
+        totalcol.classList.add("newhead");
+        head.appendChild(totalcol);
+
+        //Students row
+        var body = document.getElementById("subjectbody");
+        var temp = document.getElementById("studenttemp");
+        var itemp = document.getElementById("subitemtemp");
+
+        $(body).find(".studentrow").remove();
+
+        for (var i = 0; i < students.length; i++) {
+            var clone = clean_temp(temp);
+            clone.getElementsByClassName("count")[0].innerHTML = i + 1;
+            clone.classList.add("studentrow");
+            clone.setAttribute("data-id", students[i]["studentcode"]);
+            clone.getElementsByClassName("name")[0].innerHTML = students[i]["fullname"];
+            body.append(clone);
+            for (var j = 0; j < subjects.length; j++) {
+                var td = clean_temp(itemp);
+                td.classList.add("mark");
+                td.getElementsByTagName("input")[0].setAttribute("data-paper-id", subjects[j]["paperid"]);
+                clone.appendChild(td);
+            }
+
+            //total col
+            var totr = document.createElement("td")
+            totr.classList.add("mark");
+            clone.appendChild(totr);
+        }
+
+        var subids = "";
+        //subjects ids
+        for (var i = 0; i < subjects.length; i++) {
+            subids += subjects[i]["paperid"] + "^";
+        }
+
+        //loading_all marks
+        var rows = document.getElementsByClassName("studentrow");
+        for (var i = 0; i < rows.length; i++) {
+            var scode = rows[i].getAttribute("data-id");
+            data = new FormData();
+            data.append("studentcode", scode);
+            data.append("papers", subids);
+            var detail = load_ajax_data("get_student_marks", data);
+            var keys = Object.keys(detail);
+
+            var totalmark = 0;
+            for (var k = 0; k < keys.length; k++) {
+                var pid = keys[k];
+                var inp = $(rows[i]).find("[data-paper-id='" + pid + "']").eq(0).val(detail[pid]);
+                var m = parseFloat(detail[pid]);
+                if (isNaN(m)) {
+                    m = 0;
+                }
+
+                totalmark += m;
+            }
+
+            var childs = rows[i].getElementsByClassName("mark");
+            childs[childs.length - 1].innerHTML = totalmark;
+        }
+
+        $("#uploadModal").modal("show");
+    }
+
+
+    $(window).on("load", function () {
+        //load_data();
+    })
+</script>
+
+{% endblock %}

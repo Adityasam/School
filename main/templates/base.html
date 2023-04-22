@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+        integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/f422f2e2ec.js" crossorigin="anonymous"></script>
+    <script src="{% static 'js/myjs.js' %}"></script>
+    <script src="{% static 'js/banks.js' %}"></script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-1 pdy-20 text-center g-0" id="sidemenu">
+                <img src="{% static 'img/logowhite.png' %}" class="sidelogo" />
+                <div class="mt-5">
+                    {% for m in menu %}
+                    {% with ur=m.pageurl ic=m.icon pagecode=request.session.PAGECODE %}
+                    <div class="text-center pr">
+                        <a href="{% url 'main:'|add:ur %}">
+                            <img src="{% static 'img/'|add:ic %}" data-bs-toggle="tooltip" data-bs-placement="right"
+                            title="{{m.title}}" class="menuicon {% if pagecode == m.pagecode %}active{% endif %}" />
+                        </a>
+                        <i class="fas fa-caret-left cl-w" {% if pagecode != m.pagecode %}hidden{% endif %}
+                        style="font-size: 24px;position: absolute;top:50%;right:0;transform: translateY(-50%);margin-top: -12px;"></i>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                    <div class="text-center bt" style="padding-top:24px">
+                        <a href="{% url 'main:login' %}">
+                            <img src="{% static 'img/logout.png' %}" class="menuicon" style="opacity: 1;" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col pd-20 ps-0">
+                {% block content %} {% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="shadow success"></div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12 py-5 text-center">
+                                <div id="success_message"></div>
+                            </div>
+                            <div class="col-12 text-center">
+                                <div class="mybtn blue" onclick="dismiss_success()">Okay</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content br-30">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmModalLabel">Alert</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div class="row mb-5">
+                <div class="col-12 text-center" style="font-size: 16px;" id="confirmMessage"></div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <div class="mybtn orange shadow" id="confirmNeg">No</div>
+                </div>
+                <div class="col-6 text-end">
+                    <div class="mybtn green shadow" id="confirmPos">Yes</div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!--STatus temp-->
+    <div class="status_btn shadow" hidden id="status_temp" onclick="change_status()">
+        <div class="p-n">Active : </div>
+        <div class="p-n">546</div>
+    </div>
+    <input type="text" value="{% now 'Y-m-d' %}" id="currentdate" hidden/>
+</body>
+
+<script src="{% static 'js/dropdown.js' %}"></script>
+
+<script>
+    function ask_confirm(message, posfun, negfun){
+        $("#confirmPos").on("click", function(){
+            window[posfun]();
+        })
+
+        $("#confirmNeg").on("click", function(){
+            window[negfun]();
+        })
+        $("#confirmMessage").html(message);
+        $("#confirmModal").modal("show");
+    }
+
+    function hide_confirm(){
+        $("#confirmModal").modal("hide");
+    }
+
+    function show_toast(message, type="success"){
+        $("#toast").html(message);
+        $("#toast").removeClass("success");
+        $("#toast").removeClass("warning");
+
+        $("#toast").addClass(type);
+        $("#toast").addClass("show");
+
+        setTimeout(function(){
+            $("#toast").removeClass("show");
+        }, 2000);
+    }
+
+    function dismiss_success() {
+        $("#successModal").modal("hide");
+    }
+
+    function success_modal(message) {
+        $("#success_message").html(message);
+        $("#successModal").modal("show");
+    }
+
+    $(document).ready(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+</script>
+
+</html>

@@ -1,0 +1,453 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+</style>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead">Class Routine</div>
+        <div class="col-2 my-auto">
+            <div class="custom_dropdown">
+                <input type="text" data-id="{{activesessionid}}" value="{{activesession}}" id="sessionfilter"
+                    class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Session..." />
+                <div class="optionblock">
+                    {% for s in sessions %}
+                    <div class="option_item" data-id="{{ s.id }}">{{s.Title}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-2 my-auto">
+            <div class="custom_dropdown">
+                <input type="text" data-id="" id="classfilter"
+                    class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                <div class="optionblock">
+                    {% for class in classes %}
+                    <div class="option_item" data-fun="change_section" data-id="{{ class.id }}">{{class.Title}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-2 my-auto">
+            <div class="custom_dropdown">
+                <input type="text" data-id="" id="sectionfilter"
+                    class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                <div class="optionblock" id="sectionfilter_drop">
+                    {% for s in sections %}
+                    <div class="option_item" hidden data-cls="{{s.ClassId}}" data-id="{{ s.id }}">{{s.Title}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-1 my-auto">
+            <div class="mybtn blue shadow f-12" onclick="load_data()">Load</div>
+        </div>
+    </div>
+    <div id="card_container" class="mt-3">
+        <div class="row mb-4 main_card" data-name="Monday" data-day="1">
+            <div class="col" style="white-space: nowrap;">
+                <div class="bg-white shadow pd-10 br-30 ps-4">
+                    <div class="row">
+                        <div class="col-1 my-auto fwb" style="font-size: 26px;border-right: 2px solid #00000050;">Mon
+                        </div>
+                        <div class="col my-auto card_block">
+                            <!--Cards-->
+                        </div>
+                        <div class="col-1 my-auto text-end" style="display: 2%;">
+                            <i class="fas fa-angle-right cur" style="font-size: 20px;transform: scaleY(1.5);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto" style="width: 5%;">
+                <i class="fas fa-plus-circle cl-b" style="font-size: 26px;" onclick="addModal()"></i>
+            </div>
+        </div>
+        <div class="row mb-4 main_card" data-name="Tuesday" data-day="2">
+            <div class="col" style="white-space: nowrap;">
+                <div class="bg-white shadow pd-10 br-30 ps-4">
+                    <div class="row">
+                        <div class="col-1 my-auto fwb" style="font-size: 26px;border-right: 2px solid #00000050;">Tue
+                        </div>
+                        <div class="col my-auto card_block">
+                            <!--Cards-->
+                        </div>
+                        <div class="col-1 my-auto text-end" style="display: 2%;">
+                            <i class="fas fa-angle-right cur" style="font-size: 20px;transform: scaleY(1.5);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto" style="width: 5%;">
+                <i class="fas fa-plus-circle cl-b" style="font-size: 26px;" onclick="addModal()"></i>
+            </div>
+        </div>
+        <div class="row mb-4 main_card" data-name="Wednesday" data-day="3">
+            <div class="col" style="white-space: nowrap;">
+                <div class="bg-white shadow pd-10 br-30 ps-4">
+                    <div class="row">
+                        <div class="col-1 my-auto fwb" style="font-size: 26px;border-right: 2px solid #00000050;">Wed
+                        </div>
+                        <div class="col my-auto card_block">
+                            <!--Cards-->
+                        </div>
+                        <div class="col-1 my-auto text-end" style="display: 2%;">
+                            <i class="fas fa-angle-right cur" style="font-size: 20px;transform: scaleY(1.5);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto" style="width: 5%;">
+                <i class="fas fa-plus-circle cl-b" style="font-size: 26px;" onclick="addModal()"></i>
+            </div>
+        </div>
+        <div class="row mb-4 main_card" data-name="Thursday" data-day="4">
+            <div class="col" style="white-space: nowrap;">
+                <div class="bg-white shadow pd-10 br-30 ps-4">
+                    <div class="row">
+                        <div class="col-1 my-auto fwb" style="font-size: 26px;border-right: 2px solid #00000050;">Thu
+                        </div>
+                        <div class="col my-auto card_block">
+                            <!--Cards-->
+                        </div>
+                        <div class="col-1 my-auto text-end" style="display: 2%;">
+                            <i class="fas fa-angle-right cur" style="font-size: 20px;transform: scaleY(1.5);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto" style="width: 5%;">
+                <i class="fas fa-plus-circle cl-b" style="font-size: 26px;" onclick="addModal()"></i>
+            </div>
+        </div>
+        <div class="row mb-4 main_card" data-name="Friday" data-day="5">
+            <div class="col" style="white-space: nowrap;">
+                <div class="bg-white shadow pd-10 br-30 ps-4">
+                    <div class="row">
+                        <div class="col-1 my-auto fwb" style="font-size: 26px;border-right: 2px solid #00000050;">Fri
+                        </div>
+                        <div class="col my-auto card_block">
+                            <!--Cards-->
+                        </div>
+                        <div class="col-1 my-auto text-end" style="display: 2%;">
+                            <i class="fas fa-angle-right cur" style="font-size: 20px;transform: scaleY(1.5);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto" style="width: 5%;">
+                <i class="fas fa-plus-circle cl-b" style="font-size: 26px;" onclick="addModal()"></i>
+            </div>
+        </div>
+        <div class="row mb-4 main_card" data-name="Saturday" data-day="6">
+            <div class="col" style="white-space: nowrap;">
+                <div class="bg-white shadow pd-10 br-30 ps-4">
+                    <div class="row">
+                        <div class="col-1 my-auto fwb" style="font-size: 26px;border-right: 2px solid #00000050;">Sat
+                        </div>
+                        <div class="col my-auto card_block">
+                            <!--Cards-->
+                        </div>
+                        <div class="col-1 my-auto text-end" style="display: 2%;">
+                            <i class="fas fa-angle-right cur" style="font-size: 20px;transform: scaleY(1.5);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto" style="width: 5%;">
+                <i class="fas fa-plus-circle cl-b" style="font-size: 26px;" onclick="addModal()"></i>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!--Card temp-->
+<div class="routine_card shadow" id="card_temp" hidden>
+    <i class="fas fa-edit editbtn text-center shadow" onclick="edit_routine()"></i>
+    <i class="fas fa-trash delbtn text-center shadow" onclick="start_delete()"></i>
+    <div class="mb-2">
+        <i class="fas fa-book cl-g f-16 me-2"></i>
+        <span class="subject">Hindi</span>
+    </div>
+    <div class="mb-2">
+        <i class="fas fa-clock cl-g f-16 me-2"></i>
+        <span class="timing">09:00 AM - 10:00 AM</span>
+    </div>
+    <div>
+        <i class="fas fa-user-tie cl-g f-16 me-2"></i>
+        <span class="faculty">Mr Rajesh P.</span>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addModal" data-id="" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="addModalLabel">Add Routine</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-6 mb-4">
+                                    <div class="mb-1 f-10">Class & Section</div>
+                                    <div class="f-16 fwb" id="classandsec">2 - A</div>
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="mb-1 f-10">Day</div>
+                                    <div class="f-16 fwb" id="routineday">Monday</div>
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="mb-1 f-10">Subject</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="subject"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Subject..." />
+                                        <div class="optionblock">
+                                            {% for sub in subject %}
+                                            <div class="option_item" data-id="{{ sub.id }}">{{sub.Title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="mb-1 f-10">Faculty</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="faculty"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Faculty..." />
+                                        <div class="optionblock">
+                                            {% for f in faculty %}
+                                            <div class="option_item"
+                                                data-show="{{f.FirstName}} {{f.MiddleName}} {{f.LastName}}"
+                                                data-id="{{ f.FacultyCode }}">
+                                                {{f.FacultyCode}} : {{f.FirstName}} {{f.MiddleName}} {{f.LastName}}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="mb-1 f-10">Start Time</div>
+                                    <input type="time" class="form-control f-12 br-30 shadow INP" id="starttime" />
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="mb-1 f-10">Finish Time</div>
+                                    <input type="time" class="form-control f-12 br-30 shadow INP" id="endtime" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="submit_data()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var delid = "";
+    function start_delete(){
+        var parent = event.target.parentElement;
+        delid = parent.getAttribute("data-id");
+        ask_confirm("Are you sure you want to delete this class?", "delete_routine", "hide_confirm");
+    }
+
+    function delete_routine(){
+        delete_item(delid, "Routine", "1");
+        hide_confirm();
+        load_data();
+    }
+
+    function change_section() {
+        var id = event.target.getAttribute("data-id");
+        $("#sectionfilter_drop").find(".option_item").attr("hidden", true);
+        $("#sectionfilter_drop").find("div[data-cls='" + id + "']").attr("hidden", false);
+
+        var total = $("#sectionfilter_drop").find(".option_item").length;
+        var count = $("#sectionfilter_drop").find(".option_item[hidden]").length;
+
+        var active = total - count;
+        if (active == 0) {
+            $("#sectionfilter").val("No Section");
+            $("#sectionfilter").attr("data-id", "");
+        }
+    }
+
+    function edit_routine() {
+        var parent = event.target.parentElement;
+        var id = parent.getAttribute("data-id");
+        $("#addModalLabel").html("Edit Routine");
+        $("#addModalLabel").attr("data-id", id);
+
+        $("#classandsec").html($("#classfilter").val() + " - " + $("#sectionfilter").val());
+        $("#routineday").html(parent.parentElement.parentElement.parentElement.parentElement.parentElement.getAttribute("data-name"));
+        $("#routineday").attr("data-id", parent.parentElement.parentElement.parentElement.parentElement.parentElement.getAttribute("data-day"));
+
+        $("#subject").attr("data-id", $(parent).find(".subject").eq(0).attr("data-id"));
+        $("#faculty").attr("data-id", $(parent).find(".faculty").eq(0).attr("data-id"));
+        $("#starttime").val($(parent).find(".timing").eq(0).attr("data-start"));
+        $("#endtime").val($(parent).find(".timing").eq(0).attr("data-end"));
+
+        set_drop_default();
+        $("#addModal").modal("show");
+    }
+
+    function submit_data() {
+        if ($("#subject").attr("data-id") == "") {
+            show_toast("Please select a subject", "warning");
+            return;
+        }
+
+        if ($("#faculty").attr("data-id") == "") {
+            show_toast("Please select a faculty", "warning");
+            return;
+        }
+
+        if ($("#starttime").val() == "") {
+            show_toast("Please select the start time", "warning");
+            return;
+        }
+
+        if ($("#endtime").val() == "") {
+            show_toast("Please select the finish time", "warning");
+            return;
+        }
+
+        var routineid = $("#addModalLabel").attr("data-id");
+        var data = new FormData();
+        if (routineid != "") {
+            data.append("routineid", routineid);
+        }
+        data.append("class", $("#classfilter").attr("data-id"));
+        data.append("section", $("#sectionfilter").attr("data-id"));
+        data.append("subject", $("#subject").attr("data-id"));
+        data.append("faculty", $("#faculty").attr("data-id"));
+        data.append("starttime", $("#starttime").val());
+        data.append("sessionid", $("#sessionfilter").attr("data-id"));
+        data.append("endtime", $("#endtime").val());
+        data.append("day", $("#routineday").attr("data-id"));
+        var code = send_ajax_data("save_routine", data);
+
+        var message = "Class routine saved";
+        success_modal(message);
+        load_data();
+        $("#addModal").modal("hide");
+    }
+
+    function addModal() {
+        var cls = $("#classfilter").attr("data-id");
+        var sec = $("#sectionfilter").attr("data-id");
+
+        if (cls == "") {
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        var secdrop = document.getElementById("sectionfilter_drop").getElementsByClassName("option_item");
+        var ac = 0;
+        for (var i = 0; i < secdrop.length; i++) {
+            if (secdrop[i].hidden == false) {
+                ac++;
+            }
+        }
+        if (sec == "" && ac != 0) {
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        $("#classandsec").html($("#classfilter").val() + " - " + $("#sectionfilter").val());
+        $("#routineday").html(event.target.parentElement.parentElement.getAttribute("data-name"));
+        $("#routineday").attr("data-id", event.target.parentElement.parentElement.getAttribute("data-day"));
+        $("#addModal").find("input").val("");
+        $("#addModal").find("input").attr("data-id", "");
+        $("#addModalLabel").attr("data-id", "");
+        $("#addModalLabel").html("Add Routine");
+        $("#addModal").modal("show");
+    }
+
+    function load_local() {
+        load_data();
+    }
+
+    function search_page() {
+        load_data();
+    }
+
+    function load_data() {
+        var cls = $("#classfilter").attr("data-id");
+        var sec = $("#sectionfilter").attr("data-id");
+        var sessionid = $("#sessionfilter").attr("data-id");
+
+        if (sessionid == "") {
+            show_toast("Please select the session", "warning");
+            return;
+        }
+
+        if (cls == "") {
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        var secdrop = document.getElementById("sectionfilter_drop").getElementsByClassName("option_item");
+        var ac = 0;
+        for (var i = 0; i < secdrop.length; i++) {
+            if (secdrop[i].hidden == false) {
+                ac++;
+            }
+        }
+
+        if (sec == "" && ac != 0) {
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        for (var i = 1; i < 7; i++) {
+            var data = new FormData();
+            data.append("class", cls);
+            data.append("section", sec);
+            data.append("sessionid", sessionid);
+            data.append("day", i);
+            var list = load_ajax_data("get_class_routine", data);
+
+            list = list.data;
+            var parent = document.getElementsByClassName("card_block")[i - 1];
+            var temp = document.getElementById("card_temp");
+            parent.innerHTML = "";
+            for (var j = 0; j < list.length; j++) {
+                var clone = clean_temp(temp);
+                parent.append(clone);
+
+                $(clone).attr("data-id", list[j]["id"]);
+                $(clone).attr("data-session", list[j]["sessionid"]);
+                $(clone).find(".subject").html(list[j]["subjecttitle"]);
+                $(clone).find(".subject").attr("data-id", list[j]["subjectid"]);
+                $(clone).find(".timing").attr("data-start", list[j]["starttime"]);
+                $(clone).find(".timing").attr("data-end", list[j]["endtime"]);
+                $(clone).find(".timing").html(AMPM(list[j]["starttime"]) + " - " + AMPM(list[j]["endtime"]));
+                $(clone).find(".faculty").html(list[j]["firstname"] + " " + list[j]["middlename"] + " " + list[j]["lastname"]);
+                $(clone).find(".faculty").attr("data-id", list[j]["facultyid"]);
+
+                $(clone).css("animation", "0.5s ease-in-out " + (i * 100 + j * 100) + "ms 1 routine forwards");
+            }
+        }
+    }
+
+    $(window).on("load", function () {
+        //load_data();
+    })
+</script>
+
+{% endblock %}

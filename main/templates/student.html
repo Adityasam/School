@@ -1,0 +1,475 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-2 fwb pagehead">Student</div>
+        <div class="col-3 my-auto" id="status_container">
+
+        </div>
+        <div class="col-3 my-auto">
+            <div class="bg-white shadow br-30" style="padding:5px 10px;display: inline-block;">
+                <input type="text" placeholder="Search..." id="srch" class="search_input" />
+            </div>
+            <div class="search_icon text-center shadow" onclick="search_page()">
+                <i class="fas fa-search p-n"></i>
+            </div>
+        </div>
+        <div class="col-2 my-auto">
+            <div class="custom_dropdown">
+                <input type="text" data-id="" id="classfilter" value="All Classes"
+                    class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Class..." />
+                <div class="optionblock" id="class_drop">
+                    <div class="option_item" data-id="" data-fun="class_filter">All Classes</div>
+                    {% for class in classes %}
+                    <div class="option_item" data-id="{{class.id}}" data-fun="class_filter">{{class.Title}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-2 text-end my-auto">
+            <div class="mybtn shadow blue" onclick="studentModal()">
+                <i class="fas fa-plus mr-10 p-n"></i>
+                <span class="p-n">Add Student</span>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3" id="card_container">
+
+    </div>
+
+    <!-- {% include 'pagination.html' %} -->
+</div>
+
+<!--Card temp-->
+<div class="col-12 mb-4 main_card" id="card_temp" hidden style="white-space: nowrap;">
+    <div class="bg-white shadow pd-10 br-30">
+        <div class="row">
+            <div class="col-1">
+                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="small_pic shadow" />
+            </div>
+            <div class="col-3 my-auto">
+                <div class="fwb name" style="font-size:18px"></div>
+                <div style="font-size:12px" class="class">Class : 2nd</div>
+            </div>
+            <div class="col f-12 my-auto">
+                <div class="mb-2">Father's Name</div>
+                <div class="fwb fathername"></div>
+            </div>
+            <div class="col f-12 my-auto">
+                <div class="mb-2">Mother's Name</div>
+                <div class="fwb mothername"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div class="mb-2">Age</div>
+                <div class="fwb age"></div>
+            </div>
+            <div class="col f-12 my-auto">
+                <div class="mb-2">Roll No.</div>
+                <div class="fwb rollno">1</div>
+            </div>
+            <div class="col-2 bl f-14">
+                <div class="mb-2">
+                    <i class="fas fa-phone faculty_contact_icon shadow me-1"></i>
+                    <span class="f-12 mobile"></span>
+                </div>
+                <div>
+                    <i class="fas fa-envelope faculty_contact_icon shadow me-1"></i>
+                    <span class="f-12 email"></span>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto">
+                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)"></i>
+                <br>
+                <i class="fas fa-edit me-3 cur" style="color:var(--my_green)" onclick="edit_student()"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="studentModal" data-id="" style="width:70%;left: 15%;padding: 20px;" tabindex="-1"
+    aria-labelledby="studentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" style="width:100%;">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="studentModalLabel">Add Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-3 mb-3">
+                            <div style="position: relative;height: 100%;padding-right: 100%;">
+                                <input type="file" id="photofile" hidden accept="image/png, image/jpeg, image/jpg"
+                                    onchange="set_profile()" />
+                                <img src="{% static 'img/defaultuser.jpg' %}" onclick="click_profie()"
+                                    class="add_photo shadow" id="profilepic" />
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <div class="row">
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">First Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="First Name..." id="firstname" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Middle Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Middle Name..." id="middlename" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Last Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Last Name..." id="lastname" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Email ID</div>
+                                    <input type="email" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Email ID..." id="email" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Mobile</div>
+                                    <input type="tel" class="form-control f-12 br-30 shadow INP" placeholder="Mobile..."
+                                        id="mobile" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Whatsapp</div>
+                                    <input type="tel" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Whatsapp..." id="whatsapp" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Gender</div>
+                                    <div data-id="" id="gender" class="OP">
+                                        <div class="opbtn me-2 shadow" data-id="M">Male</div>
+                                        <div class="opbtn shadow" data-id="F">Female</div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Date of Birth</div>
+                                    <input type="date" class="form-control f-12 br-30 shadow INP" id="dob" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Father's Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Father's Name" id="fathername" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Mother's Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Mother's Name" id="mothername" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Aadhar No</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Aadhar No." id="aadhar" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Class</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="class"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Class..." />
+                                        <div class="optionblock" id="class_drop">
+                                            {% for class in classes %}
+                                            <div class="option_item" data-fun="change_section" data-id="{{class.id}}">
+                                                {{class.Title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Section</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="section"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Section..." />
+                                        <div class="optionblock" id="section_drop">
+                                            {% for s in sections %}
+                                            <div class="option_item" data-cls="{{s.ClassId}}" hidden data-id="{{s.id}}">{{s.Title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Roll Number</div>
+                                    <input type="number" step="1" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Roll Number" id="rollnumber" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deletebtn" onclick="start_delete()">Delete</button>
+                <button type="button" class="btn btn-primary" id="archivebtn" onclick="archive()">Archive</button>
+                <button type="button" class="btn btn-primary" id="unarchivebtn" onclick="unarchive()">Unarchive</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="submit_data()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function start_delete(){
+        $("#studentModal").modal("hide");
+        ask_confirm("Are you sure you want to delete this student?", "delete_student", "hide_confirm");
+    }
+
+    function delete_student(){
+        var id = $("#studentModalLabel").attr("data-tabid");
+        delete_item(id, "Student");
+        hide_confirm();
+        load_status();
+        load_data();
+    }
+
+    function change_section() {
+        var id = event.target.getAttribute("data-id");
+        $("#section_drop").find(".option_item").attr("hidden", true);
+        $("#section_drop").find("div[data-cls='" + id + "']").attr("hidden", false);
+
+        var total = $("#section_drop").find(".option_item").length;
+        var count = $("#section_drop").find(".option_item[hidden]").length;
+
+        var active = total - count;
+        if (active == 0) {
+            $("#section").val("No Section");
+            $("#section").attr("data-id", "");
+        }
+    }
+
+    function archive() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = $("#studentModalLabel").attr("data-id");
+        var data = new FormData();
+        data.append("studentcode", id);
+        data.append("status", "C");
+        send_ajax_data("change_student_status", data);
+        load_status();
+        load_data();
+        $("#studentModal").modal("hide");
+        show_toast("Student Archived", "success");
+    }
+
+    function unarchive() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = $("#studentModalLabel").attr("data-id");
+        var data = new FormData();
+        data.append("studentcode", id);
+        data.append("status", "A");
+        send_ajax_data("change_student_status", data);
+        load_status();
+        load_data();
+        $("#studentModal").modal("hide");
+        show_toast("Student Unarchived", "success");
+    }
+
+    function edit_student() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = parent.getAttribute("data-id");
+        var tabid = parent.getAttribute("data-tabid");
+        $("#studentModalLabel").html("Edit Student : " + id);
+        $("#studentModalLabel").attr("data-id", id);
+        $("#studentModalLabel").attr("data-tabid", tabid);
+
+        var data = new FormData();
+        data.append("studentcode", id);
+        var detail = load_ajax_data("get_student_detail", data);
+        detail = detail.data;
+
+        $("#firstname").val(detail["firstname"]);
+        $("#middlename").val(detail["middlename"]);
+        $("#lastname").val(detail["lastname"]);
+        $("#email").val(detail["emailid"]);
+        $("#mobile").val(detail["mobile"]);
+        $("#whatsapp").val(detail["whatsapp"]);
+        $("#gender").attr("data-id", detail["gender"]);
+        $("#dob").val(detail["dateofbirth"]);
+        $("#section").attr("data-id", detail["section"]);
+        $("#fathername").val(detail["fathername"]);
+        $("#mothername").val(detail["mothername"]);
+        $("#class").attr("data-id", detail["class"]);
+        $("#aadhar").val(detail["aadharno"]);
+        document.getElementById("profilepic").src = "/static/uploads/" + detail["photo"];
+        url_to_file("/static/uploads/" + detail["photo"], document.getElementById("photofile"));
+
+        $("#deletebtn").attr("hidden", false);
+
+        var status = $(".pagestatus.active").eq(0).attr("data-status-id");
+        if(status == "A"){
+            $("#archivebtn").attr("hidden", false);
+            $("#unarchivebtn").attr("hidden", true);
+        }else{
+            $("#archivebtn").attr("hidden", true);
+            $("#unarchivebtn").attr("hidden", false);
+        }
+
+        set_drop_default();
+        $("#studentModal").modal("show");
+    }
+
+    function submit_data() {
+        var studentcode = $("#studentModalLabel").attr("data-id");
+        var ops = document.getElementsByClassName("OP");
+        var inps = document.getElementsByClassName("INP");
+
+        var data = new FormData();
+        if (studentcode != "") {
+            data.append("studentcode", studentcode);
+        }
+
+        for (var i = 0; i < ops.length; i++) {
+            data.append(ops[i].id, ops[i].getAttribute("data-id"));
+        }
+        for (var i = 0; i < inps.length; i++) {
+            if (inps[i].value != "") {
+                data.append(inps[i].id, inps[i].value);
+            }
+        }
+
+        var photo = document.getElementById("photofile").files;
+        if (photo.length > 0) {
+            photo = photo[0];
+            var filename = save_file(photo);
+            filename = filename.name;
+            data.append("photo", filename);
+        }
+
+        var code = send_ajax_data("save_student", data);
+
+        if (studentcode == "") {
+            var message = "New student created with code " + code.code;
+            success_modal(message);
+        } else {
+            var message = "Student with code " + code.code + " updated";
+            success_modal(message);
+        }
+        load_data();
+        $("#studentModal").modal("hide");
+    }
+
+    function studentModal() {
+        $("#profilepic").attr("src", "{% static 'img/defaultuser.jpg' %}");
+        $("#studentModal").find(".opbtn").removeClass("active");
+        $("#studentModal").find("input").val("");
+        $("#deletebtn").attr("hidden", true);
+        $("#archivebtn").attr("hidden", true);
+        $("#unarchivebtn").attr("hidden", true);
+        $("#studentModal").find("input").attr("data-id", "");
+        $("#studentModalLabel").attr("data-id", "");
+        $("#studentModalLabel").html("Add student");
+        $("#studentModal").modal("show");
+    }
+
+    function click_profie() {
+        document.getElementById("photofile").click();
+    }
+
+    function set_profile() {
+        var files = document.getElementById("photofile").files;
+        if (files.length > 0) {
+            files = files[0];
+            compressImage(files, 500, 500, 80, function (dataURL) {
+                // Convert the compressed image data URL to a file object
+                var newname = "compimage." + files.name.split(".").pop();
+                var compressedFile = dataURLtoFile(dataURL, newname);
+                document.getElementById("profilepic").src = URL.createObjectURL(compressedFile);
+                var dt = new DataTransfer();
+                dt.items.add(compressedFile);
+                document.getElementById("photofile").files = dt.files;
+            });
+        }
+    }
+
+    function load_local() {
+        load_data();
+    }
+
+    function search_page() {
+        load_data();
+    }
+
+    function class_filter() {
+        load_data();
+    }
+
+    function load_data() {
+        var data = new FormData();
+        var search = $("#srch").val().trim().toLowerCase();
+        var status = $(".pagestatus.active").eq(0).attr("data-status-id");
+        var cls = $("#classfilter").attr("data-id");
+
+        data.append("class", cls);
+        data.append("status", status);
+        data.append("search", search);
+        var list = load_ajax_data("get_student_list", data);
+        var parent = document.getElementById("card_container");
+        var temp = document.getElementById("card_temp");
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var row = list[i];
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            $(clone).attr("data-tabid", row["id"]);
+            $(clone).find(".rollno").html(row["rollnumber"]);
+            $(clone).attr("data-id", row["studentcode"]);
+            $(clone).find(".name").html(row["fullname"]);
+            $(clone).find(".fathername").html(row["fathername"]);
+            $(clone).find(".mothername").html(row["mothername"]);
+            $(clone).find(".age").html(get_age(row["dateofbirth"]) + " Years");
+            $(clone).find(".mobile").html(row["mobile"]);
+            $(clone).find(".email").html(row["emailid"]);
+            $(clone).find(".class").html("Class : " + row["classtitle"]+row["sectiontitle"]);
+            if (row["photo"] != "null" && row["photo"] != "") {
+                clone.getElementsByClassName("small_pic")[0].src = "/static/uploads/" + row["photo"];
+            }
+        }
+
+        if (status == "A") {
+            $("#archivebtn").attr("hidden", false);
+            $("#unarchivebtn").attr("hidden", true);
+        } else {
+            $("#archivebtn").attr("hidden", true);
+            $("#unarchivebtn").attr("hidden", false);
+        }
+    }
+
+    function load_status() {
+        var data = new FormData();
+        data.append("type", "STUDENT");
+        var list = load_ajax_data("get_status", data);
+        list = list.data;
+
+        var parent = document.getElementById("status_container");
+        var temp = document.getElementById("status_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+            clone.getElementsByTagName("div")[0].innerHTML = list[i][1] + " : ";
+            clone.getElementsByTagName("div")[1].innerHTML = list[i][2];
+            clone.setAttribute("data-status-id", list[i][0]);
+            clone.classList.add("pagestatus");
+        }
+
+        $(".pagestatus").eq(0).addClass("active");
+    }
+
+    $(window).on("load", function () {
+        load_status();
+        load_data();
+    })
+</script>
+
+{% endblock %}
