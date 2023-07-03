@@ -72,22 +72,31 @@
         <div class="col-6 bl">
             <div class="fwb pagehead mb-3">This Month</div>
             <div class="row">
-                <div class="col-6 text-center">
+                <div class="col-4 text-center">
                     <div class="shadow pd-20 br-20 bg-green">
-                        <div class="fwb cl-w" style="font-size: 30px;border-bottom: 2px solid white;">
+                        <div class="fwb cl-w" style="font-size: 24px;border-bottom: 2px solid white;">
                             <span>&#8377</span>
                             <span id="totalfee">0</span>
                         </div>
                         <div class="mt-2 cl-w">Collection</div>
                     </div>
                 </div>
-                <div class="col-6 text-center">
+                <div class="col-4 text-center">
                     <div class="shadow pd-20 br-20 bg-orange">
-                        <div class="fwb cl-w" style="font-size: 30px;border-bottom: 2px solid white;">
+                        <div class="fwb cl-w" style="font-size: 24px;border-bottom: 2px solid white;">
                             <span>&#8377</span>
                             <span id="totalexpense">0</span>
                         </div>
                         <div class="mt-2 cl-w">Expense</div>
+                    </div>
+                </div>
+                <div class="col-4 text-center">
+                    <div class="shadow pd-20 br-20 bg-gray">
+                        <div class="fwb cl-w" style="font-size: 24px;border-bottom: 2px solid white;">
+                            <span>&#8377</span>
+                            <span id="totaloverdue">0</span>
+                        </div>
+                        <div class="mt-2 cl-w">Overdue</div>
                     </div>
                 </div>
             </div>
@@ -111,53 +120,15 @@
                 </div>
             </div>
             <hr>
-            <div class="row">
-                <div class="col-6 br">
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 1st</div>
-                        <div class="col-7 fwb f-20 mt-auto">56%</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 2nd</div>
-                        <div class="col-7 fwb f-20 mt-auto">45%</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 3rd</div>
-                        <div class="col-7 fwb f-20 mt-auto">51%</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 4th</div>
-                        <div class="col-7 fwb f-20 mt-auto">64%</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 5th</div>
-                        <div class="col-7 fwb f-20 mt-auto">62%</div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 6th</div>
-                        <div class="col-7 fwb f-20 mt-auto">56%</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 7th</div>
-                        <div class="col-7 fwb f-20 mt-auto">45%</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 8th</div>
-                        <div class="col-7 fwb f-20 mt-auto">51%</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 9th</div>
-                        <div class="col-7 fwb f-20 mt-auto">64%</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 mt-auto">Class 10th</div>
-                        <div class="col-7 fwb f-20 mt-auto">62%</div>
-                    </div>
-                </div>
-            </div>
+            <div class="row" id="class_container"></div>
         </div>
+    </div>
+</div>
+
+<div id='class_temp' hidden class="col-6 mb-2">
+    <div class="row mb-2">
+        <div class="col-5 mt-auto title"></div>
+        <div class="col-7 fwb f-20 mt-auto done"></div>
     </div>
 </div>
 
@@ -186,15 +157,18 @@
     }
 
     function load_fee_expense() {
-        var month = "2023-04";
+        var month = "{% now 'Y-m' %}";
         var data = new FormData();
         data.append("month", month);
-        var list = load_ajax_data("fee_expense_summary", data);
-        var fee = add_commas(list.fee);
-        var expense = add_commas(list.expense);
+        data.append("session", "{{activesessionid}}");
+        var list = load_ajax_data("/fee_expense_summary", data);
+        var fee = add_commas(list.fee[0]["totalfee"]);
+        var expense = add_commas(list.expense[0]["totalexpense"]);
+        var overdue = add_commas(list.overdue[0]["overdue"]);
 
         $("#totalfee").html(fee);
         $("#totalexpense").html(expense);
+        $("#totaloverdue").html(overdue);
     }
 
     function load_people_count() {
@@ -203,9 +177,9 @@
         data.append("date", date);
         var list = load_ajax_data("get_people_count", data);
 
-        $("#facultycount").html(list.totalfaculty + "/" + list.totalfaculty);
-        $("#studentcount").html(list.totalstudent + "/" + list.totalstudent);
-        $("#facultystaff").html(list.totalstaff + "/" + list.totalstaff);
+        $("#facultycount").html(list.faculty.presentfaculty + "/" + list.faculty.totalfaculty);
+        $("#studentcount").html(list.student.presentstudent + "/" + list.student.totalstudent);
+        $("#staffcount").html(list.staff.presentstaff + "/" + list.staff.totalstaff);
     }
 
     function load_monthwise_expense() {
@@ -216,10 +190,57 @@
         load_chart(monthnames, expense);
     }
 
+    function load_syllabus(){
+        var data = new FormData();
+        data.append("session", "{{activesessionid}}");
+        var alldetail = load_ajax_data("get_main_dashboard", data);
+        var syllabus = alldetail.syllabus;
+
+        var totalchapter = 0;
+        var compchapter = 0;
+		
+		var parent = document.getElementById("class_container");
+        var temp = document.getElementById("class_temp");
+        parent.innerHTML = "";
+		
+		
+        for (var i = 0; i < syllabus.length; i++) {
+            var total = parseInt(syllabus[i]["totalchapter"]);
+            if(isNaN(total)){
+                total = 0;
+            }
+
+            var comp = parseInt(syllabus[i]["donechapter"]);
+            if(isNaN(comp)){
+                comp = 0;
+            }
+
+            totalchapter += total;
+            compchapter += comp;
+			
+			var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.getElementsByClassName("title")[0].innerHTML = "Class "+syllabus[i]["title"];
+
+            var per = (comp/total)*100;
+            if(isNaN(per)){
+                per = 0;
+            }
+
+            clone.getElementsByClassName("done")[0].innerHTML = per.toFixed(2)+"%";
+        }
+
+        var totaper = ((compchapter/totalchapter)*100).toFixed();
+        document.getElementById("syllabus").parentElement.setAttribute("data-value", parseInt(totaper));
+        $("#totalsyllabus").html(totaper+"%");
+    }
+
     $(window).on("load", function () {
         load_fee_expense();
         load_people_count();
         load_monthwise_expense();
+        load_syllabus();
         animate_meter();
     })
 </script>

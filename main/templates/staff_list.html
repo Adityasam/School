@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-2 fwb pagehead">Staff</div>
+        <div class="col-3 my-auto" id="status_container">
+
+        </div>
+        <div class="col-3 my-auto">
+            <div class="bg-white shadow br-30" style="padding:5px 10px;display: inline-block;">
+                <input type="text" placeholder="Search..." id="srch" class="search_input" />
+            </div>
+            <div class="search_icon text-center shadow" onclick="search_page()">
+                <i class="fas fa-search p-n"></i>
+            </div>
+        </div>
+        <div class="col-4 text-end my-auto">
+            <div class="mybtn shadow blue" onclick="staffModal()">
+                <i class="fas fa-plus mr-10 p-n"></i>
+                <span class="p-n">Add Staff</span>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3" id="card_container">
+
+    </div>
+</div>
+
+<!--Card temp-->
+<div class="col-12 mb-4 main_card" id="card_temp" hidden style="white-space: nowrap;">
+    <div class="bg-white shadow pd-10 br-30">
+        <div class="row">
+            <div class="col-1">
+                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="small_pic shadow" />
+            </div>
+            <div class="col my-auto">
+                <div class="fwb name" style="font-size:18px"></div>
+                <div style="font-size:12px" class="designation"></div>
+            </div>
+            <div class="col-2 f-12 my-auto">
+                <div class="mb-2">Joining Date</div>
+                <div class="fwb joiningdate"></div>
+            </div>
+            <div class="col-2 f-12 my-auto">
+                <div class="mb-2">Education</div>
+                <div class="fwb education"></div>
+            </div>
+            <div class="col-2 bl f-14">
+                <div class="mb-2">
+                    <i class="fas fa-phone faculty_contact_icon shadow me-1"></i>
+                    <span class="f-12 mobile"></span>
+                </div>
+                <div>
+                    <i class="fas fa-envelope faculty_contact_icon shadow me-1"></i>
+                    <span class="f-12 email"></span>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto">
+                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)"></i>
+                <br>
+                <i class="fas fa-edit me-3 cur" style="color:var(--my_green)" onclick="edit_staff()"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="staffModal" data-id="" style="width:70%;left: 15%;padding: 20px;" tabindex="-1"
+    aria-labelledby="staffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" style="width:100%;">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="staffModalLabel">Add Staff</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-3 mb-3">
+                            <div style="position: relative;height: 100%;padding-right: 100%;">
+                                <input type="file" id="photofile" hidden accept="image/png, image/jpeg, image/jpg"
+                                    onchange="set_profile()" />
+                                <img src="{% static 'img/defaultuser.jpg' %}" onclick="click_profie()"
+                                    class="add_photo shadow" id="profilepic" />
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <div class="row">
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">First Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="First Name..." id="firstname" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Middle Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Middle Name..." id="middlename" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Last Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Last Name..." id="lastname" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Email ID</div>
+                                    <input type="email" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Email ID..." id="email" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Mobile</div>
+                                    <input type="tel" class="form-control f-12 br-30 shadow INP" placeholder="Mobile..."
+                                        id="mobile" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Whatsapp</div>
+                                    <input type="tel" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Whatsapp..." id="whatsapp" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Gender</div>
+                                    <div data-id="" id="gender" class="OP">
+                                        <div class="opbtn me-2 shadow" data-id="M">Male</div>
+                                        <div class="opbtn shadow" data-id="F">Female</div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Date of Birth</div>
+                                    <input type="date" class="form-control f-12 br-30 shadow INP" id="dob" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Joining Date</div>
+                                    <input type="date" class="form-control f-12 br-30 shadow INP" id="joiningdate" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Designation</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id=""
+                                            class="search_input form-control f-12 br-30 shadow OP"
+                                            placeholder="Designation.." id="designation" />
+                                        <div class="optionblock">
+                                            {% for d in designations %}
+                                            <div class="option_item" data-id="{{d.id}}">{{d.Title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Salary</div>
+                                    <input type="number" class="form-control f-12 br-30 shadow INP" placeholder="0.00"
+                                        id="salary" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Aadhar No</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Aadhar No." id="aadhar" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Education</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Education" id="education" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Name In Bank</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Name In Bank..." id="nameinbank" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Bank Account No</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Bank Account No..." id="bankaccount" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Bank Name</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id=""
+                                            class="search_input form-control f-12 br-30 shadow OP"
+                                            placeholder="Bank Name..." id="bankcode" />
+                                        <div class="optionblock" id="bankdrop">
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">IFSC Code</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="IFSC Code..." id="ifsc" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deletebtn" onclick="start_delete()">Delete</button>
+                <button type="button" class="btn btn-primary" id="archivebtn" onclick="archive()">Archive</button>
+                <button type="button" class="btn btn-primary" id="unarchivebtn" onclick="unarchive()">Unarchive</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="submit_data()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="subtemp" hidden class="bg-w shadow br-20 px-3 py-1 f-12 me-3" style="display: inline-block;">
+    <span>Subject Title</span>
+    <i class="fas fa-trash cl-r f-12 ms-2 ps-2" onclick="event.target.parentElement.remove()"></i>
+</div>
+
+<script>
+    $("#staffModal").find("input").on('keypress',function(e) {
+        if(e.which == 13) {
+            submit_data();
+        }
+    });
+
+    function start_delete(){
+        $("#staffModal").modal("hide");
+        ask_confirm("Are you sure you want to delete this staff?", "delete_staff", "hide_confirm");
+    }
+
+    function delete_staff(){
+        var id = $("#staffModalLabel").attr("data-tabid");
+        delete_item(id, "Staff");
+        hide_confirm();
+        load_status();
+        load_data();
+    }
+
+    function archive() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = $("#staffModalLabel").attr("data-id");
+        var data = new FormData();
+        data.append("staffcode", id);
+        data.append("status", "C");
+        send_ajax_data("change_staff_status", data);
+        load_status();
+        load_data();
+        $("#staffModal").modal("hide");
+        show_toast("Staff Archived", "success");
+    }
+
+    function unarchive() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = $("#staffModalLabel").attr("data-id");
+        var data = new FormData();
+        data.append("staffcode", id);
+        data.append("status", "A");
+        send_ajax_data("change_staff_status", data);
+        load_status();
+        load_data();
+        $("#staffModal").modal("hide");
+        show_toast("Staff Unarchived", "success");
+    }
+
+    function edit_staff() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = parent.getAttribute("data-id");
+        var tabid = parent.getAttribute("data-tabid");
+        $("#staffModalLabel").html("Edit Staff : " + id);
+        $("#staffModalLabel").attr("data-id", id);
+        $("#staffModalLabel").attr("data-tabid", tabid);
+
+        var data = new FormData();
+        data.append("staffcode", id);
+        var maindetail = load_ajax_data("get_staff_detail", data);
+        detail = maindetail.data;
+
+        $("#firstname").val(detail["firstname"]);
+        $("#middlename").val(detail["middlename"]);
+        $("#lastname").val(detail["lastname"]);
+        $("#email").val(detail["emailid"]);
+        $("#mobile").val(detail["mobile"]);
+        $("#whatsapp").val(detail["whatsapp"]);
+        $("#gender").attr("data-id", detail["gender"]);
+        $("#dob").val(detail["dateofbirth"]);
+        $("#joiningdate").val(detail["joiningdate"]);
+        $("#salary").val(detail["salary"]);
+        $("#aadhar").val(detail["aadharno"]);
+        $("#education").val(detail["education"]);
+        $("#designation").attr("data-id", detail["designation"]);
+        $("#nameinbank").val(detail["nameinbank"]);
+        $("#bankaccount").val(detail["bankaccountno"]);
+        $("#bankcode").attr("data-id", detail["bankcode"]);
+        $("#ifsc").val(detail["ifsc"]);
+		if(detail["photo"] != ""){
+			document.getElementById("profilepic").src = "/static/uploads/" + detail["photo"];
+			url_to_file("/static/uploads/" + detail["photo"], document.getElementById("photofile"));
+		}
+
+        $("#deletebtn").attr("hidden", false);
+
+        var status = $(".pagestatus.active").eq(0).attr("data-status-id");
+        if(status == "A"){
+            $("#archivebtn").attr("hidden", false);
+            $("#unarchivebtn").attr("hidden", true);
+        }else{
+            $("#archivebtn").attr("hidden", true);
+            $("#unarchivebtn").attr("hidden", false);
+        }
+
+        set_drop_default();
+        $("#staffModal").modal("show");
+    }
+
+    function submit_data() {
+        var staffcode = $("#staffModalLabel").attr("data-id");
+        var ops = document.getElementsByClassName("OP");
+        var inps = document.getElementsByClassName("INP");
+
+        var data = new FormData();
+        if (staffcode != "") {
+            data.append("staffcode", staffcode);
+        }
+
+        for (var i = 0; i < ops.length; i++) {
+            data.append(ops[i].id, ops[i].getAttribute("data-id"));
+        }
+        for (var i = 0; i < inps.length; i++) {
+            if (inps[i].value != "") {
+                data.append(inps[i].id, inps[i].value);
+            }
+        }
+
+        var photo = document.getElementById("photofile").files;
+        if (photo.length > 0) {
+            photo = photo[0];
+            var filename = save_file(photo);
+            filename = filename.name;
+            data.append("photo", filename);
+        }
+        
+        var code = send_ajax_data("save_staff", data);
+
+        if (staffcode == "") {
+            var message = "New staff created with code " + code.code;
+            success_modal(message);
+        }else{
+            var message = "Staff with code "+ code.code +" updated";
+            success_modal(message);
+        }
+        load_data();
+        $("#staffModal").modal("hide");
+    }
+
+    function staffModal() {
+        $("#profilepic").attr("src", "{% static 'img/defaultuser.jpg' %}");
+        $("#staffModal").find(".opbtn").removeClass("active");
+        $("#staffModal").find("input").val("");
+        $("#staffModal").find("input").attr("data-id", "");
+        $("#staffModalLabel").attr("data-id", "");
+        $("#staffModalLabel").html("Add Faculty");
+        $("#staffModal").modal("show");
+
+        $("#deletebtn").attr("hidden", true);
+        $("#archivebtn").attr("hidden", true);
+        $("#unarchivebtn").attr("hidden", true);
+    }
+
+    function click_profie() {
+        document.getElementById("photofile").click();
+    }
+
+    function set_profile() {
+        var files = document.getElementById("photofile").files;
+        if (files.length > 0) {
+            files = files[0];
+            compressImage(files, 500, 500, 80, function(dataURL) {
+                // Convert the compressed image data URL to a file object
+                var newname = "compimage."+files.name.split(".").pop();
+                var compressedFile = dataURLtoFile(dataURL, newname);
+                document.getElementById("profilepic").src = URL.createObjectURL(compressedFile);
+                var dt = new DataTransfer();
+                dt.items.add(compressedFile);
+                document.getElementById("photofile").files = dt.files;
+              });
+        }
+    }
+
+    function load_local() {
+        load_data();
+    }
+
+    function search_page() {
+        load_data();
+    }
+
+    function load_data() {
+        var data = new FormData();
+        var search = $("#srch").val().trim().toLowerCase();
+        var status = $(".pagestatus.active").eq(0).attr("data-status-id");
+        data.append("status", status);
+        data.append("search", search);
+        var list = load_ajax_data("get_staff_list", data);
+        var parent = document.getElementById("card_container");
+        var temp = document.getElementById("card_temp");
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var row = list[i];
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            $(clone).attr("data-tabid", row["id"]);
+            $(clone).attr("data-id", row["staffcode"]);
+            $(clone).find(".name").html(row["fullname"]);
+            $(clone).find(".joiningdate").html(format_date(row["joiningdate"]));
+            $(clone).find(".education").html(row["education"]);
+            $(clone).find(".mobile").html(row["mobile"]);
+            $(clone).find(".designation").html(row["designationtitle"]);
+            $(clone).find(".email").html(row["emailid"]);
+            if (row["photo"] != "null" && row["photo"] != "") {
+                clone.getElementsByClassName("small_pic")[0].src = "/static/uploads/" + row["photo"];
+            }
+        }
+
+        if (status == "A") {
+            $("#archivebtn").attr("hidden", false);
+            $("#unarchivebtn").attr("hidden", true);
+        } else {
+            $("#archivebtn").attr("hidden", true);
+            $("#unarchivebtn").attr("hidden", false);
+        }
+    }
+
+    function load_status() {
+        var data = new FormData();
+        data.append("type", "STAFF");
+        var list = load_ajax_data("get_status", data);
+        list = list.data;
+
+        var parent = document.getElementById("status_container");
+        var temp = document.getElementById("status_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+            clone.getElementsByTagName("div")[0].innerHTML = list[i][1] + " : ";
+            clone.getElementsByTagName("div")[1].innerHTML = list[i][2];
+            clone.setAttribute("data-status-id", list[i][0]);
+            clone.classList.add("pagestatus");
+        }
+
+        $(".pagestatus").eq(0).addClass("active");
+    }
+
+    $(window).on("load", function () {
+        load_status();
+        load_data();
+        set_banks(document.getElementById("bankdrop"));
+    })
+</script>
+
+{% endblock %}

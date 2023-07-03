@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .mark_input {
+        background-color: transparent !important;
+        border: none;
+        pointer-events: none;
+    }
+</style>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead">Salary</div>
+        <div class="col-2">
+            <div class="status_btn shadow active" data-id="F" onclick="change_status()">
+                <div class="p-n">Faculty</div>
+            </div>
+            <div class="status_btn shadow" data-id="S" onclick="change_status()">
+                <div class="p-n">Staff</div>
+            </div>
+        </div>
+        <div class="col-2 my-auto">
+            <div class="custom_dropdown">
+                <input type="text" data-id="{{activesessionid}}" id="sessionfilter" value="{{activesession}}"
+                    class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Session..." />
+                <div class="optionblock">
+                    {% for s in sessions %}
+                    <div class="option_item" data-id="{{ s.id }}">
+                        {{s.Title}}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-2 my-auto">
+            <input type="month" value="{% now 'Y-m' %}" class="form-control f-12 br-30 shadow" id="monthyear" />
+        </div>
+        <div class="col-1 my-auto">
+            <div class="mybtn shadow orange" onclick="load_data()">Load</div>
+        </div>
+        <div class="col-2 text-end my-auto">
+            <div class="mybtn shadow blue" onclick="process_salary()">Process Salary</div>
+        </div>
+    </div>
+    <div class="mt-3">
+        <table class="f-12 table">
+            <thead>
+                <tr>
+                    <th style="width: 24px;">#</th>
+                    <th style="width: 30px;">
+                        <input type="checkbox" class="form-check-input" onchange="select_all()" />
+                    </th>
+                    <th>Faculty Code</th>
+                    <th>Faculty Name</th>
+                    <th>Last Processed</th>
+                    <th>Salary</th>
+                    <th>Days</th>
+                    <th>Payable</th>
+                    <th style="width: 10%;">Deductions</th>
+                    <th style="width: 10%;">Incentive</th>
+                    <th>Net Salary</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="table_body">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="table_temp" style="vertical-align: middle;">
+        <td class="count"></td>
+        <td>
+            <input type="checkbox" class="form-check-input chk" />
+        </td>
+        <td class="code"></td>
+        <td class="name">Aditya Nath Tiwari</td>
+        <td class="last">No Record</td>
+        <td class="salary">35000</td>
+        <td class="days">31</td>
+        <td class="payable">35000</td>
+        <td>
+            <input type="number" onkeyup="change_salary()" class="form-control form-control-sm f-12 deduction"
+                value="0" />
+        </td>
+        <td>
+            <input type="number" onkeyup="change_salary()" class="form-control form-control-sm f-12 incentive"
+                value="0" />
+        </td>
+        <th class="net"></th>
+        <th class="text-end">
+            <i class="fas fa-history cur cl-g f-14" onclick="load_history()"></i>
+        </th>
+    </tr>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 50vw;">
+        <div class="modal-content br-30">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Salary History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table f-12">
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Salary</th>
+                                        <th>Days</th>
+                                        <th>Payable</th>
+                                        <th>Deduction</th>
+                                        <th>Incentive</th>
+                                        <th>Net Salary</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail_body">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function select_all() {
+        $(".salrow").find(".chk").prop("checked", event.target.checked);
+    }
+
+    function load_history() {
+        var code = event.target.parentElement.parentElement.getAttribute("data-code");
+        var name = event.target.parentElement.parentElement.getElementsByClassName("name")[0].innerHTML;
+
+        $("#detailModalLabel").html("Salary History : <span class='fwb'>" + name + "</span>");
+
+        var data = new FormData();
+        data.append("facultycode", code);
+        var list = load_ajax_data("get_salary_history", data);
+        console.log(list);
+        var body = document.getElementById("detail_body");
+		body.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var tr = document.createElement("tr");
+            tr.innerHTML += "<td>" + list[i]["monthyear"] + "</td>";
+            tr.innerHTML += "<td>" + list[i]["salary"] + "</td>";
+            tr.innerHTML += "<td>" + list[i]["days"] + "</td>";
+            tr.innerHTML += "<td>" + list[i]["payable"] + "</td>";
+            tr.innerHTML += "<td>" + list[i]["deduction"] + "</td>";
+            tr.innerHTML += "<td>" + list[i]["incentive"] + "</td>";
+            tr.innerHTML += "<td>" + INR + " " + list[i]["netsalary"] + "</td>";
+
+            body.appendChild(tr);
+        }
+        $("#detailModal").modal("show");
+    }
+
+    function process_salary() {
+        var sel = $(".salrow").find(".chk:checked").length;
+        if (sel == 0) {
+            show_toast("Please select at least one faculty", "warning");
+            return;
+        }
+
+        var rows = document.getElementsByClassName("salrow");
+        var datastring = "";
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].getElementsByClassName("chk")[0].checked) {
+                datastring += rows[i].getAttribute("data-code") + "^";
+                datastring += rows[i].getElementsByClassName("salary")[0].innerHTML + "^";
+                datastring += rows[i].getElementsByClassName("days")[0].innerHTML + "^";
+                datastring += rows[i].getElementsByClassName("payable")[0].innerHTML + "^";
+                datastring += rows[i].getElementsByClassName("deduction")[0].value + "^";
+                datastring += rows[i].getElementsByClassName("incentive")[0].value + "^";
+                datastring += rows[i].getElementsByClassName("net")[0].innerHTML;
+                datastring += "#";
+            }
+        }
+
+        var session = $("#sessionfilter").attr("data-id");
+        var monthyear = $("#monthyear").val();
+        var data = new FormData();
+        data.append("session", session);
+        data.append("monthyear", monthyear);
+        data.append("datastring", datastring);
+        var ret = send_ajax_data("save_salary", data);
+
+        if (ret.status == "exists") {
+            var codes = ret.data;
+            show_toast("Salaries of " + codes.join(", ") + " has already been processed for the selected month", "warning");
+        } else {
+            show_toast("Salary Processed", "success");
+            load_data();
+        }
+    }
+
+    function change_salary() {
+        var parent = event.target.parentElement.parentElement;
+        var deduction = parseFloat(parent.getElementsByClassName("deduction")[0].value);
+        if (isNaN(deduction)) {
+            deduction = 0;
+        }
+
+        var incentive = parseFloat(parent.getElementsByClassName("incentive")[0].value);
+        if (isNaN(incentive)) {
+            incentive = 0;
+        }
+
+        var salary = parseFloat(parent.getElementsByClassName("payable")[0].innerHTML);
+        if (isNaN(salary)) {
+            salary = 0;
+        }
+
+        parent.getElementsByClassName("net")[0].innerHTML = (salary - deduction + incentive).toFixed(2);
+    }
+
+    function load_local(){
+        load_data();
+    }
+
+    function load_data() {
+        var session = $("#sessionfilter").attr("data-id");
+        var monthyear = $("#monthyear").val();
+        var type = document.getElementsByClassName("status_btn active")[0].getAttribute("data-id");
+
+        var data = new FormData();
+        data.append("sessionid", session);
+        data.append("type", type);
+        data.append("monthyear", $("#monthyear").val());
+        var list = load_ajax_data("get_faculty_for_salary", data);
+
+
+        var monthyear = $("#monthyear").val().split("-");
+        var year = parseInt(monthyear[0]);
+        var month = parseInt(monthyear[1]);
+
+        var sunday = 0;
+        var noofdays = getDaysInMonth(year, month);
+        for (var i = 0; i < noofdays; i++) {
+            var newdate = new Date(year, month - 1, i + 1);
+            if (newdate.getDay() == 0) {
+                sunday++;
+            }
+        }
+
+        var parent = document.getElementById("table_body");
+        var temp = document.getElementById("table_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+            clone.classList.add("salrow");
+            clone.setAttribute("data-code", list[i]["facultycode"]);
+            $(clone).find(".count").html(i + 1);
+            $(clone).find(".code").html(list[i]["facultycode"]);
+            $(clone).find(".name").html(list[i]["fullname"]);
+            $(clone).find(".salary").html(list[i]["salary"]);
+            $(clone).find(".last").html(list[i]["lastrecord"]);
+
+            var absent = parseInt(list[i]["absentcount"]);
+            $(clone).find(".days").html(noofdays - absent);
+
+            $(clone).find(".days").attr("data-absent", absent);
+
+            var salary = parseFloat(list[i]["salary"]);
+            if (isNaN(salary)) {
+                salary = 0;
+            }
+
+            var perday = salary / 30;
+            var salarydeduct = salary - (perday * absent);
+
+            $(clone).find(".payable").html(salarydeduct.toFixed(2));
+            $(clone).find(".net").html(salarydeduct.toFixed(2));
+        }
+    }
+</script>
+
+{% endblock %}

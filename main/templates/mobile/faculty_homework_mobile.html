@@ -1,0 +1,193 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<script src="{% static 'ckeditor/ckeditor.js'%}"></script>
+<script>
+	CKEDITOR.env.isCompatible = true;
+</script>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="{{activesessionid}}" value="{{activesession}}"
+                                id="sessionfilter" class="class search_input shadow br-30 form-control f-12 OP"
+                                placeholder="Session..." />
+                            <div class="optionblock">
+                                {% for s in sessions %}
+                                <div class="option_item" data-id="{{ s.id }}">{{s.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="classfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                            <div class="optionblock">
+                                {% for class in classes %}
+                                <div class="option_item" data-fun="change_class" data-id="{{ class.id }}">{{class.Title}}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="sectionfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                            <div class="optionblock" id="section_drop">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="subjectfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Subject..." />
+                            <div class="optionblock">
+                                {% for s in subjects %}
+                                <div class="option_item" data-id="{{ s.id }}">{{s.Title}}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <input type="date" id="datefilter" class="form-control form-control-sm f-12 shadow br-30" value="{% now 'Y-m-d' %}">
+                    </div>
+                    <div class="col-6 text-center">
+                        <div class="bg-green br-30 shadow" style="padding: 3px;" onclick="load_data()">
+                            <i class="fas fa-search cl-w f-14 p-n"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12">
+            <textarea id="tinyeditor" data-id=""></textarea>
+        </div>
+        <div class="col-12 text-end">
+            <div class="mybtn green mt-4" onclick="submit_data()">Save</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    CKEDITOR.replace('tinyeditor');
+</script>
+
+<script>
+    function change_class() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("section_drop"));
+    }
+
+
+    function load_data(){
+        var data = new FormData();
+        var sessionid = $("#sessionfilter").attr("data-id");
+        var classid = $("#classfilter").attr("data-id");
+        var subjectid = $("#subjectfilter").attr("data-id");
+        var sectionid = $("#sectionfilter").attr("data-id");
+        var datefilter= $("#datefilter").val();
+
+        if(sessionid == ""){
+            show_toast("Please select the session", "warning");
+            return;
+        }
+
+        if(classid == ""){
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        if(sectionid == "" && "{{hassection}}" == "True" && $("#sectionfilter").val() != "N/A"){
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        if(subjectid == ""){
+            show_toast("Please select the subject", "warning");
+            return;
+        }
+
+        if(datefilter == ""){
+            show_toast("Please select the date", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        data.append("sessionid", sessionid);
+        data.append("classid", classid);
+        data.append("subjectid", subjectid);
+        data.append("sectionid", sectionid);
+        data.append("date", datefilter);
+        var work = load_ajax_data("load_homework", data);
+        if(work.length > 0){
+            work = work[0];
+            CKEDITOR.instances["tinyeditor"].setData(work["work"]);
+        }else{
+            CKEDITOR.instances["tinyeditor"].setData("");
+        }
+    }
+
+    function submit_data(){
+        var data = new FormData();
+        var sessionid = $("#sessionfilter").attr("data-id");
+        var classid = $("#classfilter").attr("data-id");
+        var sectionid = $("#sectionfilter").attr("data-id");
+        var subjectid = $("#subjectfilter").attr("data-id");
+        var datefilter= $("#datefilter").val();
+        var text = CKEDITOR.instances["tinyeditor"].setData();
+
+        if(sessionid == ""){
+            show_toast("Please select the session", "warning");
+            return;
+        }
+
+        if(classid == ""){
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        if(sectionid == "" && "{{hassection}}" == "True" && $("#sectionfilter").val() != "N/A"){
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        if(subjectid == ""){
+            show_toast("Please select the subject", "warning");
+            return;
+        }
+
+        if(datefilter == ""){
+            show_toast("Please select the date", "warning");
+            return;
+        }
+
+        if(text == ""){
+            show_toast("Please enter something in home work", "warning");
+            return;
+        }
+
+        data.append("sessionid", sessionid);
+        data.append("classid", classid);
+        data.append("subjectid", subjectid);
+        data.append("sectionid", sectionid);
+        data.append("date", datefilter);
+        data.append("text", text);
+        data.append("givenby", $("#USERID").val());
+        send_ajax_data("save_homework", data);
+
+        show_toast("Home Work Saved", "success");
+    }
+</script>
+
+{% endblock %}

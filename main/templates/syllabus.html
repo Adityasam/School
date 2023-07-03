@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .mark_input {
+        background-color: transparent !important;
+        border: none;
+        pointer-events: none;
+    }
+</style>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-6 fwb pagehead">Syllabus</div>
+        <div class="col-6 text-end my-auto">
+            <div class="mybtn shadow blue cl-w" id="editbtn" onclick="add_chapter('C')">
+                <i class="fas fa-plus pe-2"></i>
+                <span>Add Chapter</span>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3" id="card_container">
+        <div class="col-2 br">
+            <div class="custom_dropdown mb-4">
+                <input type="text" id="sessionfilter" data-id="{{activesessionid}}" value="{{activesession}}"
+                    class="class search_input shadow br-30 form-control f-12 OP" placeholder="Session..." />
+                <div class="optionblock">
+                    {% for s in sessions %}
+                    <div class="option_item" data-id="{{s.id}}">{{s.Title}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="custom_dropdown mb-4">
+                <input type="text" data-id="" id="classfilter"
+                    class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                <div class="optionblock">
+                    {% for class in classes %}
+                    <div class="option_item" data-fun="load_section" data-id="{{ class.id }}">{{class.Title}}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="custom_dropdown mb-4" {% if hassection == False %}hidden{% endif %}>
+                <input type="text" data-id="" id="sectionfilter"
+                    class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                <div class="optionblock" id="sectionfilter_drop">
+                    
+                </div>
+            </div>
+
+            <div class="custom_dropdown mb-4">
+                <input type="text" data-id="" id="subjectfilter"
+                    class="class search_input shadow br-30 form-control f-12 OP" placeholder="Subject..." />
+                <div class="optionblock">
+                    {% for s in subjects %}
+                    <div class="option_item" data-id="{{ s.id }}">{{s.Title}}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mybtn orange shadow db text-center" style="margin-top: 40px !important;" onclick="load_data()">
+                Load</div>
+        </div>
+
+        <div class="col-10" id="chapter_block" data-sortid="0">
+        </div>
+    </div>
+</div>
+
+<div class="chapter_item" id="chapter_temp" hidden data-parentid="" data-sortid="">
+    <i class="fas fa-plus expand_btn text-center shadow syllabus_expand_btn" onclick="expand_row()"></i>
+    <i class="fas fa-minus shrink_btn text-center shadow syllabus_expand_btn bg-orange" onclick="expand_row()"></i>
+    <i class="fas fa-circle last_btn text-center shadow syllabus_expand_btn bg-gray"></i>
+    <input type="text" class="edit form-control form-control-sm edit_text" style="width: 70%;"
+        placeholder="Chapter Title..." />
+
+    <i class="fas fa-trash shadow icon_btn_sm bg-red text-center pa" onclick="delete_item()"
+        style="right:0px;top: 3px;"></i>
+    <i class="fas fa-edit shadow editbtn icon_btn_sm bg-blue text-center pa" onclick="start_edit()" hidden
+        style="right:40px;top: 3px;"></i>
+    <i class="fas fa-save shadow savebtn icon_btn_sm bg-green text-center pa" onclick="save_chapter()"
+        style="right:40px;top: 3px;"></i>
+    <i class="fas fa-plus shadow add_btn icon_btn_sm bg-orange text-center pa" onclick="add_chapter('I')"
+        style="right:80px;top: 3px;"></i>
+    <i class="fas fa-check shadow icon_btn_sm chapter_check text-center pa" onclick="mark_done()"
+        style="right:120px;top: 3px;"></i>
+</div>
+
+<script>
+    function load_section() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("sectionfilter_drop"));
+    }
+
+    function change_section(){
+        
+    }
+
+    function delete_item() {
+        var item = event.target.parentElement;
+        var id = item.getAttribute("data-sortid");
+        var data = new FormData();
+        data.append("sortid", id);
+        send_ajax_data("delete_chapter", data);
+        load_data();
+
+        show_toast("Chapter Deleted", "success");
+    }
+
+    function mark_done() {
+        var item = event.target.parentElement;
+        $(event.target).toggleClass("done");
+
+        var gpar = item.parentElement;
+
+        var allitems = gpar.getElementsByClassName("chitem");
+        var allcheck = true;
+        for (var i = 0; i < allitems.length; i++) {
+            if(!allitems[i].getElementsByClassName("chapter_check")[0].classList.contains("done")){
+                allcheck = false;
+                break;
+            }
+        }
+
+        var id = item.getAttribute("data-sortid");
+        var data = new FormData();
+        data.append("sortid", id);
+        if (!event.target.classList.contains("done")) {
+            data.append("status", "0");
+        } else {
+            data.append("status", "1");
+        }
+        send_ajax_data("mark_chapter_done", data);
+
+        //marking the parent done
+        id = gpar.getAttribute("data-sortid");
+        data = new FormData();
+        data.append("sortid", id);
+        if (allcheck == false) {
+            data.append("status", "0");
+        } else {
+            data.append("status", "1");
+        }
+        send_ajax_data("mark_chapter_done", data);
+
+        load_data();
+
+        if (!event.target.classList.contains("done")) {
+            show_toast("Chapter Marked Pending", "success");
+        } else {
+            show_toast("Chapter Completed", "success");
+        }
+    }
+
+    function start_edit() {
+        var parent = event.target.parentElement;
+        parent.getElementsByTagName("input")[0].classList.add("edit");
+        parent.getElementsByClassName("savebtn")[0].hidden = false;
+        parent.getElementsByClassName("editbtn")[0].hidden = true;
+
+        parent.getElementsByClassName("chapter_check")[0].hidden = true;
+        parent.getElementsByClassName("add_btn")[0].hidden = true;
+    }
+
+    function load_data() {
+        var session = $("#sessionfilter").attr("data-id");
+        var classid = $("#classfilter").attr("data-id");
+        var sec = $("#sectionfilter").attr("data-id");
+        var subject = $("#subjectfilter").attr("data-id");
+
+        if(session == ""){
+            show_toast("Please select the session", "warning");
+            return;
+        }
+
+        if(classid == ""){
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        var sectext = $("#sectionfilter").val();
+
+        if (sec == "" && sectext != "N/A" && "{{hassection}}" == "True") {
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        if(subject == ""){
+            show_toast("Please select the subject", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        data.append("sessionid", session);
+        data.append("classid", classid);
+        data.append("sectionid", sec);
+        data.append("subjectid", subject);
+        var list = load_ajax_data("get_syllabus", data);
+
+        var superparent = document.getElementById("chapter_block");
+        var temp = document.getElementById("chapter_temp");
+        var tempparent = new Array();
+
+        superparent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            superparent.appendChild(clone);
+
+            clone.getElementsByClassName("savebtn")[0].hidden = true;
+            clone.getElementsByClassName("editbtn")[0].hidden = false;
+            clone.getElementsByTagName("input")[0].classList.remove("edit");
+            clone.classList.add("chitem");
+            clone.setAttribute("data-sortid", list[i]["id"]);
+            clone.setAttribute("data-parentid", list[i]["parentid"]);
+            clone.getElementsByTagName("input")[0].value = list[i]["title"];
+
+            if (list[i]["completed"]) {
+                clone.getElementsByClassName("chapter_check")[0].classList.add("done");
+            }
+
+            var tclone = clone.cloneNode(true);
+            tempparent.push(tclone);
+        }
+
+        //Arranging
+        for (var i = 0; i < tempparent.length; i++) {
+            var id = tempparent[i].getAttribute("data-sortid");
+            var parentid = tempparent[i].getAttribute("data-parentid");
+
+            var par = document.querySelectorAll("[data-sortid='" + parentid + "']");
+            if (par.length > 0) {
+                var itm = document.querySelectorAll("[data-sortid='" + id + "']");
+                par[0].appendChild(itm[0]);
+            }
+        }
+
+        var allitems = document.getElementsByClassName("chitem");
+        for (var i = 0; i < allitems.length; i++) {
+            var chi = allitems[i].getElementsByClassName("chitem");
+
+            if (chi.length == 0) {
+                $(allitems[i]).addClass("last");
+            } else {
+                $(allitems[i]).addClass("expand");
+            }
+        }
+    }
+</script>
+
+<script>
+    function add_chapter(type = 'C') {
+        var session = $("#sessionfilter").attr("data-id");
+        var classid = $("#classfilter").attr("data-id");
+        var sec = $("#sectionfilter").attr("data-id");
+        var subject = $("#subjectfilter").attr("data-id");
+
+        var parent = document.getElementById("chapter_block");
+        if (type == "I") {
+            parent = event.target.parentElement;
+        }
+        var temp = document.getElementById("chapter_temp");
+
+        var clone = clean_temp(temp);
+        parent.appendChild(clone);
+        clone.classList.add("chitem");
+
+        var parentid = parent.getAttribute("data-sortid");
+        clone.setAttribute("data-sortid", "");
+        clone.setAttribute("data-parentid", parentid);
+
+        parent.classList.remove("last");
+        parent.classList.add("expand");
+        clone.classList.add("last");
+        parent.getElementsByClassName("chapter_check")[0].hidden = true;
+        clone.getElementsByClassName("chapter_check")[0].hidden = true;
+        clone.getElementsByClassName("add_btn")[0].hidden = true;
+    }
+
+    function save_chapter() {
+        var parent = event.target.parentElement.parentElement;
+        var parentid = parent.getAttribute("data-sortid");
+        var clone = event.target.parentElement;
+        var count = parent.getElementsByClassName("chitem").length;
+        var sortid = clone.getAttribute("data-sortid");
+        
+        var data = new FormData();
+        if (sortid != "") {
+            data.append("sortid", sortid);
+        }
+
+        var session = $("#sessionfilter").attr("data-id");
+        var classid = $("#classfilter").attr("data-id");
+        var sec = $("#sectionfilter").attr("data-id");
+        var subject = $("#subjectfilter").attr("data-id");
+
+        data.append("parentid", parentid);
+        data.append("chapterno", (count + 1));
+        data.append("sessionid", session);
+        data.append("classid", classid);
+        data.append("sectionid", sec);
+        data.append("subjectid", subject);
+        data.append("title", clone.getElementsByTagName("input")[0].value);
+        var newid = send_ajax_data("save_chapter", data);
+        newid = newid.id;
+
+        clone.setAttribute("data-sortid", newid);
+
+        clone.getElementsByTagName("input")[0].classList.remove("edit");
+        clone.getElementsByClassName("savebtn")[0].hidden = true;
+        clone.getElementsByClassName("editbtn")[0].hidden = false;
+        clone.getElementsByClassName("chapter_check")[0].hidden = false;
+        clone.getElementsByClassName("add_btn")[0].hidden = false;
+    }
+
+    function expand_row() {
+        $(event.target.parentElement).toggleClass("expand");
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    tr.sunday {
+        background-color: var(--my_blue);
+        color: white;
+    }
+
+    tr.absent {
+        background-color: var(--my_red);
+        color: white;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row f-12" data-id="F" id="type">
+                    <div class="my-auto col">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" class="search_input form-control f-12 br-30 shadow OP"
+                                placeholder="Class..." id="classfilter" />
+                            <div class="optionblock">
+                                {% for c in classes %}
+                                <div class="option_item" data-fun="change_class" data-id="{{c.id}}">{{c.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="my-auto col-5" {% if hassection == False%} hidden {% endif %}>
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" class="search_input form-control f-12 br-30 shadow OP"
+                                placeholder="Section..." id="sectionfilter" />
+                            <div class="optionblock" id="section_drop">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 text-center my-auto ps-0">
+                        <div class="bg-green br-30 shadow" style="padding: 5px;" onclick="load_data()">
+                            <i class="fas fa-search cl-w f-14 p-n"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="student_container" style="perspective: 1000px;">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="main_body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="main_temp" style="vertical-align: middle;">
+        <th class="count">1</th>
+        <td>
+            <img src="{% static 'img/defaultuser.jpg' %}" alt="Picture" class="faculty_pic_mobile shadow p-n">
+        </td>
+        <td>
+            <div class="fwb f-16 name p-n"></div>
+            <div class="f-12 subject p-n"></div>
+        </td>
+        <td class="text-center">
+            <i class="fas fa-phone shadow contact_icon mobile" onclick="make_call()" data-id=""></i>
+        </td>
+    </tr>
+</table>
+
+<script>
+    function make_call() {
+        var id = event.target.getAttribute("data-id");
+        if (id != "") {
+            window.open("tel:" + id);
+        }
+    }
+
+    function open_profile(){
+        var id= event.target.getAttribute("data-id");
+        window.open("student_profile/"+id, "_self");
+    }
+
+    function change_class() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("section_drop"));
+    }
+
+    function load_data() {
+        var data = new FormData();
+        var search = "";
+        var status = "A";
+        var cls = $("#classfilter").attr("data-id");
+        var section = $("#sectionfilter").attr("data-id");
+
+        data.append("class", cls);
+        data.append("status", status);
+        data.append("search", search);
+        data.append("section", section);
+        var list = load_ajax_data("get_student_list", data);
+
+        var parent = document.getElementById("main_body");
+        var temp = document.getElementById("main_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            $(clone).find("td,th").attr("data-id", list[i]["studentcode"]);
+            $(clone).on("click", function () {
+                open_profile();
+            })
+            $(clone).find(".count").eq(0).html(i+1);
+            $(clone).find(".name").html(list[i]["fullname"]);
+            $(clone).find(".subject").html("Class : " + list[i]["classtitle"] + list[i]["sectiontitle"]);
+            $(clone).find(".mobile").attr("data-id", list[i]["mobile"]);
+
+            if (list[i]["photo"] != "null" && list[i]["photo"] != "") {
+                clone.getElementsByClassName("faculty_pic_mobile")[0].src = "/static/uploads/" + list[i]["photo"];
+            }
+        }
+
+    }
+
+    $(window).on("load", function () {
+        //load_data();
+    })
+</script>
+
+{% endblock %}

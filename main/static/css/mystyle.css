@@ -5,11 +5,17 @@
     --my_pink: #ED85FF;
     --light_blue: #F8F9FD;
     --my_red: #C30101;
+    --my_gray: #00000031;
 }
 
 body {
     background-color: var(--my_blue) !important;
     font-family: Poppins !important;
+}
+
+a{
+    text-decoration: none !important;
+    color: #222222 !important;
 }
 
 .single_line{
@@ -20,6 +26,10 @@ body {
 
 .di{
     display: inline-block;
+}
+
+.db{
+    display: block !important;
 }
 
 .mb-10{
@@ -64,6 +74,10 @@ body {
 
 .cl-b {
     color: var(--my_blue);
+}
+
+.cl-gr{
+    color: #00000031;
 }
 
 .cl-o{
@@ -173,8 +187,16 @@ body {
     background-color: white;
 }
 
+.bg-white {
+    background-color: white !important;
+}
+
 .bg-light {
     background-color: var(--light_blue) !important;
+}
+
+.bg-gray{
+    background-color: var(--my_gray) !important;
 }
 
 .bg-orange{
@@ -196,6 +218,12 @@ body {
 #sidemenu {
     width: 5% !important;
     position: relative;
+    height: calc(100vh - 40px);
+    overflow-y: scroll;
+}
+
+#sidemenu::-webkit-scrollbar{
+    display: none;
 }
 
 .pagehead {
@@ -335,6 +363,7 @@ body {
     border-radius: 20px;
     border: 2px solid var(--my_blue);
     object-fit: cover;
+	object-position:top;
 }
 
 .opbtn {
@@ -362,7 +391,7 @@ body {
     border-radius: 10px;
     width: auto;
     font-size: 12px;
-    z-index: 10;
+    z-index: 99;
     display: none;
     padding: 10px;
     white-space: nowrap;
@@ -401,9 +430,10 @@ body {
     left: 50%;
     transform: translateX(-50%);
     font-size: 12px;
-    margin-top: -40px;
+    margin-top: -50px;
     z-index: 999999999;
     transition: all ease-in-out 0.3s;
+    white-space: nowrap;
 }
 
 #toast.show {
@@ -533,6 +563,23 @@ body {
     overflow-x: hidden;
 }
 
+
+.main_block::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius:20px;
+  }
+  
+  .main_block::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius:20px;
+  }
+  
+  .main_block::-webkit-scrollbar{
+      width:10px;
+      border-radius:20px;
+  }
+  
+
 .page_btn {
     border-radius: 5px;
     padding: 5px 10px;
@@ -575,6 +622,10 @@ body {
 
 .pr{
     position: relative;
+}
+
+.pa{
+    position: absolute;
 }
 
 @keyframes routine{
@@ -680,6 +731,13 @@ body {
     border: 2px solid #00000052;
 }
 
+.custom_toggle.white{
+    border: 2px solid white !important;
+    background-color: white;
+    width: 84px;
+    color: #222222;
+}
+
 .custom_toggle > span{
     position: absolute;
     top:50%;
@@ -715,10 +773,18 @@ body {
     border: 2px solid var(--my_blue);
 }
 
+.custom_toggle.white.active{
+    border: 2px solid white;
+}
+
 .custom_toggle.active > span{
     right: 2px;
     left: auto;   
     background-color: var(--my_blue);
+}
+
+.custom_toggle.white.active > span{
+    background-color: green;
 }
 
 .custom_toggle.active > .pos{
@@ -826,4 +892,340 @@ body {
 .attvalue.present{
     color: var(--my_green);
     opacity: 1;
+}
+
+.table_icon_btn{
+    border-radius: 100px;
+    padding: 5px;
+    font-size: 12px;
+    width: 22px;
+    height: 22px;
+    color: white;
+    cursor: pointer;
+}
+
+.icon_btn{
+    border-radius: 100px;
+    padding: 8px;
+    font-size: 12px;
+    width: 28px;
+    height: 28px;
+    color: white;
+    cursor: pointer;
+    line-height: 12px;
+}
+
+.icon_btn_sm{
+    border-radius: 100px;
+    padding: 8px;
+    font-size: 10px;
+    width: 26px;
+    height: 26px;
+    color: white;
+    cursor: pointer;
+    line-height: 10px;
+}
+
+.modal_top_btn{
+    font-size: 16px;
+    padding: 10px;
+    width: 36px;
+    height: 36px;
+    color: white;
+    cursor: pointer;
+    border-radius: 100px;
+}
+
+.syllabus_expand_btn{
+    border-radius: 100px;
+    font-size: 12px;
+    padding: 8px;
+    width: 28px;
+    height: 28px;
+    background-color: var(--my_blue);
+    color: white;
+    cursor: pointer;
+}
+
+.chapter_item{
+    position: relative;
+    background-color: white;
+    border-radius: 30px;
+    box-shadow: 0px 0px 20px #00000031;
+    margin-bottom: 20px;
+}
+
+.chapter_item > .expand_btn{
+    display: inline-block;
+}
+
+.chapter_item > .shrink_btn{
+    display: none;
+}
+
+.chapter_item > .last_btn{
+    display: none;
+}
+
+.chapter_item.expand > .expand_btn{
+    display: none;
+}
+
+.chapter_item.expand > .shrink_btn{
+    display: inline-block;
+}
+
+.chapter_item.last > .expand_btn{
+    display: none;
+}
+
+.chapter_item.last > .shrink_btn{
+    display: none;
+}
+
+.chapter_item.last > .last_btn{
+    display: inline-block;
+}
+
+.chapter_item > .chapter_item{
+    margin-top: 10px;
+    padding-left: 28px;
+    display: none;
+    border-radius: none;
+    border-radius: 0;
+    box-shadow: none;
+    margin-bottom: 10px;
+    background-color: transparent;
+}
+
+.chapter_item.expand > .chapter_item{
+    display: block;
+}
+
+.edit_text{
+    border: none !important;
+    outline: none !important;
+    display: inline-block !important;
+    font-size: 16px !important;
+    pointer-events: none;
+}
+
+.edit_text.edit{
+    pointer-events: initial;
+}
+
+.chapter_item > .chapter_check{
+    display: none;
+}
+
+.chapter_item.last > .chapter_check{
+    display: inline-block;
+}
+
+.chapter_check{
+    background-color: var(--my_gray);
+}
+
+.chapter_check.done{
+    background-color: var(--my_green);
+}
+
+/* Mobile */
+
+#mobile_menu_container{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    transition: all ease-in-out 0.3s;
+    transform: translateX(-80vw);
+    z-index: 0;
+}
+
+#mobile_menu_container.active{
+    transform: translateX(0vw);
+	z-index:99999999;
+}
+
+#mobile_menu_container > i{
+    opacity: 1;
+    transform: rotate(0deg);
+    transition: all ease-in-out 0.3s;
+}
+
+#mobile_menu_container.active > i{
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+#mobilemenu{
+    border-radius: 0px 20px 20px 0px;
+    background-color: var(--my_blue);
+    padding: 10px 20px;
+    position: fixed;
+    top:0;
+    left: 0;
+    height: 100vh;
+    width: 80vw;
+    overflow-y: scroll;
+}
+
+.mobilelogo{
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    display: inline-block;
+    margin-right: 20px;
+}
+
+.mobilemenuicon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.mobilemenuicon.active {
+    opacity: 1;
+    box-shadow: 0px 0px 10px white;
+    border-radius: 5px;
+    padding: 5px;
+    width: 28px;
+    height: 28px
+}
+
+@keyframes mobile_card_anim{
+    0%{
+        transform: rotateX(-90deg);
+        opacity: 0;
+    }100%{
+        transform: rotateX(0deg);
+        opacity: 1;
+    }
+}
+
+.att_card{
+    transform-origin: top;
+    transform: rotateX(-90deg);
+    opacity: 0;
+    animation: 0.5s ease-in-out 0s 1 mobile_card_anim forwards;
+}
+
+.att_card:nth-child(1){
+    animation-delay: 0.1s;
+}
+
+.att_card:nth-child(2){
+    animation-delay: 0.2s;
+}
+
+.att_card:nth-child(3){
+    animation-delay: 0.3s;
+}
+
+.att_card:nth-child(4){
+    animation-delay: 0.4s;
+}
+
+.att_card:nth-child(5){
+    animation-delay: 0.5s;
+}
+
+.att_card:nth-child(6){
+    animation-delay: 0.6s;
+}
+
+.att_card:nth-child(7){
+    animation-delay: 0.7s;
+}
+
+.att_card:nth-child(8){
+    animation-delay: 0.8s;
+}
+
+.active_mobile_menu{
+    border: 1px solid white;
+    border-radius: 30px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: var(--my_green);
+}
+
+#loader{
+    position: fixed;
+    top:0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #00000069;
+}
+
+#loader > div{
+    position: absolute;
+    top:50%;
+    left: 50%;
+    color: white;
+    transform: translate(-50%, -50%);
+}
+
+#loader > div > img{
+    object-fit: contain;
+    width: 100px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.mobile_status_btn{
+    border-radius: 100px;
+    padding: 5px;
+    font-size: 12px;
+    transition: all ease-in-out 0.3s;
+}
+
+.mobile_status_btn.active{
+    background-color: var(--my_green);
+    color: white;
+}
+
+.contact_icon{
+    font-size: 14px;
+    background-color: var(--my_green);
+    color: white;
+    padding: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 100px;
+}
+
+.faculty_pic_mobile{
+    width: 40px;
+    border-radius: 200px;
+    height: 40px;
+    object-fit: cover;
+    border: 2px solid var(--my_blue);
+}
+
+.click_row > td{
+    pointer-events: none;
+}
+
+.click_row > th{
+    pointer-events: none;
+}
+
+.uni_add_btn{
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    color: white;
+    background-color: var(--my_blue);
+    font-size: 20px;
+    padding: 10px;
+    width: 42px;
+    height: 42px;
+    border-radius: 100px;
+    line-height: 20px;
+    border: 2px solid white;
 }

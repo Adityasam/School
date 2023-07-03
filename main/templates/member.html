@@ -1,0 +1,590 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-2 fwb pagehead">Member</div>
+        <div class="col-3 my-auto" id="status_container">
+
+        </div>
+        <div class="col-5 my-auto">
+            <div class="row">
+                <div class="col-4">
+                    <div class="custom_dropdown">
+                        <input type="text" data-id="" id="batchfilter" value="All Batches"
+                            class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Batch..." />
+                        <div class="optionblock" id="batch_drop">
+                            <div class="option_item" data-id="" data-fun="load_data">All Batches</div>
+                            {% for b in batches %}
+                            <div class="option_item" data-id="{{b.id}}" data-fun="load_data">{{b.title}}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5">
+                    <input type="text" placeholder="Search..." id="srch" class="form-control shadow f-12 br-30"/>
+                </div>
+                <div class="col-1 my-auto">
+                    <div class="search_icon text-center shadow" onclick="search_page()">
+                        <i class="fas fa-search p-n"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-2 text-end my-auto">
+            <div class="mybtn shadow blue" onclick="studentModal()">
+                <i class="fas fa-plus mr-10 p-n"></i>
+                <span class="p-n">Add Member</span>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3" id="card_container">
+
+    </div>
+
+    <!-- {% include 'pagination.html' %} -->
+</div>
+
+<!--Card temp-->
+<div class="col-12 mb-4 main_card" id="card_temp" hidden style="white-space: nowrap;">
+    <div class="bg-white shadow pd-10 br-30">
+        <div class="row">
+            <div class="col-1">
+                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="small_pic shadow" />
+            </div>
+            <div class="col my-auto">
+                <div class="fwb name" style="font-size:18px"></div>
+                <div style="font-size:12px" class="batch">Batch : </div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div>Fee Due</div>
+                <div class="fwb feedue">May-2023</div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div>Joining Date</div>
+                <div class="fwb joiningdate"></div>
+            </div>
+            <div class="col-1 f-12 my-auto">
+                <div>Monthly Fee</div>
+                <div class="fwb monthlyfee"></div>
+            </div>
+            <div class="col-2 f-14 b-l my-auto">
+                <div class="mb-2">
+                    <i class="fas fa-phone faculty_contact_icon shadow me-1"></i>
+                    <span class="f-12 mobile"></span>
+                </div>
+                <div>
+                    <i class="fas fa-envelope faculty_contact_icon shadow me-1"></i>
+                    <span class="f-12 email"></span>
+                </div>
+            </div>
+            <div class="col-1 text-end my-auto">
+                <i class="fas fa-eye me-3 cur" style="color:var(--my_green)" onclick="show_detail()"></i>
+                <br>
+                <i class="fas fa-edit me-3 cur" style="color:var(--my_green)" onclick="edit_student()"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="studentModal" data-id="" style="width:70%;left: 15%;padding: 20px;" tabindex="-1"
+    aria-labelledby="studentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" style="width:100%;">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="studentModalLabel">Add Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-3 mb-3">
+                            <div style="position: relative;height: 100%;padding-right: 100%;">
+                                <input type="file" id="photofile" hidden accept="image/png, image/jpeg, image/jpg"
+                                    onchange="set_profile()" />
+                                <img src="{% static 'img/defaultuser.jpg' %}" onclick="click_profie()"
+                                    class="add_photo shadow" id="profilepic" style="object-position: center;"/>
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <div class="row">
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Full Name</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Full Name..." id="fullname" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Email ID</div>
+                                    <input type="email" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Email ID..." id="email" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Mobile</div>
+                                    <input type="tel" class="form-control f-12 br-30 shadow INP" placeholder="Mobile..."
+                                        id="mobile" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Whatsapp</div>
+                                    <input type="tel" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Whatsapp..." id="whatsapp" />
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Gender</div>
+                                    <div data-id="" id="gender" class="OP">
+                                        <div class="opbtn me-2 shadow" data-id="M">Male</div>
+                                        <div class="opbtn shadow" data-id="F">Female</div>
+                                    </div>
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Batch</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="batch"
+                                            class="search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Batch..." />
+                                        <div class="optionblock">
+                                            {% for b in batches %}
+                                            <div class="option_item" data-id="{{b.id}}">
+                                                {{b.title}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Aadhar No</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP"
+                                        placeholder="Aadhar No." id="aadhar" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Joining Date</div>
+                                    <input type="date" class="form-control f-12 br-30 shadow INP" id="joiningdate" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Monthly Fee</div>
+                                    <input type="number" class="form-control f-12 br-30 shadow INP" id="monthlyfee" value="{{request.session.generalfee}}"/>
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Login Password</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP" id="loginpassword"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" id="block_btn" onclick="block_member()">Block</button>
+                <button type="button" class="btn btn-danger" id="deletebtn" onclick="start_delete()">Delete</button>
+                <button type="button" class="btn btn-primary" id="archivebtn" onclick="archive_member()">Archive</button>
+                <button type="button" class="btn btn-primary" id="unarchivebtn" onclick="unarchive()">Unarchive</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="submit_data()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 60%;">
+        <div class="modal-content br-30">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Member Detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-3">
+                            <div style="position: relative;width: 100%;padding-bottom: 100%;">
+                                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="shadow" id="detailpic"
+                                    style="position: absolute;width: 100%;height: 100%;border-radius: 1000px;padding: 5px;object-fit: cover;border: 2px solid var(--my_blue);">
+                            </div>
+                        </div>
+                        <div class="col-9 f-14 my-auto">
+                            <div class="row">
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Full Name</div>
+                                    <div id="detail_fullname"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Mobile</div>
+                                    <div id="detail_mobile"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Whatsapp</div>
+                                    <div id="detail_whatsapp"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Email</div>
+                                    <div id="detail_email"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Gender</div>
+                                    <div id="detail_gender"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Fees Due</div>
+                                    <div id="detail_due"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Joining Date</div>
+                                    <div id="detail_joining"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Batch</div>
+                                    <div id="detail_batch"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Aadhar No</div>
+                                    <div id="detail_aadhar"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Monthly Fee</div>
+                                    <div id="detail_fee"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Archive Modal -->
+<div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="archiveModalLabel">Archive Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>Leaving Date</div>
+                <input type="date" id="leavedate" value="{% now 'Y-m-d' %}" class="form-control f-12 mt-2">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="archive()">Archive</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#studentModal").find("input").on('keypress',function(e) {
+        if(e.which == 13) {
+            submit_data();
+        }
+    });
+
+    function show_detail() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var code= parent.getAttribute("data-id");
+
+        $("#detailModalLabel").html("Member Detail : "+code);
+        var data = new FormData();
+        data.append("membercode", code);
+        var maindetail = load_ajax_data("get_member_detail", data);
+        detail = maindetail.data;
+
+        $("#detail_fullname").html(detail["fullname"]);
+        $("#detail_mobile").html(detail["mobile"]);
+        $("#detail_whatsapp").html(detail["whatsapp"]);
+        $("#detail_email").html(detail["email"]);
+        $("#detail_fee").html(INR+" "+detail["monthlyfee"]);
+        if(detail["gender"] == "M"){
+            $("#detail_gender").html("Male");
+        }else if(detail["gender"] == "F"){
+            $("#detail_gender").html("Female");
+        }
+        $("#detail_joining").html(format_date(detail["joiningdate"]));
+        $("#detail_batch").html(detail["batchtitle"]);
+        $("#detail_aadhar").html(detail["aadharno"]);
+        
+        if(detail["picture"] != ""){
+            document.getElementById("detailpic").src = "/static/uploads/"+detail["picture"];
+        }
+        
+        $("#detailModal").modal("show");
+    }
+</script>
+
+<script>
+    function block_member(){
+        var code = $("#studentModalLabel").attr("data-id");
+        var data = new FormData();
+        data.append("userid", code);
+        send_ajax_data("/block_unblock_user", data);
+        if(event.target.innerHTML == "Block"){
+            event.target.innerHTML = "Unblock";
+            show_toast("User blocked", "success");
+        }else{
+            event.target.innerHTML = "Block";
+            show_toast("User unblocked", "success");
+        }
+    }
+
+    function start_delete() {
+        $("#studentModal").modal("hide");
+        ask_confirm("Are you sure you want to delete this member?", "delete_member", "hide_confirm");
+    }
+
+    function delete_member() {
+        var id = $("#studentModalLabel").attr("data-tabid");
+        delete_item(id, "LibraryMember");
+        hide_confirm();
+        load_status();
+        load_data();
+    }
+
+    function archive_member(){
+        $("#studentModal").modal("hide");
+        $("#archiveModal").modal("show");
+    }
+
+    function archive() {
+        var id = $("#studentModalLabel").attr("data-id");
+        var leavedate = $("#leavedate").val();
+        var data = new FormData();
+        data.append("membercode", id);
+        data.append("status", "C");
+        data.append("leavingdate", leavedate);
+        send_ajax_data("change_member_status", data);
+        load_data();
+        $("#archiveModal").modal("hide");
+        show_toast("Member Archived", "success");
+    }
+
+    function unarchive() {
+        var id = $("#studentModalLabel").attr("data-id");
+        var data = new FormData();
+        data.append("membercode", id);
+        data.append("status", "A");
+        send_ajax_data("change_member_status", data);
+        load_status();
+        load_data();
+        $("#studentModal").modal("hide");
+        show_toast("Member Unarchived", "success");
+    }
+
+    function edit_student() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = parent.getAttribute("data-id");
+        var tabid = parent.getAttribute("data-tabid");
+        $("#studentModalLabel").html("Edit Member : " + id);
+        $("#studentModalLabel").attr("data-id", id);
+        $("#studentModalLabel").attr("data-tabid", tabid);
+
+        var data = new FormData();
+        data.append("membercode", id);
+        var detail = load_ajax_data("get_member_detail", data);
+        detail = detail.data;
+
+        $("#fullname").val(detail["fullname"]);
+        $("#email").val(detail["email"]);
+        $("#mobile").val(detail["mobile"]);
+        $("#whatsapp").val(detail["whatsapp"]);
+        $("#gender").attr("data-id", detail["gender"]);
+        $("#joiningdate").val(detail["joiningdate"]);
+        $("#monthlyfee").val(detail["monthlyfee"]);
+        $("#batch").attr("data-id", detail["batchid"]);
+        $("#aadhar").val(detail["aadharno"]);
+        $("#loginpassword").val(detail["loginpassword"]);
+        document.getElementById("profilepic").src = "/static/uploads/" + detail["picture"];
+        document.getElementById("photofile").classList.add("old");
+        //url_to_file("/static/uploads/" + detail["picture"], document.getElementById("photofile"));
+
+        if(detail["blocked"] == false){
+            $("#block_btn").html("Block");
+        }else{
+            $("#block_btn").html("Unblock");
+        }
+
+        $("#deletebtn").attr("hidden", false);
+
+        var status = $(".pagestatus.active").eq(0).attr("data-status-id");
+        if (status == "A") {
+            $("#archivebtn").attr("hidden", false);
+            $("#unarchivebtn").attr("hidden", true);
+        } else {
+            $("#archivebtn").attr("hidden", true);
+            $("#unarchivebtn").attr("hidden", false);
+        }
+
+        set_drop_default();
+        $("#studentModal").modal("show");
+    }
+
+    function submit_data() {
+        var membercode = $("#studentModalLabel").attr("data-id");
+        var ops = document.getElementsByClassName("OP");
+        var inps = document.getElementsByClassName("INP");
+
+        var data = new FormData();
+        if (membercode != "") {
+            data.append("membercode", membercode);
+        }
+
+        for (var i = 0; i < ops.length; i++) {
+            data.append(ops[i].id, ops[i].getAttribute("data-id"));
+        }
+        for (var i = 0; i < inps.length; i++) {
+            if (inps[i].value != "") {
+                data.append(inps[i].id, inps[i].value);
+            }
+        }
+
+        var photo = document.getElementById("photofile").files;
+        if (photo.length > 0 && !document.getElementById("photofile").classList.contains("old")) {
+            photo = photo[0];
+            var filename = save_file(photo);
+            filename = filename.name;
+            data.append("photo", filename);
+        }
+
+        var code = send_ajax_data("save_member", data);
+
+        if (membercode == "") {
+            var message = "New member created with code " + code.code;
+            success_modal(message);
+        } else {
+            var message = "Member with code " + code.code + " updated";
+            success_modal(message);
+        }
+
+        save_user();
+        load_status();
+        load_data();
+        $("#studentModal").modal("hide");
+    }
+
+    function save_user(){
+        var pass = $("#loginpassword").val().trim();
+        var newid = $("#studentModalLabel").attr("data-id");
+
+        var data = new FormData();
+        data.append("userid", newid);
+        data.append("password", pass);
+        send_ajax_data("update_member_user", data);
+    }
+
+    function studentModal() {
+        $("#profilepic").attr("src", "{% static 'img/defaultuser.jpg' %}");
+        $("#studentModal").find(".opbtn").removeClass("active");
+        $("#studentModal").find("input").val("");
+        $("#studentModal").find("input").attr("data-id","");
+        $("#studentModal").modal("show");
+    }
+
+    function click_profie() {
+        document.getElementById("photofile").click();
+    }
+
+    function set_profile() {
+        var files = document.getElementById("photofile").files;
+        if (files.length > 0) {
+            files = files[0];
+            compressImage(files, 500, 500, 80, function (dataURL) {
+                // Convert the compressed image data URL to a file object
+                var newname = "compimage." + files.name.split(".").pop();
+                var compressedFile = dataURLtoFile(dataURL, newname);
+                document.getElementById("profilepic").src = URL.createObjectURL(compressedFile);
+                var dt = new DataTransfer();
+                dt.items.add(compressedFile);
+                document.getElementById("photofile").files = dt.files;
+                document.getElementById("photofile").classList.remove("old");
+            });
+        }
+    }
+
+    function load_local() {
+        load_data();
+    }
+
+    function search_page() {
+        load_data();
+    }
+
+    function class_filter() {
+        load_data();
+    }
+
+    function load_data() {
+        var data = new FormData();
+        var search = $("#srch").val().trim().toLowerCase();
+        var status = $(".pagestatus.active").eq(0).attr("data-status-id");
+        var batch = $("#batchfilter").attr("data-id");
+        
+        data.append("batch", batch);
+        data.append("status", status);
+        data.append("search", search);
+        var list = load_ajax_data("get_member_list", data);
+        var parent = document.getElementById("card_container");
+        var temp = document.getElementById("card_temp");
+        parent.innerHTML = "";
+
+        for (var i = 0; i < list.length; i++) {
+            var row = list[i];
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            $(clone).attr("data-id", row["membercode"]);
+            $(clone).attr("data-tabid", row["id"]);
+            $(clone).find(".joiningdate").html(format_date(row["joiningdate"]));
+            $(clone).find(".name").html(row["fullname"]);
+            $(clone).find(".monthlyfee").html(INR+" "+row["monthlyfee"]);
+            $(clone).find(".mobile").html(row["mobile"]);
+            $(clone).find(".email").html(row["email"]);
+            $(clone).find(".batch").html("Batch : " + row["batchtitle"]);
+            if (row["picture"] != "null" && row["picture"] != "") {
+                clone.getElementsByClassName("small_pic")[0].src = "/static/uploads/" + row["picture"];
+            }
+        }
+
+        if (status == "A") {
+            $("#archivebtn").attr("hidden", false);
+            $("#unarchivebtn").attr("hidden", true);
+        } else {
+            $("#archivebtn").attr("hidden", true);
+            $("#unarchivebtn").attr("hidden", false);
+        }
+    }
+
+    function load_status() {
+        var data = new FormData();
+        data.append("type", "LIBMEMBER");
+        var list = load_ajax_data("get_status", data);
+        list = list.data;
+
+        var parent = document.getElementById("status_container");
+        var temp = document.getElementById("status_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+            clone.getElementsByTagName("div")[0].innerHTML = list[i][1] + " : ";
+            clone.getElementsByTagName("div")[1].innerHTML = list[i][2];
+            clone.setAttribute("data-status-id", list[i][0]);
+            clone.classList.add("pagestatus");
+        }
+
+        $(".pagestatus").eq(0).addClass("active");
+    }
+
+    $(window).on("load", function () {
+        load_status();
+        load_data();
+    })
+</script>
+
+{% endblock %}

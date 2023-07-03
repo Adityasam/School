@@ -25,36 +25,33 @@
                 </div>
             </div>
         </div>
-        <div class="col-3 my-auto" id="status_container">
+        <div class="col-4 my-auto" id="status_container">
             <div class="row">
-                <div class="col-6">
+                <div class="col-5">
                     <div class="custom_dropdown">
                         <input type="text" data-id="" id="classfilter"
                             class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
                         <div class="optionblock">
                             {% for class in classes %}
-                            <div class="option_item" data-fun="change_section" data-id="{{ class.id }}">{{class.Title}}
+                            <div class="option_item" data-fun="load_section" data-id="{{ class.id }}">{{class.Title}}
                             </div>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-5" {% if hassection == False %}hidden{% endif %}>
                     <div class="custom_dropdown">
                         <input type="text" data-id="" id="sectionfilter"
                             class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
                         <div class="optionblock" id="sectionfilter_drop">
-                            {% for s in sections %}
-                            <div class="option_item" hidden data-cls="{{s.ClassId}}" data-id="{{ s.id }}">{{s.Title}}
-                            </div>
-                            {% endfor %}
+                            
                         </div>
                     </div>
                 </div>
+                <div class="col-2 my-auto">
+                    <div class="mybtn orange shadow" onclick="load_table()">Load</div>
+                </div>
             </div>
-        </div>
-        <div class="col-1 my-auto">
-            <div class="mybtn orange shadow" onclick="load_table()">Load</div>
         </div>
         <div class="col-3 text-end my-auto">
             <div class="mybtn shadow green" hidden id="savebtn" onclick="submit_data()">Save</div>
@@ -78,6 +75,8 @@
     </div>
 </div>
 
+<iframe src="{% url 'main:mark_sheet' %}" id="myframe" frameborder="0" hidden></iframe>
+
 <table hidden>
     <tr style="vertical-align: middle;" id="studenttemp">
         <th class="count"></th>
@@ -92,12 +91,178 @@
     </tr>
 </table>
 
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content br-30">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="f-12">Teacher's Feedback</div>
+                    <textarea id="feedback" rows="5" class="form-control-sm form-control f-12"></textarea>
+                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="newPrint()">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="offercontainer" hidden></div>
+<input type="file" id="doctemp" hidden />
+
 <script>
+    var printbtn = null;
+    function init_print() {
+        printbtn = event.target;
+        if (event.target.classList.contains("fa-print")) {
+            show_loader("Printing...");
+        } else if (event.target.classList.contains("fa-download")) {
+            show_loader("Downloading...");
+        }
+
+        setTimeout(start_print, 500);
+    }
+
+    function feedbackModal(){
+        printbtn = event.target;
+        $("#feedback").val("");
+        $("#exampleModal").modal("show");
+    }
+
+    function newPrint() {
+        $("#exampleModal").modal("hide");
+
+        var frame = document.getElementById("myframe");
+        
+        var cw = frame.contentWindow.document;
+
+        if($("#feedback").val().trim() != ""){
+            cw.getElementById("teacherfeedback").innerHTML = $("#feedback").val();
+        }
+        var subjects = document.getElementById("subjecthead").getElementsByClassName("newhead");
+        var marks = printbtn.parentElement.parentElement.getElementsByClassName("mark");
+
+        var par = printbtn.parentElement.parentElement;
+        var studentname = par.getElementsByClassName("name")[0].innerHTML;
+
+        var session = "";
+        var maxmarks = 0;
+        var totalmarks = 0;
+        var table = cw.getElementById("table_body");
+
+        frame.contentWindow.clear_table();
+
+        for (var i = 0; i < subjects.length - 2; i++) {
+            var tr = document.createElement("tr");
+            table.appendChild(tr);
+
+            tr.innerHTML += "<td>" + subjects[i].innerHTML + "</td>";
+            tr.innerHTML += "<td>" + subjects[i].getAttribute("data-max") + "</td>";
+            tr.innerHTML += "<td>" + marks[i].getElementsByTagName("input")[0].value + "</td>";
+
+            session = subjects[i].getAttribute("data-session");
+
+            var mx = parseInt(subjects[i].getAttribute("data-max"));
+            if (isNaN(mx)) {
+                mx = 0;
+            }
+
+            var mk = parseInt(marks[i].getElementsByTagName("input")[0].value);
+            if (isNaN(mk)) {
+                mk = 0;
+            }
+
+            maxmarks += mx;
+            totalmarks += mk;
+        }
+
+        cw.getElementById("totalmax").innerHTML = maxmarks;
+        cw.getElementById("totalmarks").innerHTML = totalmarks;
+
+        cw.getElementById("rclass").innerHTML = $("#classfilter").val();
+        cw.getElementById("rdate").innerHTML = "{% now 'd/m/Y' %}";
+        cw.getElementById("rsession").innerHTML = session;
+        cw.getElementById("rname").innerHTML = studentname;
+
+        frame.contentWindow.print();
+    }
+
+    function start_print() {
+        var datastring = "";
+
+        var subjects = document.getElementById("subjecthead").getElementsByClassName("newhead");
+        var marks = printbtn.parentElement.parentElement.getElementsByClassName("mark");
+
+        var par = printbtn.parentElement.parentElement;
+        var studentname = par.getElementsByClassName("name")[0].innerHTML;
+
+        var session = "";
+        var maxmarks = 0;
+        var totalmarks = 0;
+        for (var i = 0; i < subjects.length - 2; i++) {
+            datastring += subjects[i].innerHTML + "^";
+            datastring += subjects[i].getAttribute("data-max") + "^";
+            datastring += marks[i].getElementsByTagName("input")[0].value + "#";
+
+            session = subjects[i].getAttribute("data-session");
+
+            var mx = parseInt(subjects[i].getAttribute("data-max"));
+            if (isNaN(mx)) {
+                mx = 0;
+            }
+
+            var mk = parseInt(marks[i].getElementsByTagName("input")[0].value);
+            if (isNaN(mk)) {
+                mk = 0;
+            }
+
+            maxmarks += mx;
+            totalmarks += mk;
+        }
+
+        datastring += "Total^" + maxmarks + "^" + totalmarks + "#";
+
+        var date = "{% now 'd/m/Y' %}";
+        var classname = $("#classfilter").val();
+
+        var data = new FormData();
+        data.append("STUDENTNAME_F", studentname);
+        data.append("DATE_F", date);
+        data.append("CLASS_F", classname);
+        data.append("SESSION_F", session);
+        data.append("DATASTRING_L", datastring);
+        var temp = document.getElementById("doctemp").files[0];
+        data.append("template", temp);
+        var rdata = send_ajax_data("print_report_card", data);
+
+        var pdffile = rdata;
+        var pdfurl = response_to_url(pdffile.content, "ReportCard_" + ".pdf")
+        if (printbtn.classList.contains("fa-print")) {
+            window.open(pdfurl);
+        } else if (printbtn.classList.contains("fa-download")) {
+            var a = document.createElement("a");
+            a.href = pdfurl;
+            document.getElementsByTagName("body")[0].appendChild(a);
+
+            $(a).attr("download", "")
+            $(a).attr("target", "_blank")
+
+            a.click();
+            a.remove();
+        }
+
+        hide_loader();
+    }
+
     function calculate_marks() {
         var parent = event.target.parentElement.parentElement;
         var marks = parent.getElementsByClassName("mark");
         var total = 0;
-        for (var i = 0; i < marks.length - 1; i++) {
+        for (var i = 0; i < marks.length - 2; i++) {
             var m = parseFloat(marks[i].getElementsByTagName("input")[0].value);
             if (isNaN(m)) {
                 m = 0;
@@ -106,24 +271,16 @@
             total += m;
         }
 
-        marks[marks.length - 1].innerHTML = total;
+        marks[marks.length - 2].innerHTML = total;
     }
 
-    function change_section() {
-        $("#sectionfilter").val("");
-        $("#sectionfilter").attr("data-id", "");
-        var id = event.target.getAttribute("data-id");
-        $("#sectionfilter_drop").find(".option_item").attr("hidden", true);
-        $("#sectionfilter_drop").find("div[data-cls='" + id + "']").attr("hidden", false);
+    function load_section() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("sectionfilter_drop"));
+    }
 
-        var total = $("#sectionfilter_drop").find(".option_item").length;
-        var count = $("#sectionfilter_drop").find(".option_item[hidden]").length;
-
-        var active = total - count;
-        if (active == 0) {
-            $("#sectionfilter").val("No Section");
-            $("#sectionfilter").attr("data-id", "");
-        }
+    function change_section(){
+        
     }
 
     function change_exam() {
@@ -149,7 +306,7 @@
         for (var i = 0; i < studentrow.length; i++) {
             datastring += studentrow[i].getAttribute("data-id") + "*";
             var subs = studentrow[i].getElementsByClassName("mark");
-            for (var s = 0; s < subs.length - 1; s++) {
+            for (var s = 0; s < subs.length - 2; s++) {
                 datastring += subs[s].getElementsByTagName("input")[0].getAttribute("data-paper-id") + "/";
                 var num = parseFloat(subs[s].getElementsByTagName("input")[0].value);
                 if (isNaN(num)) {
@@ -200,6 +357,13 @@
             return;
         }
 
+        var sectext = $("#sectionfilter").val();
+
+        if (sec == "" && sectext != "N/A" && "{{hassection}}" == "True") {
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
         var data = new FormData();
         data.append("classid", cls);
         data.append("sectionid", sec);
@@ -217,6 +381,8 @@
             var th = document.createElement("th");
             th.classList.add("newhead");
             th.innerHTML = subjects[i]["title"];
+            th.setAttribute("data-max", subjects[i]["totalmarks"]);
+            th.setAttribute("data-session", subjects[i]["sessiontitle"]);
             head.appendChild(th);
         }
 
@@ -225,6 +391,10 @@
         totalcol.innerHTML = "Total";
         totalcol.classList.add("newhead");
         head.appendChild(totalcol);
+
+        var blank = document.createElement("th");
+        blank.classList.add("newhead");
+        head.appendChild(blank);
 
         //Students row
         var body = document.getElementById("subjectbody");
@@ -251,6 +421,17 @@
             var totr = document.createElement("td")
             totr.classList.add("mark");
             clone.appendChild(totr);
+
+            var eye = document.createElement("td");
+            eye.classList.add("text-end");
+            eye.classList.add("mark");
+            clone.appendChild(eye);
+            eye.innerHTML = "<i class='fas fa-print cl-b f-14 cur'></i>";
+            //eye.innerHTML += "<i class='fas fa-download cl-o f-14 cur'></i>";
+
+            eye.onclick = function () {
+                feedbackModal();
+            }
         }
 
         var subids = "";
@@ -282,7 +463,7 @@
             }
 
             var childs = rows[i].getElementsByClassName("mark");
-            childs[childs.length - 1].innerHTML = totalmark;
+            childs[childs.length - 2].innerHTML = totalmark;
         }
 
         $("#uploadModal").modal("show");
@@ -290,7 +471,7 @@
 
 
     $(window).on("load", function () {
-        //load_data();
+        url_to_file("/static/template/reportcard.docx", document.getElementById("doctemp"));
     })
 </script>
 

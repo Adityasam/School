@@ -10,7 +10,7 @@
         <div class="col-3">
             <div class="bg-w shadow pd-20 br-20">
                 <div class="setting_btn active">Class</div>
-                <div class="setting_btn">Section</div>
+                <div class="setting_btn" {% if hassection == False %}hidden{% endif %}>Section</div>
                 <div class="setting_btn">Subject</div>
             </div>
         </div>
@@ -29,18 +29,22 @@
                     </div>
                 </div>
                 <hr>
-                <div>
-                    <div class="row fwb f-12">
-                        <div class="col-1">#</div>
-                        <div class="col-1">Title</div>
-                        <div class="col-2">Fee</div>
-                        <div class="col-2">Has Sections</div>
-                    </div>
-                </div>
-                <hr>
-                <div id="class_container">
-
-                </div>
+                <table class="table f-12">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th style="width: 10%;">Title</th>
+                            <th style="width: 12%;">Fee</th>
+                            <th>Has Section</th>
+                            <th>Class Teacher</th>
+                            <th style="width: 12%;">Room No</th>
+                            <th></th>    
+                        </tr>
+                    </thead>
+                    <tbody id="class_container">
+                        
+                    </tbody>
+                </table>
             </div>
             <!--CLass ENd-->
             <!--Section-->
@@ -57,19 +61,21 @@
                     </div>
                 </div>
                 <hr>
-                <div>
-                    <div class="row fwb f-12">
-                        <div class="col-1">#</div>
-                        <div class="col-2">Class</div>
-                        <div class="col-2">Section</div>
-                        <div class="col-2">Room No</div>
-                        <div class="col-3">Class Teacher</div>
-                    </div>
-                </div>
-                <hr>
-                <div id="section_container">
+                <table class="table f-12">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th style="width: 12%;">Class</th>
+                            <th style="width: 12%;">Section</th>
+                            <th style="width: 12%;">Room No</th>
+                            <th>Class Teacher</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="section_container">
 
-                </div>
+                    </tbody>
+                </table>
             </div>
             <!--Section End-->
             <!--Subject-->
@@ -86,16 +92,16 @@
                     </div>
                 </div>
                 <hr>
-                <div>
-                    <div class="row fwb f-12">
-                        <div class="col-1">#</div>
-                        <div class="col-6">Title</div>
-                    </div>
-                </div>
-                <hr>
-                <div id="subject_container">
+                <table class="table f-12">
+                    <thead>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th></th>
+                    </thead>
+                    <tbody id="subject_container">
 
-                </div>
+                    </tbody>
+                </table>
             </div>
             <!--Subject End-->
         </div>
@@ -103,105 +109,115 @@
 </div>
 
 <!--CLass temp-->
-<div id="class_temp" hidden class="row setting_row mb-3" data-id="">
-    <div class="col-1 my-auto count">1</div>
-    <div class="col-1">
-        <input type="text" placeholder="Class..." class="title form-control f-12 setting_input" />
-    </div>
-    <div class="col-2">
-        <input type="number" placeholder="Fee..." class="fee form-control f-12 setting_input" />
-    </div>
-    <div class="col-2 my-auto">
-        <div class="custom_toggle shadow hassection TOG" data-id="0" data-fun="toggle_teacher">
-            <div class="pos">Yes</div>
-            <div class="neg">No</div>
-            <span></span>
-        </div>
-    </div>
-    <div class="col-3">
-        <div class="custom_dropdown teachercol" hidden>
-            <input type="text" data-id="" class="setting_input faculty search_input form-control f-12"
-                placeholder="Class Teacher..." />
-            <div class="optionblock">
-                {% for f in faculty %}
-                <div class="option_item" data-id="{{f.facultycode}}"
-                    data-show="{{f.firstname}} {{f.middlename}} {{f.lastname}}">
-                    {{f.facultycode}} : {{f.firstname}} {{f.middlename}} {{f.lastname}}
-                </div>
-                {% endfor %}
+<table hidden >
+    <tr id="class_temp" class="setting_row mb-3" data-id="" style="vertical-align: middle;">
+        <td class="count">1</td>
+        <td>
+            <input type="text" placeholder="Class..." class="title form-control f-12 setting_input" />
+        </td>
+        <td>
+            <input type="number" placeholder="Fee..." class="fee form-control f-12 setting_input" />
+        </td>
+        <td>
+            <div class="custom_toggle shadow hassection TOG" {% if hassection == False %}hidden{% endif %}
+            data-id="0" data-fun="toggle_teacher">
+                <div class="pos">Yes</div>
+                <div class="neg">No</div>
+                <span></span>
             </div>
-        </div>
-    </div>
-    <div class="col-3 my-auto text-end">
-        <i onclick="save_class()" class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
-        <i hidden onclick="edit_class()"
-            class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
-        <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
-            onclick="delete_master('classrow')"></i>
-    </div>
-</div>
+        </td>
+        <td class="nosection">
+            <div class="custom_dropdown teachercol nosec" {% if hassection == True %}hidden{% endif %}>
+                <input type="text" data-id="" class="setting_input faculty search_input form-control f-12"
+                    placeholder="Class Teacher..." />
+                <div class="optionblock">
+                    {% for f in faculty %}
+                    <div class="option_item" data-id="{{f.facultycode}}"
+                        data-show="{{f.firstname}} {{f.middlename}} {{f.lastname}}">
+                        {{f.facultycode}} : {{f.firstname}} {{f.middlename}} {{f.lastname}}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </td>
+        <td class="nosection">
+            <input type="text" placeholder="Room No..." class="roomno form-control f-12 setting_input nosec" />
+        </td>
+        <td class="text-end">
+            <i onclick="save_class()" class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
+            <i hidden onclick="edit_class()"
+                class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
+            <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
+                onclick="delete_master('classrow')"></i>
+        </td>
+    </tr>
+</table>
 <!--Class temp end-->
 
 <!--Section temp-->
-<div hidden id="section_temp" class="row setting_row mb-3" data-id="">
-    <div class="col-1 my-auto count">1</div>
-    <div class="col-2">
-        <div class="custom_dropdown">
-            <input type="text" data-id="" class="setting_input class search_input form-control f-12"
-                placeholder="Class..." />
-            <div class="optionblock sectionclassdrop">
-                {% for c in classes %}
-                <div class="option_item" data-id="{{c.id}}">{{c.Title}}</div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    <div class="col-2">
-        <input type="text" placeholder="Section..." class="title form-control f-12 setting_input" />
-    </div>
-    <div class="col-2">
-        <input type="text" placeholder="Room No..." class="roomno form-control f-12 setting_input" />
-    </div>
-    <div class="col-3">
-        <div class="custom_dropdown">
-            <input type="text" data-id="" class="setting_input faculty search_input form-control f-12"
-                placeholder="Class Teacher..." />
-            <div class="optionblock">
-                {% for f in faculty %}
-                <div class="option_item" data-id="{{f.facultycode}}"
-                    data-show="{{f.firstname}} {{f.middlename}} {{f.lastname}}">
-                    {{f.facultycode}} : {{f.firstname}} {{f.middlename}} {{f.lastname}}
+<table hidden>
+    <tr hidden id="section_temp" class="setting_row mb-3" data-id="" style="vertical-align: middle;">
+        <td class="count">1</td>
+        <td>
+            <div class="custom_dropdown">
+                <input type="text" data-id="" class="setting_input class search_input form-control f-12"
+                    placeholder="Class..." />
+                <div class="optionblock sectionclassdrop">
+                    {% for c in classes %}
+                    <div class="option_item" data-id="{{c.id}}">{{c.Title}}</div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
-        </div>
-    </div>
-    <div class="col-2 my-auto text-end">
-        <i onclick="save_section()"
-            class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
-        <i hidden onclick="edit_section()"
-            class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
-        <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
-            onclick="delete_master('sectionrow')"></i>
-    </div>
-</div>
+        </td>
+        <td>
+            <input type="text" placeholder="Section..." class="title form-control f-12 setting_input" />
+        </td>
+        <td>
+            <input type="text" placeholder="Room No..." class="roomno form-control f-12 setting_input" />
+        </td>
+        <td>
+            <div class="custom_dropdown">
+                <input type="text" data-id="" class="setting_input faculty search_input form-control f-12"
+                    placeholder="Class Teacher..." />
+                <div class="optionblock">
+                    {% for f in faculty %}
+                    <div class="option_item" data-id="{{f.facultycode}}"
+                        data-show="{{f.firstname}} {{f.middlename}} {{f.lastname}}">
+                        {{f.facultycode}} : {{f.firstname}} {{f.middlename}} {{f.lastname}}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </td>
+        <td class="text-end">
+            <i onclick="save_section()"
+                class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
+            <i hidden onclick="edit_section()"
+                class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
+            <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
+                onclick="delete_master('sectionrow')"></i>
+        </td>
+    </tr>
+</table>
 <!--Section end -->
 
 <!--Subject temp-->
-<div id="subject_temp" hidden class="row setting_row mb-3" data-id="">
-    <div class="col-1 my-auto count">1</div>
-    <div class="col-6">
-        <input type="text" placeholder="Title..." class="title form-control f-12 setting_input" />
-    </div>
-    <div class="col-5 my-auto text-end">
-        <i onclick="save_subject()"
-            class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
-        <i hidden onclick="edit_subject()"
-            class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
-        <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
-            onclick="delete_master('subjectrow')"></i>
-    </div>
-</div>
+<table hidden>
+    <tr id="subject_temp" hidden class="setting_row mb-3" data-id="" style="vertical-align: middle;">
+        <td class="count">1</td>
+        <td>
+            <input type="text" placeholder="Title..." class="title form-control f-12 setting_input" />
+        </td>
+        <td class="text-end">
+            <i onclick="save_subject()"
+                class="savebtn fas fa-save me-2 setting_action_icon shadow bg-green text-center"></i>
+            <i hidden onclick="edit_subject()"
+                class="editbtn fas fa-edit me-2 setting_action_icon shadow bg-blue text-center"></i>
+            <i class="delbtn fas fa-trash setting_action_icon shadow bg-red text-center"
+                onclick="delete_master('subjectrow')"></i>
+        </td>
+    </tr>
+</table>
 <!--Subject temp end-->
 
 <!-- Modal -->
@@ -304,9 +320,9 @@
     function toggle_teacher(){
         var par = event.target.parentElement.parentElement;
         if(event.target.classList.contains("active")){
-            par.getElementsByClassName("teachercol")[0].hidden = true;
+            $(par).find(".nosec").attr("hidden", true);
         }else{
-            par.getElementsByClassName("teachercol")[0].hidden = false;
+            $(par).find(".nosec").attr("hidden", false);
         }
     }
 
@@ -413,6 +429,7 @@
         var clas = parent.getElementsByClassName("title")[0].value.trim();
         var faculty = parent.getElementsByClassName("faculty")[0].getAttribute("data-id");
         var fee = parent.getElementsByClassName("fee")[0].value.trim();
+        var roomno = parent.getElementsByClassName("roomno")[0].value.trim();
         var id = parent.getAttribute("data-id");
         var hassection = parent.getElementsByClassName("hassection")[0].getAttribute("data-id");
 
@@ -424,6 +441,7 @@
         data.append("title", clas);
         data.append("fee", fee);
         data.append("hassection", hassection);
+        data.append("roomno", roomno);
         var newid = send_ajax_data("save_class", data);
 
         $(parent).attr("data-id", newid.classid);
@@ -618,19 +636,21 @@
             $(clone).attr("data-id", list[i]["id"]);
             $(clone).find(".title").val(list[i]["title"]);
             $(clone).find(".fee").val(list[i]["classfee"]);
+            $(clone).find(".roomno").val(list[i]["roomno"]);
             $(clone).find(".faculty").attr("data-id",list[i]["classteacher"]);
             $(clone).find(".savebtn").attr("hidden", true);
             $(clone).find(".editbtn").attr("hidden", false);
             
             var hassec = list[i]["hassections"];
+
             if(hassec == "0"){
                 $(clone).find(".hassection").attr("data-id", "0");
                 $(clone).find(".hassection").removeClass("active");
-                $(clone).find(".teachercol").attr("hidden", false);
+                $(clone).find(".nosec").attr("hidden", false);
             }else{
                 $(clone).find(".hassection").attr("data-id", "1");
                 $(clone).find(".hassection").addClass("active");
-                $(clone).find(".teachercol").attr("hidden", true);
+                $(clone).find(".nosec").attr("hidden", true);
             }
             $(clone).find("input").attr("disabled", true);
             $(clone).find(".TOG").addClass("p-n");

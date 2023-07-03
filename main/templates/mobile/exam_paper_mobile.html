@@ -1,0 +1,251 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<script src="{% static 'ckeditor/ckeditor.js'%}"></script>
+<script>
+	CKEDITOR.env.isCompatible = true;
+</script>
+
+<div class="container-fluid g-0">
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;min-height: 95vh;">
+        <div class="col-12" id="main_container">
+
+        </div>
+    </div>
+</div>
+
+<i class="fas fa-plus bg-blue cl-w f-20 shadow text-center" onclick="add_modal()"
+    style="width: 48px;position: fixed;bottom: 20px;right: 14px;padding: 14px;border-radius: 100px;"></i>
+
+
+<div id="main_temp" hidden class="bg-white shadow pd-10 br-20 mb-3" onclick="edit_paper()">
+    <div class="row f-12 p-n">
+        <div class="col-7 my-auto">
+            <div class="fwb f-16 subject"></div>
+            <div>
+                <i class="fas fa-calendar cl-o pe-2"></i>
+                <span class="examdate"></span>
+            </div>
+        </div>
+        <div class="col-5 my-auto">
+            <div>
+                <i class="fas fa-graduation-cap cl-o text-center" style="width: 24px;"></i>
+                <span class="class"></span>
+            </div>
+            <div>
+                <i class="fas fa-clipboard cl-o text-center" style="width: 24px;"></i>
+                <span class="exam"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Add Paper</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <div class="f-10">Exam</div>
+                            <div class="custom_dropdown">
+                                <input type="text" data-id="" value="" id="examfilter"
+                                    class="search_input shadow br-30 form-control f-12" placeholder="Exam..." />
+                                <div class="optionblock">
+                                    {% for s in exams %}
+                                    <div class="option_item" data-id="{{ s.id }}">{{s.title}}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="f-10">Class</div>
+                            <div class="custom_dropdown">
+                                <input type="text" data-id="" id="classfilter"
+                                    class="class search_input shadow br-30 form-control f-12 OP"
+                                    placeholder="Class..." />
+                                <div class="optionblock">
+                                    {% for class in classes %}
+                                    <div class="option_item" data-fun="change_class" data-id="{{ class.id }}">
+                                        {{class.Title}}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="f-10">Section</div>
+                            <div class="custom_dropdown">
+                                <input type="text" data-id="" id="sectionfilter"
+                                    class="class search_input shadow br-30 form-control f-12 OP"
+                                    placeholder="Section..." />
+                                <div class="optionblock" id="section_drop">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="f-10">Subject</div>
+                            <div class="custom_dropdown">
+                                <input type="text" data-id="" id="subjectfilter"
+                                    class="class search_input shadow br-30 form-control f-12 OP"
+                                    placeholder="Subject..." />
+                                <div class="optionblock">
+                                    {% for s in subjects %}
+                                    <div class="option_item" data-id="{{ s.id }}">{{s.Title}}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="f-10">Exam Date</div>
+                            <input type="date" id="datefilter" class="form-control form-control-sm f-12 shadow br-30">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="f-10">Total Marks</div>
+                            <input type="number" id="totalmarks" class="form-control form-control-sm f-12 shadow br-30">
+                        </div>
+                        <div class="col-9">
+                            <div class="f-10">Copy From</div>
+                            <div class="custom_dropdown">
+                                <input type="text" data-id="" id="oldpaper"
+                                    class="search_input shadow br-30 form-control f-12" placeholder="Search..." />
+                                <div class="optionblock">
+                                    {% for c in papers %}
+                                    <div class="option_item" data-id="{{c.id}}">
+                                        {{c.subject}} : {{c.examtitle}} - {{c.paperdate|date:"F j,Y"}}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="mb-1 f-10" style="opacity: 0;">Copy From</div>
+                            <div class="mybtn orange shadow db" onclick="load_old_paper()">Load</div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <textarea id="tinyeditor" data-id=""></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submit_data()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function add_modal() {
+        $("#addModalLabel").attr("data-id", "");
+        $("#addModal").modal("show");
+    }
+
+    function load_old_paper() {
+        var oldid = $("#oldpaper").attr("data-id");
+        if (oldid == "") {
+            show_toast("Please select a paper to copy from", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        data.append("paperid", oldid);
+        var detail = load_ajax_data("get_paper_detail", data);
+
+        CKEDITOR.instances["tinyeditor"].setData(detail["content"]);
+    }
+
+    function edit_paper() {
+        var parent = event.target;
+        var id = parent.getAttribute("data-id");
+        $("#addModalLabel").html("Edit Paper");
+        $("#addModalLabel").attr("data-id", id);
+        var data = new FormData();
+        data.append("paperid", id);
+        var detail = load_ajax_data("get_paper_detail", data);
+
+        $("#subjectfilter").attr("data-id", detail["subjectid"]);
+        $("#datefilter").val(detail["paperdate"]);
+        $("#totalmarks").val(detail["totalmarks"]);
+        $("#classfilter").attr("data-id", detail["classid"]);
+        $("#sectionfilter").attr("data-id", detail["sectionid"]);
+        $("#examfilter").attr("data-id", detail["examid"]);
+        CKEDITOR.instances["tinyeditor"].setData(detail["content"]);
+
+        set_drop_default();
+        $("#addModal").modal("show");
+    }
+
+    function submit_data() {
+        var paperid = $("#addModalLabel").attr("data-id");
+        var data = new FormData();
+        if (paperid != "") {
+            data.append("paperid", paperid);
+        }
+        data.append("subject", $("#subjectfilter").attr("data-id"));
+        if ($("#paperdate").val() != "") {
+            data.append("paperdate", $("#datefilter").val());
+        }
+
+        var totalmarks = parseInt($("#totalmarks").val());
+        if (isNaN(totalmarks)) {
+            totalmarks = 0;
+        }
+        data.append("totalmarks", totalmarks);
+        data.append("class", $("#classfilter").attr("data-id"));
+        data.append("section", $("#sectionfilter").attr("data-id"));
+        data.append("exam", $("#examfilter").attr("data-id"));
+        data.append("content", CKEDITOR.instances["tinyeditor"].getData());
+        var code = send_ajax_data("save_paper", data);
+
+        var message = "Paper saved";
+        show_toast(message, "success");
+        load_data();
+    }
+</script>
+
+<script>
+    CKEDITOR.replace('tinyeditor');
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+<script>
+    function change_class() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("section_drop"));
+    }
+
+    function load_data() {
+        var data = new FormData();
+        var list = load_ajax_data("get_paper_list", data);
+
+        var parent = document.getElementById("main_container");
+        var temp = document.getElementById("main_temp");
+        parent.innerHTML = "";
+
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            $(clone).attr("data-id", list[i]["id"]);
+            $(clone).find(".subject").html(list[i]["subject"]);
+            $(clone).find(".examdate").html(format_date(list[i]["paperdate"]));
+            $(clone).find(".class").html(list[i]["class"]+list[i]["section"]);
+            $(clone).find(".exam").html(list[i]["exam"]);
+        }
+    }
+</script>
+
+{% endblock %}

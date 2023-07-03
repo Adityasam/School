@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+</style>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead">Announcements</div>
+        <div class="col-6 my-auto"></div>
+        <div class="col-3 my-auto text-end">
+            <div class="mybtn shadow blue" onclick="newModal()">
+                <i class="fas fa-plus mr-10 p-n"></i>
+                <span class="p-n">Create Announcement</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-10">
+        <table class="table f-12">
+            <thead>
+                <tr>
+                    <th style="width:20px">#</th>
+                    <th>Title</th>
+                    <th>Created Date</th>
+                    <th>Created By</th>
+                    <th>Send Date</th>
+                    <th>Status</th>
+                    <th class="text-center" style="width:20%">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="container">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="temp">
+        <td class="count"></td>
+        <td class="title"></td>
+        <td class="createddate"></td>
+        <td class="createdby"></td>
+        <td class="senddate"></td>
+        <td class="status"></td>
+        <td class="text-center">
+            <i class="fas fa-edit cl-b me-3 cur" onclick="start_edit()"></i>
+            <i class="fas fa-trash cl-r cur" onclick="start_delete()"></i>
+        </td>
+    </tr>
+</table>
+
+<!-- New Modal -->
+<div class="modal fade" id="newModal" data-id="" tabindex="-1" aria-labelledby="newModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="newModalLabel">New Announcement</h5>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-12 mb-20">
+                            <div class="fwb f-12">Title</div>
+                            <input type="text" class="form-control form-control-sm br-30 shadow" id="title" />
+                        </div>
+                        <div class="col-12 mb-20">
+                            <div class="fwb f-12">Announcement</div>
+                            <textarea type="text" class="form-control form-control-sm br-10 shadow" rows="5"
+                                id="description"></textarea>
+                        </div>
+                        <div class="col-12 mb-20">
+                            <div class="fwb f-12">Send To</div>
+                            <div class="multi sel" data-id="P^F^S" id="send_to">
+                                <div class="opbtn shadow active me-2" data-id="P">All Students</div>
+                                <div class="opbtn shadow active me-2" data-id="F">All Faculty</div>
+                                <div class="opbtn shadow active" data-id="S">All Staff</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-info" onclick="send_notice('N')">Save</button>
+                <button type="button" class="btn btn-success" onclick="send_notice('A')">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function newModal() {
+        $("#newModal").find("input").val("");
+        $("#newModal").find("textarea").val("");
+        $("#newModal").find(".multi").attr("data-id", "");
+        $("#newModal").modal("show");
+    }
+
+    function start_edit() {
+        var id = event.target.parentElement.parentElement.getAttribute("data-id");
+        var data = new FormData();
+        data.append("noticeid", id);
+        var detail = load_ajax_data("/get_notice_detail", data);
+
+        $("#newModal").attr("data-id", id);
+        $("#title").val(detail["title"]);
+        $("#description").val(detail["description"]);
+        $("#send_to").attr("data-id", detail["sendto"]);
+
+        set_drop_default();
+        $("#newModal").modal("show");
+    }
+
+    function send_notice(status) {
+        var title = $("#title").val().trim();
+        var desc = $("#description").val().trim();
+        var send_to = $("#send_to").attr("data-id");
+
+        if (send_to == "") {
+            show_toast("Please select whom to send", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        if ($("#newModal").attr("data-id") != "") {
+            data.append("noticeid", $("#newModal").attr("data-id"));
+        }
+        data.append("title", title);
+        data.append("description", desc);
+        data.append("sendto", send_to);
+        data.append("status", status);
+        data.append("sentby", $("#USERID").val());
+        var users = send_ajax_data("/send_notice", data);
+        users = users.users;
+
+        // if (status == 'A') {
+        //     for (var i = 0; i < users.length; i++) {
+        //         send_push(users[i], title, desc, "{% url 'main:mobile_notice' %}");
+        //     }
+        // }
+
+        $("#newModal").modal("hide");
+
+        load_data();
+
+        if (status == "N") {
+            show_toast("Announcement Saved", "success");
+        } else if (status == "A") {
+            show_toast("Announcement Sent", "success");
+        }
+    }
+</script>
+
+<script>
+    function load_data() {
+        var data = new FormData();
+        var list = load_ajax_data("get_announcements", data);
+
+        var parent = document.getElementById("container");
+        var temp = document.getElementById("temp");
+        console.log(list.length);
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.setAttribute("data-id", list[i]["id"]);
+            clone.getElementsByClassName("count")[0].innerHTML = i + 1;
+            clone.getElementsByClassName("title")[0].innerHTML = list[i]["title"];
+            clone.getElementsByClassName("createddate")[0].innerHTML = format_date(list[i]["createddate"]);
+            clone.getElementsByClassName("createdby")[0].innerHTML = list[i]["createdby"];
+            clone.getElementsByClassName("senddate")[0].innerHTML = format_date(list[i]["senddate"]);
+            clone.getElementsByClassName("status")[0].innerHTML = list[i]["statustitle"];
+        }
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

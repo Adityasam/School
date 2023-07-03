@@ -62,7 +62,7 @@
                 </div>
             </div>
             <div class="col-1 text-end my-auto">
-                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)"></i>
+                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)" onclick="show_detail()"></i>
                 <br>
                 <i class="fas fa-edit me-3 cur" style="color:var(--my_green)" onclick="edit_faculty()"></i>
             </div>
@@ -84,7 +84,7 @@
                     <div class="row">
                         <div class="col-3 mb-3">
                             <div style="position: relative;height: 100%;padding-right: 100%;">
-                                <input type="file" id="photofile" hidden accept="image/png, image/jpeg, image/jpg"
+                                <input type="file" class="old" id="photofile" hidden accept="image/png, image/jpeg, image/jpg"
                                     onchange="set_profile()" />
                                 <img src="{% static 'img/defaultuser.jpg' %}" onclick="click_profie()"
                                     class="add_photo shadow" id="profilepic" />
@@ -186,6 +186,10 @@
                                     <input type="text" class="form-control f-12 br-30 shadow INP"
                                         placeholder="IFSC Code..." id="ifsc" />
                                 </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">User Login Password</div>
+                                    <input type="text" class="form-control f-12 br-30 shadow INP" id="loginpass" />
+                                </div>
                             </div>
                             <hr>
                             <div class="row mb-4">
@@ -194,7 +198,7 @@
                                     <div class="custom_dropdown">
                                         <input type="text" data-id="" id="subject"
                                             class="class search_input shadow br-30 form-control f-12"
-                                            placeholder="Class..." />
+                                            placeholder="Subject..." />
                                         <div class="optionblock" id="subject_drop">
                                             {% for subject in subjects %}
                                             <div class="option_item" data-fun="add_subject" data-id="{{subject.id}}">
@@ -227,13 +231,142 @@
     <i class="fas fa-trash cl-r f-12 ms-2 ps-2" onclick="event.target.parentElement.remove()"></i>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 60%;">
+        <div class="modal-content br-30">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Faculty Detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-3">
+                            <div style="position: relative;width: 100%;padding-bottom: 100%;">
+                                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="shadow" id="detailpic"
+                                    style="position: absolute;width: 100%;height: 100%;border-radius: 1000px;padding: 5px;object-fit: cover;border: 2px solid var(--my_blue);">
+                            </div>
+                        </div>
+                        <div class="col-9 f-14 my-auto">
+                            <div class="row">
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Full Name</div>
+                                    <div id="detail_fullname"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Mobile</div>
+                                    <div id="detail_mobile"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Whatsapp</div>
+                                    <div id="detail_whatsapp"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Email</div>
+                                    <div id="detail_education"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Gender</div>
+                                    <div id="detail_gender"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Date of Birth</div>
+                                    <div id="detail_dob"></div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="f-12 fwb">Joining Date</div>
+                                    <div id="detail_joining"></div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="f-12 fwb">Salary</div>
+                                    <div id="detail_salary"></div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="f-12 fwb">Aadhar No</div>
+                                    <div id="detail_aadhar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row f-14">
+                        <div class="col-3 mb-20">
+                            <div class="f-12 fwb">Name In Bank</div>
+                            <div id="detail_nameinbank">Aditya Nath Tiwari</div>
+                        </div>
+                        <div class="col-3 mb-20">
+                            <div class="f-12 fwb">Bank Account No</div>
+                            <div id="detail_account">987987987987979</div>
+                        </div>
+                        <div class="col-3 mb-20">
+                            <div class="f-12 fwb">Bank Name</div>
+                            <div id="detail_bank">Union Bank Of India</div>
+                        </div>
+                        <div class="col-3 mb-20">
+                            <div class="f-12 fwb">IFSC</div>
+                            <div id="detail_ifsc">UBI98988999</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    function start_delete(){
+    $("#facultyModal").find("input").on('keypress',function(e) {
+        if(e.which == 13) {
+            submit_data();
+        }
+    });
+
+    function show_detail() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var code= parent.getAttribute("data-id");
+
+        $("#detailModalLabel").html("Faculty Detail : "+code);
+        var data = new FormData();
+        data.append("facultycode", code);
+        var maindetail = load_ajax_data("get_faculty_detail", data);
+        detail = maindetail.data[0];
+        subjects = maindetail.subjects;
+
+        $("#detail_fullname").html(detail["fullname"]);
+        $("#detail_mobile").html(detail["mobile"]);
+        $("#detail_whatsapp").html(detail["whatsapp"]);
+        $("#detail_email").html(detail["email"]);
+        if(detail["gender"] == "M"){
+            $("#detail_gender").html("Male");
+        }else if(detail["gender"] == "F"){
+            $("#detail_gender").html("Female");
+        }
+        $("#detail_dob").html(format_date(detail["dateofbirth"]));
+        $("#detail_joining").html(format_date(detail["joiningdate"]));
+        $("#detail_salary").html(INR+" "+add_commas(detail["salary"]));
+        $("#detail_aadhar").html(detail["aadharno"]);
+
+        $("#detail_nameinbank").html(detail["nameinbank"]);
+        $("#detail_account").html(detail["bankaccountno"]);
+        $("#detail_bank").html(get_bank_name(detail["bankcode"]));
+        $("#detail_ifsc").html(detail["ifsc"]);
+
+        if(detail["photo"] != ""){
+            document.getElementById("detailpic").src = "/static/uploads/"+detail["photo"];
+        }
+        
+        $("#detailModal").modal("show");
+    }
+</script>
+
+<script>
+    function start_delete() {
         $("#facultyModal").modal("hide");
         ask_confirm("Are you sure you want to delete this faculty?", "delete_faculty", "hide_confirm");
     }
 
-    function delete_faculty(){
+    function delete_faculty() {
         var id = $("#facultyModalLabel").attr("data-tabid");
         delete_item(id, "Faculty");
         hide_confirm();
@@ -294,7 +427,7 @@
         var data = new FormData();
         data.append("facultycode", id);
         var maindetail = load_ajax_data("get_faculty_detail", data);
-        detail = maindetail.data;
+        detail = maindetail.data[0];
         subjects = maindetail.subjects;
 
         var subcon = document.getElementById("sub_container");
@@ -326,18 +459,24 @@
         $("#experience").val(detail["experience"]);
         $("#nameinbank").val(detail["nameinbank"]);
         $("#bankaccount").val(detail["bankaccountno"]);
+        $("#loginpass").val(detail["loginpass"]);
         $("#bankcode").attr("data-id", detail["bankcode"]);
         $("#ifsc").val(detail["ifsc"]);
-        document.getElementById("profilepic").src = "/static/uploads/" + detail["photo"];
-        url_to_file("/static/uploads/" + detail["photo"], document.getElementById("photofile"));
+
+        if(detail["photo"] != ""){
+            document.getElementById("profilepic").src = "/static/uploads/" + detail["photo"];
+        }else{
+            document.getElementById("profilepic").src = "/static/img/defaultuser.jpg";
+        }
+        document.getElementById("photofile").classList.add("old");
 
         $("#deletebtn").attr("hidden", false);
 
         var status = $(".pagestatus.active").eq(0).attr("data-status-id");
-        if(status == "A"){
+        if (status == "A") {
             $("#archivebtn").attr("hidden", false);
             $("#unarchivebtn").attr("hidden", true);
-        }else{
+        } else {
             $("#archivebtn").attr("hidden", true);
             $("#unarchivebtn").attr("hidden", false);
         }
@@ -372,7 +511,7 @@
         }
 
         var photo = document.getElementById("photofile").files;
-        if (photo.length > 0) {
+        if (photo.length > 0 && !document.getElementById("photofile").classList.contains("old")) {
             photo = photo[0];
             var filename = save_file(photo);
             filename = filename.name;
@@ -384,8 +523,8 @@
         if (facultycode == "") {
             var message = "New faculty created with code " + code.code;
             success_modal(message);
-        }else{
-            var message = "Faculty with code "+ code.code +" updated";
+        } else {
+            var message = "Faculty with code " + code.code + " updated";
             success_modal(message);
         }
         load_data();
@@ -401,6 +540,8 @@
         $("#facultyModalLabel").html("Add Faculty");
         $("#facultyModal").modal("show");
 
+        document.getElementById("photofile").classList.add("old");
+
         $("#deletebtn").attr("hidden", true);
         $("#archivebtn").attr("hidden", true);
         $("#unarchivebtn").attr("hidden", true);
@@ -414,15 +555,17 @@
         var files = document.getElementById("photofile").files;
         if (files.length > 0) {
             files = files[0];
-            compressImage(files, 500, 500, 80, function(dataURL) {
+            compressImage(files, 500, 500, 80, function (dataURL) {
                 // Convert the compressed image data URL to a file object
-                var newname = "compimage."+files.name.split(".").pop();
+                var newname = "compimage." + files.name.split(".").pop();
                 var compressedFile = dataURLtoFile(dataURL, newname);
                 document.getElementById("profilepic").src = URL.createObjectURL(compressedFile);
                 var dt = new DataTransfer();
                 dt.items.add(compressedFile);
                 document.getElementById("photofile").files = dt.files;
-              });
+
+                document.getElementById("photofile").classList.remove("old");
+            });
         }
     }
 

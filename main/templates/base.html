@@ -6,12 +6,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>ARCH</title>
 
+    <link rel="icon" href="{% static 'img/bluelogo.png' %}" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
+    <link rel="manifest" href="static/_manifest.json" data-pwa-version="set_in_manifest_and_pwa_js">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"
@@ -19,16 +21,36 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
     <script src="https://kit.fontawesome.com/f422f2e2ec.js" crossorigin="anonymous"></script>
     <script src="{% static 'js/myjs.js' %}"></script>
     <script src="{% static 'js/banks.js' %}"></script>
+    <script src="{% static 'js/message_desktop.js' %}"></script>
+
+    <style>
+        #refresh_btn{
+            font-size:20px;
+            color:white;
+            line-height:20px;
+            padding:10px;
+            width:40px;
+            height:40px;
+            border-radius:100%;
+            position:fixed;
+            bottom:40px;
+            right:40px;
+            background-color:var(--my_blue);
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container-fluid">
         <div class="row">
             <div class="col-1 pdy-20 text-center g-0" id="sidemenu">
-                <img src="{% static 'img/logowhite.png' %}" class="sidelogo" />
+                <img src="{% static 'img/whitelogo.png' %}" class="sidelogo" />
                 <div class="mt-5">
                     {% for m in menu %}
                     {% with ur=m.pageurl ic=m.icon pagecode=request.session.PAGECODE %}
@@ -43,7 +65,7 @@
                     {% endwith %}
                     {% endfor %}
                     <div class="text-center bt" style="padding-top:24px">
-                        <a href="{% url 'main:login' %}">
+                        <a href="{% url 'main:logmeout' %}">
                             <img src="{% static 'img/logout.png' %}" class="menuicon" style="opacity: 1;" />
                         </a>
                     </div>
@@ -104,6 +126,24 @@
     </div>
   </div>
 
+
+  <i class="fas fa-arrows-rotate shadow" onclick="location.reload();" id="refresh_btn"></i>
+
+  <input id="PRIVILEGE" hidden value="{{request.session.PRIVILEGE}}"/>
+  <input id="USERID" hidden value="{{request.session.USERID}}"/>
+  <input id="SUPERADMIN" hidden value="{{request.session.SUPERADMIN}}"/>
+  <input id="EMPCODE" hidden value="{{request.session.EMPCODE}}"/>
+  <input id="HOMEPAGE" hidden value="{{request.session.HOMEPAGE}}"/>
+  <input id="USERTYPE" hidden value="{{request.session.USERTYPE}}"/>
+  <input id="COMPANY" hidden value="{{request.session.COMPANY}}"/>
+
+<div id="loader" hidden>
+    <div class="text-center">
+        <img src="{% static 'img/loader.gif' %}"/>
+        <div id="loader_message">Loading...</div>
+    </div>
+</div>
+
     <!--STatus temp-->
     <div class="status_btn shadow" hidden id="status_temp" onclick="change_status()">
         <div class="p-n">Active : </div>
@@ -131,6 +171,19 @@
         $("#confirmModal").modal("hide");
     }
 
+    function show_loader(message=""){
+        if(message == ""){
+            message = "Loading...";
+        }
+        console.log(message);
+        $("#loader_message").html(message);
+        $("#loader").attr("hidden", false);
+    }
+
+    function hide_loader(){
+        $("#loader").attr("hidden", true);
+    }
+
     function show_toast(message, type="success"){
         $("#toast").html(message);
         $("#toast").removeClass("success");
@@ -156,6 +209,26 @@
     $(document).ready(function () {
         $('[data-bs-toggle="tooltip"]').tooltip();
     });
+
+    function logout(){
+        var data = new FormData();
+        send_ajax_data("logmeout", data);
+        window.open("login", "_self");
+    }
 </script>
 
+
+<script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('static/_service-worker.js')
+          .then(registration => {
+            console.log('Service worker registered:', registration);
+          })
+          .catch(error => {
+            console.log('Service worker registration failed:', error);
+          });
+      });
+    }
+  </script>
 </html>

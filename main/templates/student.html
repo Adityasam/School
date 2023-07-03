@@ -8,23 +8,37 @@
         <div class="col-3 my-auto" id="status_container">
 
         </div>
-        <div class="col-3 my-auto">
-            <div class="bg-white shadow br-30" style="padding:5px 10px;display: inline-block;">
-                <input type="text" placeholder="Search..." id="srch" class="search_input" />
-            </div>
-            <div class="search_icon text-center shadow" onclick="search_page()">
-                <i class="fas fa-search p-n"></i>
-            </div>
-        </div>
-        <div class="col-2 my-auto">
-            <div class="custom_dropdown">
-                <input type="text" data-id="" id="classfilter" value="All Classes"
-                    class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Class..." />
-                <div class="optionblock" id="class_drop">
-                    <div class="option_item" data-id="" data-fun="class_filter">All Classes</div>
-                    {% for class in classes %}
-                    <div class="option_item" data-id="{{class.id}}" data-fun="class_filter">{{class.Title}}</div>
-                    {% endfor %}
+        <div class="col-5 my-auto">
+            <div class="row">
+                <div class="col-3">
+                    <div class="custom_dropdown">
+                        <input type="text" data-id="" id="classfilter" value="All Classes"
+                            class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Class..." />
+                        <div class="optionblock" id="class_drop">
+                            <div class="option_item" data-id="" data-fun="load_section">All Classes</div>
+                            {% for class in classes %}
+                            <div class="option_item" data-id="{{class.id}}" data-fun="load_section">{{class.Title}}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="custom_dropdown">
+                        <input type="text" data-id="" id="sectionfilter"
+                            class="search_input shadow br-30 form-control f-12 EXC" placeholder="Section..." />
+                        <div class="optionblock" id="section_drop">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5">
+                    <input type="text" placeholder="Search..." id="srch" class="form-control shadow f-12 br-30" />
+                </div>
+                <div class="col-1 my-auto">
+                    <div class="search_icon text-center shadow" onclick="search_page()">
+                        <i class="fas fa-search p-n"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -80,7 +94,7 @@
                 </div>
             </div>
             <div class="col-1 text-end my-auto">
-                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)"></i>
+                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)" onclick="show_detail()"></i>
                 <br>
                 <i class="fas fa-edit me-3 cur" style="color:var(--my_green)" onclick="edit_student()"></i>
             </div>
@@ -102,7 +116,7 @@
                     <div class="row">
                         <div class="col-3 mb-3">
                             <div style="position: relative;height: 100%;padding-right: 100%;">
-                                <input type="file" id="photofile" hidden accept="image/png, image/jpeg, image/jpg"
+                                <input type="file" class="old" id="photofile" hidden accept="image/png, image/jpeg, image/jpg"
                                     onchange="set_profile()" />
                                 <img src="{% static 'img/defaultuser.jpg' %}" onclick="click_profie()"
                                     class="add_photo shadow" id="profilepic" />
@@ -176,24 +190,23 @@
                                         <input type="text" data-id="" id="class"
                                             class="class search_input shadow br-30 form-control f-12 OP"
                                             placeholder="Class..." />
-                                        <div class="optionblock" id="class_drop">
+                                        <div class="optionblock" id="modal_class_drop">
                                             {% for class in classes %}
-                                            <div class="option_item" data-fun="change_section" data-id="{{class.id}}">
+                                            <div class="option_item" data-fun="load_section_modal"
+                                                data-id="{{class.id}}">
                                                 {{class.Title}}</div>
                                             {% endfor %}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3 mb-4">
+                                <div class="col-3 mb-4" {% if hassection == False %}hidden{% endif %}>
                                     <div class="mb-1 f-10">Section</div>
                                     <div class="custom_dropdown">
                                         <input type="text" data-id="" id="section"
                                             class="class search_input shadow br-30 form-control f-12 OP"
                                             placeholder="Section..." />
-                                        <div class="optionblock" id="section_drop">
-                                            {% for s in sections %}
-                                            <div class="option_item" data-cls="{{s.ClassId}}" hidden data-id="{{s.id}}">{{s.Title}}</div>
-                                            {% endfor %}
+                                        <div class="optionblock" id="modal_section_drop">
+
                                         </div>
                                     </div>
                                 </div>
@@ -201,6 +214,27 @@
                                     <div class="mb-1 f-10">Roll Number</div>
                                     <input type="number" step="1" class="form-control f-12 br-30 shadow INP"
                                         placeholder="Roll Number" id="rollnumber" />
+                                </div>
+                                <div class="col-3 mb-4">
+                                    <div class="mb-1 f-10">Bus Facility</div>
+                                    <div id="bus_service" data-id="false" class="sel">
+                                        <div class="opbtn shadow me-2" data-fun="toggle_bus" data-id="true">Yes</div>
+                                        <div class="opbtn shadow active" data-fun="toggle_bus" data-id="false">No</div>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-4" id="bus_col" hidden>
+                                    <div class="mb-1 f-10">Bus</div>
+                                    <div class="custom_dropdown">
+                                        <input type="text" data-id="" id="bus"
+                                            class="class search_input shadow br-30 form-control f-12 OP"
+                                            placeholder="Bus..." />
+                                        <div class="optionblock">
+                                            {% for s in busses %}
+                                            <div class="option_item" data-id="{{s.id}}">
+                                                {{s.Name}} : {{s.BusNo}}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -218,13 +252,196 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 60%;">
+        <div class="modal-content br-30">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Student Detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-3">
+                            <div style="position: relative;width: 100%;padding-bottom: 100%;">
+                                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="shadow" id="detailpic"
+                                    style="position: absolute;width: 100%;height: 100%;border-radius: 1000px;padding: 5px;object-fit: cover;border: 2px solid var(--my_blue);">
+                            </div>
+                        </div>
+                        <div class="col-9 f-14 my-auto">
+                            <div class="row">
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Full Name</div>
+                                    <div id="detail_fullname"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Mobile</div>
+                                    <div id="detail_mobile"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Whatsapp</div>
+                                    <div id="detail_whatsapp"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Email</div>
+                                    <div id="detail_education"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Gender</div>
+                                    <div id="detail_gender"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Date of Birth</div>
+                                    <div id="detail_dob"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Father's Name</div>
+                                    <div id="detail_father"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Mother's Name</div>
+                                    <div id="detail_mother"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Class</div>
+                                    <div id="detail_class"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Aadhar No</div>
+                                    <div id="detail_aadhar"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Bus Facilty</div>
+                                    <div id="bus_facility"></div>
+                                </div>
+                                <div class="col-4 mb-20">
+                                    <div class="f-12 fwb">Bus No</div>
+                                    <div id="bus_no"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="f-16 fwb">Payment History</div>
+                    <hr>
+                    <table class="table f-12">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Month Year</th>
+                                <th>Payment Type</th>
+                                <th>Payment Date</th>
+                                <th>Amount</th>
+                                <th>Payment Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feehistory_body">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="feehistory_temp">
+        <td class="count"></td>
+        <td class="monthyear"></td>
+        <td class="type"></td>
+        <td class="date"></td>
+        <td class="amount"></td>
+        <td class="mode"></td>
+    </tr>
+</table>
+
 <script>
-    function start_delete(){
+    $("#studentModal").find("input").on('keypress',function(e) {
+        if(e.which == 13) {
+            submit_data();
+        }
+    });
+
+    function toggle_bus() {
+        if ($("#bus_service").attr("data-id") == "true") {
+            $("#bus_col").attr("hidden", false);
+        } else {
+            $("#bus_col").attr("hidden", true);
+        }
+    }
+</script>
+
+<script>
+    function show_detail() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var code = parent.getAttribute("data-id");
+
+        $("#detailModalLabel").html("Student Detail : " + code);
+        var data = new FormData();
+        data.append("studentcode", code);
+        var maindetail = load_ajax_data("get_student_detail", data);
+        detail = maindetail.data;
+        subjects = maindetail.subjects;
+
+        $("#detail_fullname").html(detail["fullname"]);
+        $("#detail_mobile").html(detail["mobile"]);
+        $("#detail_whatsapp").html(detail["whatsapp"]);
+        $("#detail_email").html(detail["email"]);
+        if (detail["gender"] == "M") {
+            $("#detail_gender").html("Male");
+        } else if (detail["gender"] == "F") {
+            $("#detail_gender").html("Female");
+        }
+        $("#detail_father").html(detail["fathername"]);
+        $("#detail_mother").html(detail["mothername"]);
+        $("#detail_class").html(detail["class"] + " - " + detail["section"]);
+        $("#detail_aadharno").html(detail["aadharno"]);
+
+        if (detail["busservice"] == true) {
+            $("#bus_facility").html("Yes");
+        } else {
+            $("#bus_facility").html("No");
+        }
+
+        $("#bus_no").html(detail["busname"]);
+
+        if (detail["photo"] != "") {
+            document.getElementById("detailpic").src = "/static/uploads/" + detail["photo"];
+        }
+
+        //Payment history
+        data = new FormData();
+        data.append("studentcode", code);
+        var fees = load_ajax_data("/student_payment_record", data);
+
+        var parent = document.getElementById("feehistory_body");
+        var temp = document.getElementById("feehistory_temp");
+        parent.innerHTML = "";
+        for (var i = 0; i < fees.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+            console.log(fees[i]);
+            clone.getElementsByClassName("count")[0].innerHTML = i + 1;
+            clone.getElementsByClassName("type")[0].innerHTML = fees[i]["feetypetitle"];
+            clone.getElementsByClassName("date")[0].innerHTML = format_date(fees[i]["documentdate"]);
+            clone.getElementsByClassName("amount")[0].innerHTML = INR+" "+add_commas(fees[i]["netamount"]);
+            clone.getElementsByClassName("mode")[0].innerHTML = fees[i]["modetitle"];
+            clone.getElementsByClassName("monthyear")[0].innerHTML = convert_monthyear(fees[i]["monthyear"]);
+        }
+
+        $("#detailModal").modal("show");
+    }
+</script>
+
+<script>
+    function start_delete() {
         $("#studentModal").modal("hide");
         ask_confirm("Are you sure you want to delete this student?", "delete_student", "hide_confirm");
     }
 
-    function delete_student(){
+    function delete_student() {
         var id = $("#studentModalLabel").attr("data-tabid");
         delete_item(id, "Student");
         hide_confirm();
@@ -232,20 +449,20 @@
         load_data();
     }
 
-    function change_section() {
-        var id = event.target.getAttribute("data-id");
-        $("#section_drop").find(".option_item").attr("hidden", true);
-        $("#section_drop").find("div[data-cls='" + id + "']").attr("hidden", false);
-
-        var total = $("#section_drop").find(".option_item").length;
-        var count = $("#section_drop").find(".option_item[hidden]").length;
-
-        var active = total - count;
-        if (active == 0) {
-            $("#section").val("No Section");
-            $("#section").attr("data-id", "");
-        }
+    function load_section() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("section_drop"));
+        load_data();
     }
+
+    function load_section_modal() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("modal_section_drop"));
+    }
+
+    // function change_section(){
+    //     load_data();
+    // }
 
     function archive() {
         var parent = event.target.parentElement.parentElement.parentElement.parentElement;
@@ -299,16 +516,21 @@
         $("#mothername").val(detail["mothername"]);
         $("#class").attr("data-id", detail["class"]);
         $("#aadhar").val(detail["aadharno"]);
-        document.getElementById("profilepic").src = "/static/uploads/" + detail["photo"];
-        url_to_file("/static/uploads/" + detail["photo"], document.getElementById("photofile"));
+        $("#bus_service").attr("data-id", detail["busservice"]);
+        $("#bus").attr("data-id", detail["busid"]);
 
+        if(detail["photo"] != ""){
+            document.getElementById("profilepic").src = "/static/uploads/" + detail["photo"];
+        }
+
+        document.getElementById("photofile").classList.add("old");
         $("#deletebtn").attr("hidden", false);
 
         var status = $(".pagestatus.active").eq(0).attr("data-status-id");
-        if(status == "A"){
+        if (status == "A") {
             $("#archivebtn").attr("hidden", false);
             $("#unarchivebtn").attr("hidden", true);
-        }else{
+        } else {
             $("#archivebtn").attr("hidden", true);
             $("#unarchivebtn").attr("hidden", false);
         }
@@ -338,11 +560,15 @@
 
         var photo = document.getElementById("photofile").files;
         if (photo.length > 0) {
-            photo = photo[0];
-            var filename = save_file(photo);
-            filename = filename.name;
-            data.append("photo", filename);
+            if(!document.getElementById("photofile").classList.contains("old")){
+                photo = photo[0];
+                var filename = save_file(photo);
+                filename = filename.name;
+                data.append("photo", filename);
+            }
         }
+
+        data.append("bus_service", $("#bus_service").attr("data-id"));
 
         var code = send_ajax_data("save_student", data);
 
@@ -367,6 +593,9 @@
         $("#studentModal").find("input").attr("data-id", "");
         $("#studentModalLabel").attr("data-id", "");
         $("#studentModalLabel").html("Add student");
+        $("#bus_service").find(".opbtn").eq(1).addClass("active");
+        $("#bus_col").attr("hidden", true);
+        document.getElementById("photofile").classList.add("old");
         $("#studentModal").modal("show");
     }
 
@@ -386,6 +615,8 @@
                 var dt = new DataTransfer();
                 dt.items.add(compressedFile);
                 document.getElementById("photofile").files = dt.files;
+
+                document.getElementById("photofile").classList.remove("old");
             });
         }
     }
@@ -407,10 +638,12 @@
         var search = $("#srch").val().trim().toLowerCase();
         var status = $(".pagestatus.active").eq(0).attr("data-status-id");
         var cls = $("#classfilter").attr("data-id");
+        var section = $("#sectionfilter").attr("data-id");
 
         data.append("class", cls);
         data.append("status", status);
         data.append("search", search);
+        data.append("section", section);
         var list = load_ajax_data("get_student_list", data);
         var parent = document.getElementById("card_container");
         var temp = document.getElementById("card_temp");
@@ -429,7 +662,7 @@
             $(clone).find(".age").html(get_age(row["dateofbirth"]) + " Years");
             $(clone).find(".mobile").html(row["mobile"]);
             $(clone).find(".email").html(row["emailid"]);
-            $(clone).find(".class").html("Class : " + row["classtitle"]+row["sectiontitle"]);
+            $(clone).find(".class").html("Class : " + row["classtitle"] + row["sectiontitle"]);
             if (row["photo"] != "null" && row["photo"] != "") {
                 clone.getElementsByClassName("small_pic")[0].src = "/static/uploads/" + row["photo"];
             }

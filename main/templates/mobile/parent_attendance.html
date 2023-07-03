@@ -1,0 +1,130 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    tr.sunday{
+        background-color: var(--my_blue);
+        color: white;
+    }
+
+    tr.absent{
+        background-color: var(--my_red);
+        color: white;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row">
+                    <div class="my-auto col-5">
+                        <input type="month" value="{% now 'Y-m' %}" id="monthfilter"
+                            class="search_input shadow br-30 form-control f-12" />
+                    </div>
+                    <div class="col my-auto text-center">
+                        <div class="di br pe-2">
+                            <span>P : </span>
+                            <span class="fwb" id="pcount">0</span>
+                        </div>
+                        <div class="di ps-2">
+                            <span>A : </span>
+                            <span class="fwb" id="acount">0</span>
+                        </div>
+                    </div>
+                    <div class="col-2 my-auto ps-0 text-center">
+                        <div class="bg-green br-30 shadow" style="padding: 3px;" onclick="load_data()">
+                            <i class="fas fa-search cl-w f-14 p-n"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="student_container" style="perspective: 1000px;">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="main_body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function load_data() {
+        var month = $("#monthfilter").val();
+        var data = new FormData();
+        data.append("month", month);
+        var list = load_ajax_data("get_parent_attendance", data);
+
+        var parent = document.getElementById("main_body");
+        parent.innerHTML = "";
+
+        var spl = month.split("-");
+        var year = parseInt(spl[0]);
+        var nmonth = parseInt(spl[1]);
+
+        var totaldays = getDaysInMonth(year, nmonth);
+
+        if("{% now 'Y-m' %}" == month){
+            totaldays = new Date().getDate();
+        }
+
+        for (var i = 0; i < totaldays; i++) {
+            var newdate = month + "-" + ("0" + (i + 1)).slice(-2);
+            var tr = document.createElement("tr");
+            tr.innerHTML += "<td>" + ("0" + (i + 1)).slice(-2) + "</td>";
+
+            var myday = getDayOnDate(newdate);
+            tr.innerHTML += "<td>" + myday + "</td>";
+
+            if (myday == "Sun") {
+                tr.classList.add("sunday");
+                tr.innerHTML += "<td></td>";
+            }else{
+                tr.innerHTML += "<td>Present</td>";
+            }
+
+            tr.setAttribute("data-date", newdate);
+
+            parent.appendChild(tr);
+        }
+
+        var pcount = 0;
+        var acount = 0;
+
+        var rows = document.getElementById("main_body").getElementsByTagName("tr");
+        for (var i = 0; i < rows.length; i++) {
+            for (var j = 0; j < list.length; j++) {
+                var attenddate = list[j]["attendancedate"].split(" ")[0].split("T")[0];
+                var status = list[j]["status"];
+
+                if(status == "A" && rows[i].getAttribute("data-date") == attenddate){
+                    rows[i].getElementsByTagName("td")[2].innerHTML = "Absent";
+                    rows[i].classList.add("absent");
+                    acount++;
+                }
+            }
+        }
+
+        $("#pcount").html(totaldays-acount);
+        $("#acount").html(acount);
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

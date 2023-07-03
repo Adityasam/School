@@ -1,0 +1,113 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .daybtn {
+        border-radius: 100px;
+        padding: 5px 20px;
+        border: 1px solid #00000030;
+        display: inline-block;
+        margin-right: 10px;
+        transition: all ease-in-out 0.3s;
+    }
+
+    .daybtn.active {
+        background-color: var(--my_green);
+        color: white;
+    }
+
+    .top_scroller {
+        overflow-x: scroll;
+        white-space: nowrap;
+    }
+
+    .top_scroller::-webkit-scrollbar {
+        display: none;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pdx-20 br-30 shadow">
+                <div class="row">
+                    <div class="col-12 pdy-10 f-12 top_scroller" style="z-index:10" id="top_scroller">
+                        <div class="daybtn shadow" data-id="1">Mon</div>
+                        <div class="daybtn shadow" data-id="2">Tue</div>
+                        <div class="daybtn shadow" data-id="3">Wed</div>
+                        <div class="daybtn shadow" data-id="4">Thu</div>
+                        <div class="daybtn shadow" data-id="5">Fri</div>
+                        <div class="daybtn shadow" data-id="6">Sat</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="main_body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(".daybtn").on("click", function () {
+        $("#top_scroller").find(".daybtn").removeClass("active");
+        event.target.classList.add("active");
+        load_data();
+    })
+
+    function set_day() {
+        var date = new Date();
+        var day = date.getDay() - 1;
+        $("#top_scroller").find(".daybtn").eq(day).addClass("active");
+        if (day > 3) {
+            $("#top_scroller").scrollLeft(500);
+        }
+    }
+
+    function load_data() {
+        var data = new FormData();
+        data.append("faculty", $("#USERID").val());
+        var day = document.getElementsByClassName("daybtn active")[0].getAttribute("data-id");
+        data.append("day", day);
+        data.append("sessionid", "{{activesessionid}}");
+        var list = load_ajax_data("/get_faculty_routine", data);
+        list = list.data;
+        console.log(list);
+        var parent = document.getElementById("main_body");
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var tr = document.createElement("tr");
+            tr.innerHTML += "<td>"+ (i+1) +"</td>";
+            if(list[i]["sectiontitle"] != ""){
+                tr.innerHTML += "<td>"+ list[i]["classtitle"]+" - "+list[i]["sectiontitle"] +"</td>";
+            }else{
+                tr.innerHTML += "<td>"+ list[i]["classtitle"]+"</td>";
+            }
+            tr.innerHTML += "<td>"+list[i]["subjecttitle"]+"</td>";
+            tr.innerHTML += "<td>"+ AMPM(list[i]["starttime"])+" - "+AMPM(list[i]["endtime"]) +"</td>";
+            parent.appendChild(tr);
+        }
+    }
+
+    $(window).on("load", function () {
+        set_day();
+        load_data();
+    })
+</script>
+
+
+{% endblock %}

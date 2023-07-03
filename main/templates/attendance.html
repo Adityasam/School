@@ -26,40 +26,37 @@
                 </div>
             </div>
         </div>
-        <div class="col-3 my-auto" id="status_container">
+        <div class="col-6 my-auto" id="status_container">
             <div class="row">
-                <div class="col-6">
+                <div class="col-3">
                     <div class="custom_dropdown">
                         <input type="text" data-id="" id="classfilter"
-                            class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                            class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Class..." />
                         <div class="optionblock">
                             {% for class in classes %}
-                            <div class="option_item" data-fun="change_section" data-id="{{ class.id }}">{{class.Title}}
+                            <div class="option_item" data-fun="load_section" data-id="{{ class.id }}">{{class.Title}}
                             </div>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-3" {% if hassection == False %}hidden{% endif %}>
                     <div class="custom_dropdown">
                         <input type="text" data-id="" id="sectionfilter"
-                            class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                            class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Section..." />
                         <div class="optionblock" id="sectionfilter_drop">
-                            {% for s in sections %}
-                            <div class="option_item" hidden data-cls="{{s.ClassId}}" data-id="{{ s.id }}">{{s.Title}}
-                            </div>
-                            {% endfor %}
+                            
                         </div>
                     </div>
                 </div>
+                <div class="col-4 my-auto">
+                    <input type="month" value="{% now 'Y-m'%}" data-id="" id="datefilter"
+                        class="shadow br-30 form-control f-12" />
+                </div>
+                <div class="col-2 my-auto">
+                    <div class="mybtn orange shadow" onclick="load_days()">Load</div>
+                </div>
             </div>
-        </div>
-        <div class="col-2 my-auto">
-            <input type="month" value="{% now 'Y-m'%}" data-id="" id="datefilter"
-                class="shadow br-30 form-control f-12" />
-        </div>
-        <div class="col-1 my-auto">
-            <div class="mybtn orange shadow" onclick="load_days()">Load</div>
         </div>
         <div class="col-2 text-end my-auto">
             <div class="mybtn shadow green" hidden id="savebtn" onclick="save_data()">Save</div>
@@ -105,6 +102,10 @@
     </tr>
 </table>
 
+<div class="pa" style="top:10px;left:50%;transform: translateX(-50%);writing-mode: vertical-lr;text-orientation: upright;z-index: 10;" id="holiday_temp" hidden>
+
+</div>
+
 <script>
     // function toggle_option() {
     //     var parent = event.target.parentElement;
@@ -144,21 +145,13 @@
         $(event.target.parentElement).removeClass("active");
     }
 
-    function change_section() {
-        $("#sectionfilter").val("");
-        $("#sectionfilter").attr("data-id", "");
-        var id = event.target.getAttribute("data-id");
-        $("#sectionfilter_drop").find(".option_item").attr("hidden", true);
-        $("#sectionfilter_drop").find("div[data-cls='" + id + "']").attr("hidden", false);
+    function load_section() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("sectionfilter_drop"));
+    }
 
-        var total = $("#sectionfilter_drop").find(".option_item").length;
-        var count = $("#sectionfilter_drop").find(".option_item[hidden]").length;
-
-        var active = total - count;
-        if (active == 0) {
-            $("#sectionfilter").val("No Section");
-            $("#sectionfilter").attr("data-id", "");
-        }
+    function change_section(){
+        
     }
 
     function start_edit() {
@@ -222,10 +215,29 @@
         load_students(days);
     }
 
+    var firstload = true;
+
     function load_students(days) {
         var classid = $("#classfilter").attr("data-id");
         var sectionid = $("#sectionfilter").attr("data-id");
         var sessionid = $("#sessionfilter").attr("data-id");
+        
+        if(classid == "" && firstload == false){
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        if(sessionid == "" && firstload == false){
+            show_toast("Please select the session", "warning");
+            return;
+        }
+
+        var sectext = $("#sectionfilter").val();
+
+        if (sectionid == "" && sectext != "N/A" && "{{hassection}}" == "True" && firstload == false) {
+            show_toast("Please select the section", "warning");
+            return;
+        }
 
         var data = new FormData();
         data.append("classid", classid);
@@ -252,16 +264,24 @@
             $(clone).find(".name").html(list[i]["fullname"]);
 
             for (var j = 0; j < days; j++) {
+                var cdate = new Date(month+"-"+("0"+(j+1)).slice(-2));
+                var cday = cdate.getDay();
+                
                 var aclone = clean_temp(attemp);
                 aclone.classList.add('block');
                 aclone.getElementsByClassName("attvalue")[0].classList.add("p-n");
                 aclone.getElementsByClassName("attvalue")[0].style.padding = "10px";
                 clone.appendChild(aclone);
 
+                if(cday == 0){
+                    aclone.style.backgroundColor = "#ff000030";
+                    aclone.getElementsByClassName("attvalue")[0].style.pointerEvents = "none";
+                }
+
                 for (var a = 0; a < attdata.length; a++) {
                     var attsplit = attdata[a].split("#");
 
-                    if (attsplit[0] == month + "-" + ("0" + (j + 1)).slice(-2)) {
+                    if (attsplit[0].split(" ")[0] == month + "-" + ("0" + (j + 1)).slice(-2)) {
                         var status = attsplit[1];
                         if(status == "P"){
                             aclone.getElementsByClassName("attvalue")[0].innerHTML = "P";
@@ -271,6 +291,35 @@
                             aclone.getElementsByClassName("attvalue")[0].classList.add("absent");
                         }
                     }
+                }
+            }
+        }
+
+        load_events();
+        firstload = false;
+    }
+
+    function load_events(){
+        var month = $("#datefilter").val();
+        var data = new FormData();
+        data.append("month", month);
+        var list = load_ajax_data("/load_month_event", data);
+        for(var i=0;i<list.length;i++){
+            var eventdate = format_date(list[i]["eventdate"]).split("/")[0];
+            eventdate = parseInt(eventdate)-1;
+            var type = list[i]["type"];
+            var attrows = document.getElementsByClassName("attrow");
+
+            $(attrows[0]).find(".block").eq(eventdate).addClass("p-n");
+            var tag = clean_temp(document.getElementById("holiday_temp"));
+            attrows[0].getElementsByClassName("block")[eventdate].appendChild(tag);
+            tag.innerHTML = list[i]["title"];
+
+            for(var a=0;a<attrows.length;a++){
+                if(type == "H"){
+                    $(".attrow").eq(a).find(".block").eq(eventdate).css("background-color", "#9bff9b");
+                }else if(type == "E"){
+                    $(".attrow").eq(a).find(".block").eq(eventdate).css("background-color", "#9bcfff");
                 }
             }
         }

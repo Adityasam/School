@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import *
+from import_export.admin import ImportExportMixin
 # Register your models here.
 
 class FacultyAdmin(admin.ModelAdmin):
@@ -43,7 +44,7 @@ class FacultySubjectAdmin(admin.ModelAdmin):
 
 admin.site.register(FacultySubject, FacultySubjectAdmin)
 
-class FeeAdmin(admin.ModelAdmin):
+class FeeAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ['DocumentCode', 'StudentCode', 'CreatedDate']
 
 admin.site.register(Fee, FeeAdmin)
@@ -98,9 +99,9 @@ class SubClassAdmin(admin.ModelAdmin):
 
 admin.site.register(SubjectClass, SubClassAdmin)
 
-class MenuAdmin(admin.ModelAdmin):
-    list_display = ['PageCode', 'Title', 'SortOrder']
-    list_editable = ['SortOrder']
+class MenuAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ['PageCode', 'Title', 'SortOrder', 'ForAdmin', 'PageUrl', 'Description']
+    list_editable = ['SortOrder','ForAdmin', 'Description']
 
 admin.site.register(Menu, MenuAdmin)
 
@@ -114,3 +115,98 @@ class AttendanceAdmin(admin.ModelAdmin):
     list_display = ['StudentCode', "AttendanceDate"]
 
 admin.site.register(Attendance, AttendanceAdmin)
+
+class FacultyAttendanceAdmin(admin.ModelAdmin):
+    list_display = ['FacultyCode', "AttendanceDate"]
+
+admin.site.register(FacultyAttendance, FacultyAttendanceAdmin)
+
+class FeeItemAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ['FeeId', "TotalAmount"]
+
+admin.site.register(FeeItem, FeeItemAdmin)
+
+class AppSettingAdmin(admin.ModelAdmin):
+    list_display = ['HasSection', "LateFee"]
+
+admin.site.register(AppSetting, AppSettingAdmin)
+
+class SalaryRecordAdmin(admin.ModelAdmin):
+    list_display = ['FacultyCode', "MonthYear"]
+
+admin.site.register(SalaryRecord, SalaryRecordAdmin)
+
+class UserPrivilegeAdmin(admin.ModelAdmin):
+    list_display = ['UserId', "PrivilegeCode"]
+
+admin.site.register(UserPrivilege, UserPrivilegeAdmin)
+
+class FacultyRemarkAdmin(admin.ModelAdmin):
+    list_display = ['Sender', "Receiver"]
+
+admin.site.register(FacultyRemark, FacultyRemarkAdmin)
+
+class HomeWorkAdmin(admin.ModelAdmin):
+    list_display = ['GivenBy', "ClassId"]
+
+admin.site.register(HomeWork, HomeWorkAdmin)
+
+class StaffAdmin(admin.ModelAdmin):
+    list_display = ['StaffCode']
+
+admin.site.register(Staff, StaffAdmin)
+
+class DesignationAdmin(admin.ModelAdmin):
+    list_display = ['Title']
+
+admin.site.register(Designation, DesignationAdmin)
+
+class MessageIdAdmin(admin.ModelAdmin):
+    list_display = ['UserId']
+
+admin.site.register(MessageId, MessageIdAdmin)
+
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ['Title', "RoleCode"]
+
+admin.site.register(Role, RoleAdmin)
+
+class RolePrivilegeAdmin(admin.ModelAdmin):
+    list_display = ['RoleCode', "PrivilegeCode"]
+
+admin.site.register(RolePrivilege, RolePrivilegeAdmin)
+
+class BusAdmin(admin.ModelAdmin):
+    list_display = ['Name', "BusNo"]
+
+admin.site.register(Bus, BusAdmin)
+
+class NoticeAdmin(admin.ModelAdmin):
+    list_display = ['Title']
+
+admin.site.register(Notice, NoticeAdmin)
+
+class NoticeUserAdmin(admin.ModelAdmin):
+    list_display = ['UserCode', "NoticeId"]
+
+admin.site.register(NoticeUser, NoticeUserAdmin)
+
+class CalendarAdmin(admin.ModelAdmin):
+    list_display = ["Title", 'EventDate']
+
+admin.site.register(Calendar, CalendarAdmin)
+
+class BatchAdmin(admin.ModelAdmin):
+    list_display = ["Title", 'StartTime', "EndTime"]
+
+admin.site.register(Batch, BatchAdmin)
+
+class MemberAdmin(admin.ModelAdmin):
+    list_display = ["MemberCode", 'FullName']
+
+admin.site.register(LibraryMember, MemberAdmin)
+
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ["CompanyCode", 'CompanyName']
+
+admin.site.register(Company, CompanyAdmin)

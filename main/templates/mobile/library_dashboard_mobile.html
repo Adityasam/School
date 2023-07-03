@@ -1,0 +1,216 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% load tz %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+
+    .statcard {
+        opacity: 0;
+    }
+
+    @keyframes statanim {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0px);
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+    integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-stacked100@1.0.0"></script>
+
+<div class="container-fluid g-0">
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12 fwb f-20 mb-2">Today</div>
+        <div class="col-12">
+            <div class="row">
+                <div class="col-12 pb-4" id="topscroll"
+                    style="overflow-x: scroll;white-space: nowrap;scroll-snap-type: x mandatory;">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-12 fwb f-20 mb-2">
+            <span>Members (<span id="currentmember"></span>)</span>
+        </div>
+        <div class="col-12">
+            <canvas id="member_chart"></canvas>
+        </div>
+        <hr>
+        <div class="col-12 fwb f-20 mb-2">
+            <span>Revenue : {% now 'Y' %} (<span id="yearrevenue"></span>)</span>
+        </div>
+        <div class="col-12">
+            <canvas id="expense_chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div id="counttemp" hidden class="shadow pd-10 br-10 me-3 di" style="scroll-snap-align: center;width: 30%;background-color: var(--my_gray);">
+    <div class="fwb count" style="font-size: 16px;">0/0</div>
+    <div class="f-12 title"></div>
+</div>
+
+
+<script>
+    function load_people_count() {
+        var date = $("#currentdate").val();
+        var data = new FormData();
+        data.append("date", date);
+        var list = load_ajax_data("get_member_count", data);
+
+        var parent = document.getElementById("topscroll");
+        var temp = document.getElementById("counttemp");
+
+        var totalcount = 0;
+        var totalpresent = 0;
+        parent.innerHTML = "";
+        
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            var c = parseInt(list[i]["batchcount"]);
+            totalcount += c;
+
+            var p = parseInt(list[i]["presentcount"]);
+            totalpresent += p;
+
+            clone.getElementsByClassName("count")[0].innerHTML = p + "/" + c;
+            clone.getElementsByClassName("title")[0].innerHTML = list[i]["batchtitle"];
+        }
+
+        var totalclone = clean_temp(temp);
+        parent.insertBefore(totalclone, parent.children[0]);
+
+        totalclone.getElementsByClassName("count")[0].innerHTML = totalpresent + "/" + totalcount;
+        totalclone.getElementsByClassName("title")[0].innerHTML = "Total";
+        totalclone.classList.add("bg-green");
+        totalclone.classList.add("cl-w");
+
+        $("#currentmember").html(totalcount);
+    }
+
+    var allmonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    function load_monthwise_expense() {
+        var data = new FormData();
+        var list = load_ajax_data("load_monthwise_library_revenue", data);
+
+        var totalexpense = 0;
+        var revenue = list;
+
+        for (var i = 0; i<list.length; i++) {
+            totalexpense += list[i];
+        }
+
+        $("#yearrevenue").html(INR+" "+add_commas(totalexpense));
+        load_chart(allmonths, revenue);
+    }
+
+    function load_member_graph() {
+        var data = new FormData();
+        var list = load_ajax_data("load_member_graph", data);
+
+        var member = list;
+        var year = new Date().getFullYear();
+        var mon = new Date().getMonth();
+        var monthnm = [];
+        for (var i = 0; i < 12; i++) {
+            monthnm.push(allmonths[mon]);
+            mon--;
+            if (mon == -1) {
+                mon = 11;
+                year--;
+            }
+
+        }
+
+        monthnm.reverse();
+        member.reverse();
+        load_m_chart(monthnm, member);
+    }
+
+    $(window).on("load", function () {
+        load_people_count();
+        load_monthwise_expense();
+        load_member_graph();
+    })
+</script>
+
+<script>
+    function load_m_chart(months, expenses) {
+        const ctx2 = document.getElementById('member_chart').getContext('2d');
+        const myChart2 = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Members',
+                    data: expenses,
+                    backgroundColor: [
+                        "#6AC977"
+                    ],
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        stacked: false
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    function load_chart(months, expenses) {
+        const ctx2 = document.getElementById('expense_chart').getContext('2d');
+        const myChart2 = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Revenue',
+                    data: expenses,
+                    backgroundColor: [
+                        "#5840BA"
+                    ],
+                    fill: false,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        stacked: false
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+{% endblock %}

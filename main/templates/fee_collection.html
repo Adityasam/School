@@ -7,10 +7,8 @@
         <div class="col-3 fwb pagehead">Fee Collection</div>
         <div class="col-2 my-auto">
             <div class="custom_dropdown">
-                <input type="text" data-id="{{activesessionid}}" id="sessionfilter"
-                    value="{{activesession}}"
-                    class="class search_input shadow br-30 form-control f-12 OP EXC"
-                    placeholder="Session..." />
+                <input type="text" data-id="{{activesessionid}}" id="sessionfilter" value="{{activesession}}"
+                    class="class search_input shadow br-30 form-control f-12 OP EXC" placeholder="Session..." />
                 <div class="optionblock">
                     {% for s in sessions %}
                     <div class="option_item" data-fun="load_data" data-id="{{ s.id }}">
@@ -48,31 +46,15 @@
                 <div class="fwb name ps-2" style="font-size:18px"></div>
                 <div style="font-size:12px" class="class ps-2">Class : 2nd</div>
             </div>
-            <div class="col-1 f-12 my-auto">
+            <div class="col-2 f-12 my-auto">
                 <div class="mb-2">Doc. No</div>
                 <div class="fwb docno"></div>
             </div>
-            <div class="col-1 f-12 my-auto">
-                <div class="mb-2">Fee Type</div>
-                <div class="fwb feetype"></div>
-            </div>
-            <div class="col-1 f-12 my-auto">
+            <div class="col-2 f-12 my-auto">
                 <div class="mb-2">Date</div>
                 <div class="fwb collectiondate"></div>
             </div>
-            <div class="col-1 f-12 my-auto">
-                <div class="mb-2">Amount</div>
-                <div class="fwb amount"></div>
-            </div>
-            <div class="col-1 f-12 my-auto">
-                <div class="mb-2">Discount</div>
-                <div class="fwb discount"></div>
-            </div>
-            <div class="col-1 f-12 my-auto">
-                <div class="mb-2">Fine</div>
-                <div class="fwb fine"></div>
-            </div>
-            <div class="col-1 f-12 my-auto">
+            <div class="col-2 f-12 my-auto">
                 <div class="mb-2">Mode</div>
                 <div class="fwb mode"></div>
             </div>
@@ -80,8 +62,8 @@
                 <div class="mb-2">Total Paid</div>
                 <div class="fwb totalpaid"></div>
             </div>
-            <div class="col-1 text-end my-auto">
-                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)"></i>
+            <div class="col-2 text-end my-auto">
+                <i class="fas fa-eye mb-2 me-3 cur" onclick="open_detail()" style="color:var(--my_green)"></i>
                 <br>
                 <i class="fas fa-edit me-3 cur" style="color:var(--my_green)" onclick="edit_student()"></i>
             </div>
@@ -90,7 +72,7 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="feeModal" data-id="" style="width:70%;left: 15%;padding: 20px;" tabindex="-1"
+<div class="modal fade" id="feeModal" data-id="" style="width:80%;left: 10%;padding: 20px;" tabindex="-1"
     aria-labelledby="feeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen" style="width:100%;">
         <div class="modal-content" style="border-radius: 30px;">
@@ -111,27 +93,15 @@
                                             placeholder="Student..." />
                                         <div class="optionblock" id="student_drop">
                                             {% for student in students %}
-                                            <div class="option_item" data-class="{{student.Class}}" data-fun="select_student" data-id="{{ student.StudentCode }}">
+                                            <div class="option_item" data-fun="select_student"
+                                                data-class="{{student.Class}}" data-id="{{ student.StudentCode }}">
                                                 {{student.StudentCode}} - {{ student.FirstName }} {{student.MiddleName}}
                                                 {{student.LastName}}</div>
                                             {% endfor %}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3 mb-4">
-                                    <div class="mb-1 f-10">Fee Type</div>
-                                    <div class="custom_dropdown">
-                                        <input type="text" data-id="" id="feetype"
-                                            class="class search_input shadow br-30 form-control f-12 OP"
-                                            placeholder="Fee Type..." />
-                                        <div class="optionblock" id="type_drop">
-                                            {% for type in feetype %}
-                                            <div class="option_item" data-id="{{type.id}}">{{type.Title}}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-3 mb-4">
+                                <div class="col mb-4">
                                     <div class="mb-1 f-10">Session</div>
                                     <div class="custom_dropdown">
                                         <input type="text" data-id="{{activesessionid}}" id="modalsession"
@@ -147,36 +117,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3 mb-4">
-                                    <div class="mb-1 f-10">Month-Year</div>
-                                    <input type="month" class="form-control f-12 br-30 shadow INP" id="monthyear" />
-                                </div>
-                                <div class="col-3 mb-4">
+                                <div class="col mb-4">
                                     <div class="mb-1 f-10">Collection Date</div>
                                     <input type="date" value="" class="form-control f-12 br-30 shadow INP"
                                         id="collectdate" />
                                 </div>
-                                <div class="col-3 mb-4">
-                                    <div class="mb-1 f-10">Amount</div>
-                                    <input type="number" class="form-control f-12 br-30 shadow INP"
-                                        onkeyup="cal_total()" id="amount" />
-                                </div>
-                                <div class="col-3 mb-4">
-                                    <div class="mb-1 f-10">Discount</div>
-                                    <input type="number" class="form-control f-12 br-30 shadow INP"
-                                        onkeyup="cal_total()" id="discount" />
-                                </div>
-                                <div class="col-3 mb-4">
-                                    <div class="mb-1 f-10">Fine</div>
-                                    <input type="number" class="form-control f-12 br-30 shadow INP"
-                                        onkeyup="cal_total()" id="fine" />
-                                </div>
-                                <div class="col-3 mb-4">
-                                    <div class="mb-1 f-10">Total Amount</div>
-                                    <input type="number" class="form-control f-12 br-30 shadow INP" id="total"
-                                        disabled />
-                                </div>
-                                <div class="col-3 mb-4">
+                                <div class="col mb-4">
                                     <div class="mb-1 f-10">Payment Mode</div>
                                     <div class="custom_dropdown">
                                         <input type="text" data-id="" id="mode"
@@ -189,60 +135,33 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3 mb-4">
+                                <div class="col mb-4">
                                     <div class="mb-1 f-10">Referenece No</div>
                                     <input type="text" class="form-control f-12 br-30 shadow INP" id="refno" />
                                 </div>
                                 <div class="col-12 mb-4">
                                     <div class="mb-1 f-10">Remarks</div>
-                                    <textarea id="remarks" rows="5"
-                                        class="form-control f-12 br-10 shadow INP"></textarea>
+                                    <textarea rows="2" type="text" class="form-control f-12 br-10 shadow INP"
+                                        id="remarks"></textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div hidden class="row">
-                        <div class="col-6 fwb my-auto">Item List</div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6 fwb my-auto">Payment List</div>
                         <div class="col-6 text-end my-auto">
-                            <div class="mybtn blue shadow f-12">Add Item</div>
+                            <div class="mybtn blue shadow f-12" onclick="add_new_payment()">Add Payment</div>
                         </div>
                     </div>
-                    <div hidden>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <div class="mb-1 f-10">Fee Type</div>
-                                <div class="custom_dropdown">
-                                    <input type="text" data-id=""
-                                        class="feetype search_input shadow br-30 form-control f-12"
-                                        placeholder="Fee Type..." />
-                                    <div class="optionblock" id="type_drop">
-                                        {% for type in feetype %}
-                                        <div class="option_item" data-id="{{type.id}}">{{type.Title}}</div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="mb-1 f-10">Month-Year</div>
-                                <input type="month" class="form-control f-12 br-30 shadow monthyear" />
-                            </div>
-                            <div class="col">
-                                <div class="mb-1 f-10">Amount</div>
-                                <input type="number" class="form-control f-12 br-30 shadow amount" />
-                            </div>
-                            <div class="col">
-                                <div class="mb-1 f-10">Discount</div>
-                                <input type="number" class="form-control f-12 br-30 shadow discount" />
-                            </div>
-                            <div class="col">
-                                <div class="mb-1 f-10">Net Amount</div>
-                                <input type="number" class="form-control f-12 br-30 shadow net" />
-                            </div>
-                            <div class="col-1 my-auto text-end">
-                                <div class="mb-1 f-10" style="opacity: 0;">View</div>
-                                <i class="fas fa-trash cl-r"></i>   
-                            </div>
-                        </div>
+                    <hr>
+                    <div id="payment_container">
+
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-9 text-end">Total Amount</div>
+                        <div class="col-2 fwb" id="final_amount">0</div>
                     </div>
                 </div>
             </div>
@@ -255,83 +174,366 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="detailModal" data-id="" tabindex="-1" style="width: 60%;left: 20%;height: auto"
+    aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" style="width:100%;">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="detailModalLabel">Fee Detail</h5>
+                <i class="fas fa-print ms-5 bg-blue modal_top_btn shadow" onclick="htmlPrint()"></i>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row f-12">
+                        <div class="col-6 mb-4">
+                            <div>Student</div>
+                            <div class="fwb" id="detailstudent"></div>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <div>Session</div>
+                            <div class="fwb" id="detailsession"></div>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <div>Collection Date</div>
+                            <div class="fwb" id="detailcollectiondate"></div>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <div>Payment Mode</div>
+                            <div class="fwb" id="detailmode"></div>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <div>Reference No</div>
+                            <div class="fwb" id="detailrefno"></div>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <div>Remarks</div>
+                            <div class="fwb" id="detailremarks"></div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div>
+                        <div class="row f-12">
+                            <div class="col-12">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Month</th>
+                                            <th>Amount</th>
+                                            <th>Discount</th>
+                                            <th>Fine</th>
+                                            <th>Net Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="payment_detail_container">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deletebtn" onclick="start_delete()">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="start_edit()">Edit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe src="" frameborder="0" id="myframe" hidden name="myframe"></iframe>
+
+<table hidden>
+    <tr id="pay_detail_temp">
+        <td class="type">Admin Fee</td>
+        <td class="month">April-2023</td>
+        <td class="amount">2000</td>
+        <td class="discount">500</td>
+        <td class="fine">1000</td>
+        <th class="total">2500</th>
+    </tr>
+</table>
+
+<div class="row mb-3" id="payment_temp" hidden>
+    <div class="col-2">
+        <div class="mb-1 f-10">Fee Type</div>
+        <div class="custom_dropdown">
+            <input type="text" data-id="" class="feetype search_input shadow br-30 form-control f-12"
+                placeholder="Fee Type..." />
+            <div class="optionblock fee_drop">
+                {% for type in feetype %}
+                <div class="option_item" data-fun="change_fee_type" data-id="{{type.id}}">{{type.Title}}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-2">
+        <div class="mb-1 f-10">Month-Year</div>
+        <input type="month" class="form-control f-12 br-30 shadow monthyear" />
+    </div>
+    <div class="col">
+        <div class="mb-1 f-10">Amount</div>
+        <input type="number" class="form-control f-12 br-30 shadow amount" onkeyup="calculate_total()" />
+    </div>
+    <div class="col">
+        <div class="mb-1 f-10">Discount</div>
+        <input type="number" class="form-control f-12 br-30 shadow discount" onkeyup="calculate_total()" />
+    </div>
+    <div class="col">
+        <div class="mb-1 f-10">Fine</div>
+        <input type="number" class="form-control f-12 br-30 shadow fine" onkeyup="calculate_total()" />
+    </div>
+    <div class="col-2">
+        <div class="mb-1 f-10">Net Amount</div>
+        <div class="fwb total">0</div>
+    </div>
+    <div class="col-1 my-auto text-end">
+        <div class="mb-1 f-10" style="opacity: 0;">View</div>
+        <i class="fas fa-trash bg-red icon_btn text-center shadow" onclick="event.target.parentElement.parentElement.remove();"></i>
+    </div>
+</div>
+
+<div id="offercontainer" hidden></div>
+<input type="file" id="doctemp" hidden />
+
 <script>
-    function start_delete(){
+    function set_enter(){
+        $("#feeModal").find("input").on('keypress',function(e) {
+            if(e.which == 13) {
+                submit_data();
+            }
+        });
+    }
+
+    function start_edit() {
+        var id = $("#detailModalLabel").attr("data-id");
+        $("#feeModalLabel").attr("data-id", id);
+        $("#detailModal").modal("hide");
+        edit_student(id);
+    }
+
+    function htmlPrint(){
+        var id = $("#detailModalLabel").attr("data-id");
+        document.getElementById("myframe").src = "receipt_template/"+id;
+    }
+
+    function open_detail(id = "") {
+        if(id == ""){
+            var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+            id = parent.getAttribute("data-id");
+        }
+        $("#detailModalLabel").attr("data-id", id);
+
+        var data = new FormData();
+        data.append("feeid", id);
+        var alldetail = load_ajax_data("get_fee_detail_show", data);
+        var detail = alldetail.detail;
+        detail = detail[0];
+
+        $("#detailstudent").attr("data-id", detail["studentcode"]);
+        $("#detailstudent").html(detail["fullname"]);
+        $("#detailsession").html(detail["sessiontitle"]);
+        $("#detailcollectiondate").html(format_date(detail["documentdate"]));
+        $("#detailmode").html(detail["modetitle"]);
+        $("#detailrefno").html(detail["referenceno"]);
+        $("#detailremarks").html(detail["remarks"]);
+
+        var items = alldetail.items;
+
+        var container = document.getElementById("payment_detail_container");
+        var temp = document.getElementById("pay_detail_temp");
+        container.innerHTML = "";
+        for (var i = 0; i < items.length; i++) {
+            var clone = clean_temp(temp);
+            container.appendChild(clone);
+            $(clone).addClass("detailrow");
+            $(clone).find(".type").html(items[i]["typetitle"]);
+            $(clone).find(".month").html(items[i]["monthyear"]);
+            $(clone).find(".amount").html(items[i]["amount"]);
+            $(clone).find(".discount").html(items[i]["discount"]);
+            $(clone).find(".fine").html(items[i]["fine"]);
+            $(clone).find(".total").html(items[i]["totalamount"]);
+        }
+
+        $("#detailModal").modal("show");
+    }
+
+    function calculate_total() {
+        var parent = event.target.parentElement.parentElement;
+        var amount = parseFloat(parent.getElementsByClassName("amount")[0].value);
+        if (isNaN(amount)) {
+            amount = 0;
+        }
+        var discount = parseFloat(parent.getElementsByClassName("discount")[0].value);
+        if (isNaN(discount)) {
+            discount = 0;
+        }
+        var fine = parseFloat(parent.getElementsByClassName("fine")[0].value);
+        if (isNaN(fine)) {
+            fine = 0;
+        }
+
+        var total = amount + fine - discount;
+
+        parent.getElementsByClassName("total")[0].setAttribute("data-value", total);
+        parent.getElementsByClassName("total")[0].innerHTML = INR + " " + add_commas(total.toFixed(2));
+
+        footer_amount();
+    }
+
+    function footer_amount() {
+        var rows = document.getElementsByClassName("payrow");
+        var total = 0;
+        for (var i = 0; i < rows.length; i++) {
+            var t = parseFloat(rows[i].getElementsByClassName("total")[0].getAttribute("data-value"));
+            if (isNaN(t)) {
+                t = 0;
+            }
+
+            total += t;
+        }
+
+        $("#final_amount").html(INR + " " + add_commas(total.toFixed(2)));
+        $("#final_amount").attr("data-value", total);
+    }
+
+    function add_new_payment() {
+        var parent = document.getElementById("payment_container");
+        var temp = document.getElementById("payment_temp");
+
+        var clone = clean_temp(temp);
+        parent.appendChild(clone);
+
+        clone.classList.add("payrow");
+
+        $(".search_input").on("focus", function () {
+            $(".custom_dropdown").removeClass("active");
+            var parent = event.target.parentElement;
+            $(parent).addClass("active");
+        });
+
+        $(".option_item").on("click", function () {
+            click_drop();
+        })
+
+        set_enter();
+    }
+
+    function start_delete() {
         $("#feeModal").modal("hide");
         ask_confirm("Are you sure you want to delete this fee collection?", "delete_fee", "hide_confirm");
     }
 
-    function delete_fee(){
+    function delete_fee() {
         var id = $("#feeModalLabel").attr("data-id");
         delete_item(id, "Fee");
         hide_confirm();
         load_data();
     }
 
-    function select_student(){
+    function select_student() {
         var cls = event.target.getAttribute("data-class");
-        var data = new FormData();
-        data.append("classid", cls);
-        var fee = load_ajax_data("get_class_fee", data);
-        $("#amount").val(fee);
-        $("#discount").val("0");
-        $("#fine").val("0");
-        $("#total").val(fee);
+        $("#student").attr("data-class", cls);
+
+        var rows = document.getElementsByClassName("payrow");
+        for (var i = 0; i < rows.length; i++) {
+            var feeid = rows[i].getElementsByClassName("feetype")[0].getAttribute("data-id");
+            var items = rows[i].getElementsByClassName("fee_drop")[0].getElementsByClassName("option_item");
+            for (var t = 0; t < items.length; t++) {
+                if (items[t].getAttribute("data-id") == feeid) {
+                    items[t].click();
+                }
+            }
+        }
     }
 
-    function cal_total() {
-        var amount = parseFloat(document.getElementById("amount").value);
-        if (isNaN(amount)) {
-            amount = 0;
-        }
-
-        var discount = parseFloat(document.getElementById("discount").value);
-        if (isNaN(discount)) {
-            discount = 0;
-        }
-
-        var fine = parseFloat(document.getElementById("fine").value);
-        if (isNaN(fine)) {
-            fine = 0;
-        }
-
-        document.getElementById("total").value = (amount + fine - discount).toFixed(2);
-    }
-
-    function edit_student() {
+    function change_fee_type() {
         var parent = event.target.parentElement.parentElement.parentElement.parentElement;
-        var id = parent.getAttribute("data-id");
+        if (event.target.getAttribute("data-id") == "3") {
+            var cls = $("#student").attr("data-class");
+            var data = new FormData();
+            data.append("classid", cls);
+            var fee = load_ajax_data("get_class_fee", data);
+            $(parent).find(".amount").val(fee);
+            $(parent).find(".discount").val("0");
+            $(parent).find(".fine").val("0");
+            $(parent).find(".amount").attr("disabled", true);
+            $(parent).find(".total").attr("data-value", fee);
+            $(parent).find(".total").html(INR + " " + add_commas(fee));
+        } else {
+            $(parent).find(".amount").attr("disabled", false);
+        }
+
+        footer_amount();
+    }
+
+    function edit_student(id = "") {
+        if (id == "") {
+            var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+            id = parent.getAttribute("data-id");
+        }
         $("#feeModalLabel").html("Edit Fee");
         $("#feeModalLabel").attr("data-id", id);
 
         var data = new FormData();
         data.append("feeid", id);
-        var detail = load_ajax_data("get_fee_detail", data);
-        detail = detail.data;
+        var alldetail = load_ajax_data("get_fee_detail", data);
+        detail = alldetail.data;
 
         $("#modalsession").attr("data-id", detail["sessionid"]);
         $("#student").attr("data-id", detail["studentcode"]);
-        $("#feetype").attr("data-id", detail["type"]);
-        $("#monthyear").val(detail["monthyear"]);
         $("#collectdate").val(detail["documentdate"]);
-        $("#amount").val(detail["amount"]);
-        $("#discount").val(detail["discount"]);
-        $("#fine").val(detail["fine"]);
-        $("#total").val(detail["totalamount"]);
+        $("#final_amount").attr("data-value", detail["totalamount"]);
+        $("#final_amount").html(INR + " " + add_commas(detail["totalamount"]));
         $("#refno").val(detail["referenceno"]);
         $("#remarks").val(detail["remarks"]);
         $("#mode").attr("data-id", detail["mode"]);
+
+
+        //items
+        var parent = document.getElementById("payment_container");
+        var temp = document.getElementById("payment_temp");
+
+        parent.innerHTML = "";
+        var items = alldetail.items;
+        for (var i = 0; i < items.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.getElementsByClassName("feetype")[0].setAttribute("data-id", items[i]["type"]);
+            clone.getElementsByClassName("monthyear")[0].value = items[i]["monthyear"];
+            clone.getElementsByClassName("amount")[0].value = items[i]["amount"];
+            clone.getElementsByClassName("discount")[0].value = items[i]["discount"];
+            clone.getElementsByClassName("fine")[0].value = items[i]["fine"];
+            clone.getElementsByClassName("total")[0].innerHTML = INR + " " + add_commas(items[i]["totalamount"]);
+            clone.getElementsByClassName("total")[0].setAttribute("data-value", items[i]["totalamount"]);
+            clone.classList.add("payrow");
+
+            $(".search_input").on("focus", function () {
+                $(".custom_dropdown").removeClass("active");
+                var parent = event.target.parentElement;
+                $(parent).addClass("active");
+            });
+
+            $(".option_item").on("click", function () {
+                click_drop();
+            })
+        }
 
         $("#deletebtn").attr("hidden", false);
 
         set_drop_default();
         $("#feeModal").modal("show");
+
+        set_enter();
     }
 
     function submit_data() {
         var feeid = $("#feeModalLabel").attr("data-id");
-        var ops = document.getElementsByClassName("OP");
-        var inps = document.getElementsByClassName("INP");
         var sessionid = $("#modalsession").attr("data-id");
 
         var data = new FormData();
@@ -340,24 +542,65 @@
             data.append("feeid", feeid);
         }
 
-        for (var i = 0; i < ops.length; i++) {
-            data.append(ops[i].id, ops[i].getAttribute("data-id"));
-        }
-        for (var i = 0; i < inps.length; i++) {
-            if (inps[i].value != "") {
-                data.append(inps[i].id, inps[i].value);
+        var studentcode = $("#student").attr("data-id");
+        var collectdate = $("#collectdate").val();
+        var mode = $("#mode").attr("data-id");
+        var refno = $("#refno").val().trim();
+        var remarks = $("#remarks").val().trim();
+
+        data.append("student", studentcode);
+        data.append("collectdate", collectdate);
+        data.append("mode", mode);
+        data.append("refno", refno);
+        data.append("remarks", remarks);
+        data.append("total", $("#final_amount").attr("data-value"));
+        //items
+        var rows = document.getElementsByClassName("payrow");
+        var datastring = "";
+
+        for (var i = 0; i < rows.length; i++) {
+            datastring += rows[i].getElementsByClassName("feetype")[0].getAttribute("data-id") + "^";
+            datastring += rows[i].getElementsByClassName("monthyear")[0].value + "^";
+
+            var amt = parseFloat($(rows[i]).find(".amount").eq(0).val());
+            if(isNaN(amt)){
+                amt = 0;
             }
+
+            var dis = parseFloat($(rows[i]).find(".discount").eq(0).val());
+            if(isNaN(dis)){
+                dis = 0;
+            }
+
+            var fin = parseFloat($(rows[i]).find(".fine").eq(0).val());
+            if(isNaN(fin)){
+                fin = 0;
+            }
+
+            var tl = parseFloat($(rows[i]).find(".total").eq(0).attr("data-value"));
+            if(isNaN(tl)){
+                tl = 0;
+            }
+
+            datastring += amt + "^";
+            datastring += dis + "^";
+            datastring += fin + "^";
+            datastring += tl + "^";
+            datastring += "#";
         }
+
+        data.append("datastring", datastring);
 
         var code = send_ajax_data("save_fee", data);
-
+        
         if (feeid == "") {
             var message = "Fee Collected";
-            success_modal(message);
-        }else{
+            show_toast(message, "success");
+        } else {
             var message = "Fee Details Updated";
-            success_modal(message);
+            show_toast(message, "success");
         }
+        open_detail(code.feeid);
         load_data();
         $("#feeModal").modal("hide");
     }
@@ -369,8 +612,9 @@
         $("#feeModalLabel").html("Collect Fee");
         $("#feeModal").modal("show");
         $("#modalsession").val("{{activesession}}")
-        $("#modalsession").attr("data-id", "{{activesession}}")
+        $("#modalsession").attr("data-id", "{{activesessionid}}")
         $("#collectdate").val($("#currentdate").val());
+        $("#payment_container").html("");
 
         $("#deletebtn").attr("hidden", true);
     }
@@ -401,6 +645,7 @@
             $(clone).attr("data-id", row["id"]);
             $(clone).find(".class").html("Class : " + row["classtitle"]);
             $(clone).find(".name").html(row["studentname"]);
+            $(clone).find(".name").attr("data-id", row["studentcode"]);
             $(clone).find(".docno").html(row["documentcode"]);
             $(clone).find(".feetype").html(row["typetitle"]);
             $(clone).find(".collectiondate").html(format_date(row["documentdate"]));

@@ -1,0 +1,137 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row">
+                    <div class="col-5 my-auto">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="{{activesessionid}}" value="{{activesession}}"
+                                id="sessionfilter" class="class search_input shadow br-30 form-control f-12 OP"
+                                placeholder="Session..." />
+                            <div class="optionblock">
+                                {% for s in sessions %}
+                                <div class="option_item" data-id="{{ s.id }}" data-fun="load_exam">{{s.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-5 my-auto">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="examfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Exam..." />
+                            <div class="optionblock" id="exam_drop">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 my-auto ps-0 text-center">
+                        <div class="bg-green br-30 shadow" style="padding: 3px;" onclick="load_data()">
+                            <i class="fas fa-search cl-w f-14 p-n"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="student_container" style="perspective: 1000px;">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Subject</th>
+                        <th>Max</th>
+                        <th>Marks</th>
+                    </tr>
+                </thead>
+                <tbody id="main_body">
+
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th></th>
+                        <th>Total</th>
+                        <th id="ttotal"></th>
+                        <th id="tmarks"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function load_data() {
+        var examid = $("#examfilter").attr("data-id");
+        var data = new FormData();
+        data.append("examid", examid);
+        var list = load_ajax_data("get_parent_report_card", data);
+
+        var parent = document.getElementById("main_body");
+        parent.innerHTML = "";
+
+        var ttotal = 0;
+        var tmarks = 0;
+
+        for (var i = 0; i < list.length; i++) {
+            var tr = document.createElement("tr");
+            tr.innerHTML += "<td>"+ (i+1) +"</td>";
+            tr.innerHTML += "<td>"+ list[i]["subjecttitle"] +"</td>";
+            tr.innerHTML += "<td>"+ list[i]["totalmarks"] +"</td>";
+            tr.innerHTML += "<td>"+ list[i]["marks"] +"</td>";
+
+            var t = parseInt(list[i]["totalmarks"]);
+            if(isNaN(t)){
+                t=0;
+            }
+
+            var m = parseInt(list[i]["marks"]);
+            if(isNaN(m)){
+                m=0;
+            }
+
+            ttotal += t;
+            tmarks += m;
+
+            parent.appendChild(tr);
+        }
+
+        var per = ((tmarks/ttotal)*100).toFixed(2)+"%";
+
+        $("#ttotal").html(ttotal);
+        $("#tmarks").html(tmarks+ " ("+per+")");
+    }
+
+    function load_exam() {
+        var session = $("#sessionfilter").attr("data-id");
+        var data = new FormData();
+        data.append("sessionid", session);
+        var list = load_ajax_data("get_exam_by_session", data);
+
+        var parent = document.getElementById("exam_drop");
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var div = document.createElement("div");
+            div.classList.add("option_item");
+            div.setAttribute("data-id", list[i]["id"]);
+            div.innerHTML = list[i]["title"];
+
+            parent.appendChild(div);
+
+            div.onclick = function () {
+                click_drop();
+            }
+        }
+    }
+
+    $(window).on("load", function () {
+        load_exam();
+    })
+</script>
+
+{% endblock %}

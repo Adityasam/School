@@ -1,0 +1,126 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row f-12" data-id="F" id="type">
+                    <div class="my-auto col">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" value="All Batches"
+                                class="search_input form-control f-12 br-30 shadow OP" placeholder="Class..."
+                                id="batchfilter" />
+                            <div class="optionblock">
+                                <div class="option_item" data-fun="load_data" data-id="">All Batches</div>
+                                {% for c in batch %}
+                                <div class="option_item" data-fun="load_data" data-id="{{c.id}}">{{c.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col my-auto ps-0">
+                        <input type="date" id="datefilter" value="{% now 'Y-m-d' %}" class="form-control br-30 shadow f-12" />
+                    </div>
+                    <div class="col-2 text-center my-auto ps-0">
+                        <div class="bg-green br-30 shadow" style="padding: 5px;" onclick="load_data()">
+                            <i class="fas fa-search cl-w f-14 p-n"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="main_body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="main_temp" style="vertical-align: middle;">
+        <td>
+            <img src="{% static 'img/defaultuser.jpg' %}" alt="Picture" class="faculty_pic_mobile shadow">
+        </td>
+        <td class="name"></td>
+        <td>
+            <div class="custom_toggle" data-fun="mark_attendance" style="width: 84px;" onclick="click_toggle()">
+                <span></span>
+                <div class="pos">Present</div>
+                <div class="neg">Absent</div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<script>
+    function mark_attendance() {
+        var date = $("#datefilter").val();
+        var batch = $("#batchfilter").attr("data-id");
+
+        var id = event.target.parentElement.parentElement.getAttribute("data-id");
+        var status = "A";
+        if (event.target.classList.contains("active")) {
+            status = "P";
+        }
+
+        var data = new FormData();
+        data.append("classid", batch);
+        data.append("date", date);
+        data.append("type", "M");
+        data.append("studentcode", id);
+        data.append("status", status);
+        send_ajax_data("mark_individual_attendance", data);
+    }
+
+    function load_data() {
+        var batch = $("#batchfilter").attr("data-id");
+        var data = new FormData();
+
+        var parent = document.getElementById("main_body");
+        var temp = document.getElementById("main_temp");
+
+        parent.innerHTML = "";
+        data.append("batch", batch);
+        data.append("date", $("#datefilter").val());
+        var list = load_ajax_data("/get_member_list_attendance", data);
+
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            $(clone).attr("data-id", list[i]["membercode"]);
+            $(clone).find(".name").html(list[i]["fullname"]);
+
+            if (list[i]["picture"] != "null" && list[i]["picture"] != "") {
+                clone.getElementsByClassName("faculty_pic_mobile")[0].src = "/static/uploads/" + list[i]["picture"];
+            }
+
+            if (list[i]["status"] == "P") {
+                clone.getElementsByClassName("custom_toggle")[0].classList.add("active");
+            }
+        }
+
+
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

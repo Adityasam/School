@@ -1,0 +1,177 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .userpic {
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        object-fit: cover;
+        border: 1px solid var(--my_blue);
+        border-radius: 100px;
+        position: absolute;
+    }
+
+    .bottom_input{
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        width: calc(100% - 20px);
+        padding: 10px;
+        z-index: 10;
+    }
+
+    .send_btn{
+        padding: 10px;
+        border-radius: 100px;
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+        background-color: var(--my_green);
+        color: white;
+    }
+
+    .mymessage{
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--my_green);
+        display: inline-block;
+    }
+
+    .yourmessage{
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--my_blue);
+        display: inline-block;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;min-height: 100vh;">
+        <div class="col-12">
+            <!--Chat Block-->
+            <div id="chat_container" class="pr pb-4">
+                
+                
+            </div>
+            <!--Chat Block-->
+            <!--Bottom Input-->
+            <div class="bottom_input">
+                <div class="row">
+                    <div class="col-10 pe-0">
+                        <input type="text" id="chat_input" class="form-control br-30 shadow" placeholder="Your Message...">
+                    </div>
+                    <div class="col-2 text-center my-auto">
+                        <i class="fas fa-paper-plane send_btn text-center" onclick="send_message()"></i>
+                    </div>
+                </div>
+            </div>
+            <!--Bottom Input End-->
+        </div>
+    </div>
+</div>
+
+<div id="my_temp" hidden class="text-end mb-3" style="padding-left: 20%;">
+    <div class="mymessage">
+        <div class="text">Hi Mr shivam, how are you doing</div>
+        <div class="f-12 cl-b mt-1 time">10:23AM</div>
+    </div>
+</div>
+
+<div id="your_temp" hidden style="padding-right: 20%;" class="mb-3">
+    <div class="yourmessage">
+        <div class="text">Hi Mr shivam, how are you doing</div>
+        <div class="f-12 cl-b mt-1 time">10:23AM</div>
+    </div>
+</div>
+
+<div class="text-center" id="datetemp" hidden>
+    <div class="di shadow px-3 py-1 mb-3 cl-w bg-gray br-20 f-12">Today</div>
+</div>
+
+<script>
+    function send_message(){
+        var message = $("#chat_input").val().trim();
+        var data = new FormData();
+        data.append("message", message);
+        data.append("receiver", "{{receiver}}");
+        data.append("sender", "{{request.session.USERID}}");
+        send_ajax_data("/send_message", data);
+
+        send_push("{{receiver}}", "New Message", message, "{% url 'main:discussion_page' request.session.USERID %}");
+        $("#chat_input").val("");
+        load_data();
+    }
+
+    function load_data() {
+        var data = new FormData();
+        data.append("sender", "{{request.session.USERID}}");
+        data.append("receiver", "{{receiver}}");
+        var list = load_ajax_data("/load_chats", data);
+
+        var parent = document.getElementById("chat_container");
+        var mytemp = document.getElementById("my_temp");
+        var yourtemp = document.getElementById("your_temp");
+        var datetemp = document.getElementById("datetemp");
+
+        parent.innerHTML = "";
+        var currentdate = "";
+        for (var i = 0; i < list.length; i++) {
+            var cdate = list[i]["sendtime"].split(" ")[0];
+            if(cdate != currentdate){
+                var cl = clean_temp(datetemp);
+                parent.appendChild(cl);
+
+                var mydate = new Date();
+                mydate = ("0"+mydate.getDate()).slice(-2) +"/"+ ("0"+(mydate.getMonth()+1)).slice(-2)+"/"+mydate.getFullYear();
+                
+                if(cdate == mydate){
+                    cl.getElementsByTagName("div")[0].innerHTML = "Today";
+                }else{
+                    cl.getElementsByTagName("div")[0].innerHTML = cdate;
+                }
+                currentdate = cdate;
+            }
+
+            var direction = list[i]["direction"];
+            var clone = null;
+            if(direction =="S"){
+                var clone = clean_temp(mytemp);
+            }else{
+                var clone = clean_temp(yourtemp)
+            }
+
+            parent.appendChild(clone);
+
+            clone.getElementsByClassName("text")[0].innerHTML = list[i]["message"];
+            clone.getElementsByClassName("time")[0].innerHTML = parse_time(list[i]["sendtime"]);
+        }
+    }
+
+    function parse_time(date){
+        date = date.split(" ");
+        var time = date[1].split(":");
+        var hour = parseInt(time[0]);
+        var minute = parseInt(time[1]);
+        var second = parseInt(time[2]);
+
+        var ampm = "AM";
+        if(hour >= 12){
+            hour = hour-12;
+            ampm = "PM";
+        }
+
+        return ("0"+hour).slice(-2)+":"+("0"+minute).slice(-2)+" "+ampm;
+    }
+
+
+    $(window).on("load", function () {
+        load_data();
+        window.scrollTo(0,document.body.scrollHeight);
+        setInterval(load_data, 5000);
+    })
+</script>
+
+{% endblock %}

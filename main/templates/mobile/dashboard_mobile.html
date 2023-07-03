@@ -1,0 +1,205 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% load tz %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+
+    .statcard {
+        opacity: 0;
+    }
+
+    @keyframes statanim {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0px);
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+    integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-stacked100@1.0.0"></script>
+
+<div class="container-fluid g-0">
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12 fwb f-20 mb-2">Today</div>
+        <div class="col-12">
+            <div class="row mb-3">
+                <div class="col-4">
+                    <a href="{% url 'main:mobileattendance_faculty' 'F' %}">
+                        <div class="bg-green cl-w shadow pd-10 br-10">
+                            <div class="fwb" style="font-size: 16px;" id="facultycount">0/0</div>
+                            <div class="f-12">Faculty</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="{% url 'main:parent_attendance' %}">
+                        <div class="bg-orange cl-w shadow pd-10 br-10">
+                            <div class="fwb" style="font-size: 16px;" id="studentcount">0/0</div>
+                            <div class="f-12">Students</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="{% url 'main:mobileattendance_faculty' 'S' %}">
+                        <div class="bg-blue cl-w shadow pd-10 br-10">
+                            <div class="fwb" style="font-size: 16px;" id="staffcount">0/0</div>
+                            <div class="f-12">Staff</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="col-12 fwb f-20 mb-2">
+            <span>Financials : This Month</span>
+        </div>
+        <div class="col-12">
+            <div class="row mb-3">
+                <div class="col-4">
+                    <div class="bg-green cl-w shadow pd-10 br-10">
+                        <div class="fwb" style="font-size: 16px;" id="collections">0</div>
+                        <div class="f-12">Collection</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="bg-red cl-w shadow pd-10 br-10">
+                        <div class="fwb" style="font-size: 16px;" id="expenses">0</div>
+                        <div class="f-12">Expenses</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="bg-gray cl-w shadow pd-10 br-10">
+                        <div class="fwb" style="font-size: 16px;" id="overdue">0</div>
+                        <div class="f-12">Overdue</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="col-12 fwb f-20 mb-2">
+            <span>Syllabus</span>
+        </div>
+        <div class="col-12">
+            <canvas id="bar_chart"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function load_data() {
+        var data = new FormData();
+        data.append("session", "{{activesessionid}}");
+        data.append("date", "{% now 'Y-m-d' %}");
+        data.append("day", (new Date()).getDay() + 1);
+        var alldetail = load_ajax_data("get_main_dashboard", data);
+        var detail = alldetail.data;
+        var syllabus = alldetail.syllabus;
+        var overdue = alldetail.overdue;
+
+        var totalchapter = 0;
+        var compchapter = 0;
+        var bardata = new Array();
+        var pending = new Array();
+        var classname = new Array();
+
+        for (var i = 0; i < syllabus.length; i++) {
+            var total = parseInt(syllabus[i]["totalchapter"]);
+            if(isNaN(total)){
+                total = 0;
+            }
+
+            var comp = parseInt(syllabus[i]["donechapter"]);
+            if(isNaN(comp)){
+                comp = 0;
+            }
+
+            totalchapter += total;
+            compchapter += comp;
+
+            var per = ((comp/total)*100).toFixed();
+            if(isNaN(per)){
+                per = 0;
+            }
+            pending.push(100-per);
+            bardata.push(per);
+            classname.push(syllabus[i]["title"]);
+        }
+
+        $("#collections").html(INR+" "+add_commas(detail[0]["allcollection"]));
+        $("#expenses").html(INR+" "+add_commas(detail[0]["allexpense"]));
+        $("#overdue").html(INR+" "+add_commas(overdue[0]["overdue"]));
+
+        draw_bar_chart(bardata, classname, pending);
+
+        var totaper = ((compchapter/totalchapter)*100).toFixed();
+        $("#totalsyllabus").html(totaper+"%");
+    }
+
+    function load_people_count() {
+        var date = $("#currentdate").val();
+        var data = new FormData();
+        data.append("date", date);
+        var list = load_ajax_data("get_people_count", data);
+
+        $("#facultycount").html(list.faculty.presentfaculty + "/" + list.faculty.totalfaculty);
+        $("#studentcount").html(list.student.presentstudent + "/" + list.student.totalstudent);
+        $("#staffcount").html(list.staff.presentstaff + "/" + list.staff.totalstaff);
+    }
+
+    $(window).on("load", function () {
+        load_data();
+        load_people_count();
+        //ask_location_permission();
+    })
+</script>
+
+<script>
+    function draw_bar_chart(ar, cls, pending) {
+        Chart.register(ChartjsPluginStacked100.default);
+        const ctx2 = document.getElementById('bar_chart').getContext('2d');
+        const myChart2 = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: cls,
+                datasets: [{
+                    label: 'Syllabus',
+                    data: ar,
+                    backgroundColor: [
+                        "#6AC977"
+                    ],
+                },{
+                    label: 'Syllabus',
+                    data: pending,
+                    backgroundColor: [
+                        "#00000031"
+                    ],
+                }],
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    stacked100: { enable: true},
+                }
+            }
+        });
+    }
+</script>
+
+{% endblock %}

@@ -3,17 +3,27 @@ $(".opbtn").on("click", function () {
   var parent = event.target.parentElement;
   if (parent.classList.contains("multi")) {
     $(event.target).toggleClass("active");
-    var options = parent.getElementsByClassName("opbtn");
+    var options = parent.getElementsByClassName("opbtn active");
     for (var i = 0; i < options.length; i++) {
       value += options[i].getAttribute("data-id") + "^";
     }
   } else {
-    $(parent).find(".opbtn").removeClass("active");
-    $(event.target).addClass("active");
-    value = event.target.getAttribute("data-id");
+    if (event.target.classList.contains("active")) {
+      event.target.classList.remove("active");
+      value = "";
+    } else {
+      $(parent).find(".opbtn").removeClass("active");
+      $(event.target).addClass("active");
+      value = event.target.getAttribute("data-id");
+    }
   }
 
   parent.setAttribute("data-id", value);
+
+  var fun = event.target.getAttribute("data-fun");
+  if (fun != "undefined" && fun != null) {
+    window[fun]();
+  }
 });
 
 $(".search_input").on("focus", function () {
@@ -24,10 +34,10 @@ $(".search_input").on("focus", function () {
 
 $(".search_input").on("focusout", function () {
   if (event.target.getAttribute("data-id") == "") {
-    event.target.value = "";
+    //event.target.value = "";
   }
   if (event.target.value == "") {
-    event.target.setAttribute("data-id", "");
+    //event.target.setAttribute("data-id", "");
   }
 });
 
@@ -124,13 +134,15 @@ $(".option_item").on("click", function () {
 function set_drop_default() {
   var drops = document.getElementsByClassName("custom_dropdown");
   for (var i = 0; i < drops.length; i++) {
-	$(drops[i]).find(".option_item").removeClass("active");
+    $(drops[i]).find(".option_item").removeClass("active");
     var defvalue = drops[i]
       .getElementsByClassName("search_input")[0]
       .getAttribute("data-id");
 
     var spl = defvalue.split("^");
-    spl = spl.slice(0, -1);
+    if (defvalue.includes("^")) {
+      spl = spl.slice(0, -1);
+    }
     var options = drops[i].getElementsByClassName("option_item");
     for (var j = 0; j < options.length; j++) {
       if (
@@ -148,9 +160,24 @@ function set_drop_default() {
   for (var i = 0; i < ops.length; i++) {
     var defvalue = ops[i].parentElement.getAttribute("data-id");
     var options = ops[i].parentElement.getElementsByClassName("opbtn");
+    
     for (var j = 0; j < options.length; j++) {
       if (options[j].getAttribute("data-id") == defvalue) {
-        options[j].click();
+        options[j].classList.add("active");
+      }
+    }
+  }
+
+  var sel = document.getElementsByClassName("sel");
+  for (var i = 0; i < sel.length; i++) {
+    var v = sel[i].getAttribute("data-id");
+    $(sel[i]).find(".opbtn").removeClass("active");
+    v = v.split("^");
+    for (var o = 0; o < v.length; o++) {
+      var def = sel[i].querySelectorAll("[data-id='" + v[o] + "']");
+
+      if (def.length > 0) {
+        def[0].click();
       }
     }
   }
@@ -159,16 +186,29 @@ function set_drop_default() {
 $(".custom_dropdown").append('<i class="fas fa-caret-down drop_caret"></i>');
 $(".search_input").attr("autocomplete", "off");
 
-function click_toggle(){
+function click_toggle() {
   $(event.target).toggleClass("active");
-  if(event.target.classList.contains("active")){
+  if (event.target.classList.contains("active")) {
     event.target.setAttribute("data-id", "1");
-  }else{
+  } else {
     event.target.setAttribute("data-id", "0");
   }
 
   var fun = event.target.getAttribute("data-fun");
-  if(fun !="undefined" && fun != null){
+  if (fun != "undefined" && fun != null) {
     window[fun]();
   }
 }
+
+$(".mobile_status_btn").on("click", function () {
+  var parent = event.target.parentElement.parentElement;
+  parent.setAttribute("data-id", event.target.getAttribute("data-id"));
+
+  $(parent).find(".mobile_status_btn").removeClass("active");
+  event.target.classList.add("active");
+
+  var fun = event.target.getAttribute("data-fun");
+  if (fun != "undefined" && fun != null) {
+    window[fun]();
+  }
+});

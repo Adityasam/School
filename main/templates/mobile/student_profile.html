@@ -1,0 +1,145 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .profilepic {
+        border-radius: 1000px;
+        width: 80px;
+        height: 80px;
+        border: 2px solid var(--my_blue);
+        padding: 2px;
+        object-fit: cover;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow pr">
+                <div class="row">
+                    <div class="col-4 my-auto text-center">
+                        <img src="{% static 'img/defaultuser.jpg' %}" id="photo" class="profilepic shadow" />
+                    </div>
+                    <div class="col-8 my-auto">
+                        <div class="fwb f-20" id="studentname">Aditya Nath Tiwari</div>
+                        <div class="f-12" id="studentcode">FAC-00001</div>
+                        <div class="f-12 class_tag" id="studentclass">2 - A</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px">
+        <div class="col-12 text-center fwb">Personal Details</div>
+        <hr>
+        <div class="col-12">
+            <table class="table f-14" style="vertical-align: middle;">
+                <tr>
+                    <th>
+                        <i class="fas fa-male me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Father</span>
+                    </th>
+                    <td id="father"></td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-female me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Mother</span>
+                    </th>
+                    <td id="mother"></td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-clipboard-user me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Roll No</span>
+                    </th>
+                    <td id="rollno">1</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-phone me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Mobile</span>
+                    </th>
+                    <td id="mobileno">+919892839884</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fab fa-whatsapp me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Whatsapp</span>
+                    </th>
+                    <td id="whatsapp">+919837398748</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-envelope me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Email</span>
+                    </th>
+                    <td id="emailid">aditya.ugp@gmail.com</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-calendar me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>DOB</span>
+                    </th>
+                    <td id="dateofbirth">23/01/1994</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-venus-mars me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Gender</span>
+                    </th>
+                    <td id="gender">Male</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-id-card me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Aadhar No</span>
+                    </th>
+                    <td id="aadhar">7586 4545 3434</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function load_data() {
+        var studentcode = "{{student_id}}";
+        if(studentcode == ""){
+            studentcode = $("#USERID").val();
+        }
+
+        var data = new FormData();
+        data.append("studentcode", studentcode);
+        var alldata = load_ajax_data("/get_student_profile", data);
+        var student = alldata.data[0];
+
+        if (student["photo"] != "") {
+            document.getElementById("photo").src = "/static/uploads/" + student["photo"];
+        }
+        $("#studentname").html(student["fullname"]);
+        $("#studentcode").html(studentcode);
+        $("#mobileno").html(student["mobile"]);
+        $("#emailid").html(student["email"]);
+        $("#whatsapp").html(student["whatsapp"]);
+        $("#dateofbirth").html(format_date(student["dateofbirth"]));
+        if (student["gender"] == "M") {
+            $("#gender").html("Male");
+        } else if (student["gender"] == "F") {
+            $("#gender").html("Female");
+        }
+        $("#rollno").html(student["rollno"]);
+        $("#aadhar").html(student["aadharno"]);
+        $("#studentclass").html(student["classtitle"]+" - "+student["sectiontitle"]);
+        $("#father").html(student["fathername"]);
+        $("#mother").html(student["mothername"]);
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

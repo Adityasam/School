@@ -1,0 +1,134 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row">
+                    <div class="{% if hassection == False %}col-5{%else%}col-3{% endif %} my-auto pe-0">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="classfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                            <div class="optionblock">
+                                {% for class in classes %}
+                                <div class="option_item" data-fun="change_class" data-id="{{ class.id }}">{{class.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3 my-auto pe-0" id="secdrop" {% if hassection == False %}hidden{% endif %}>
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="sectionfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                            <div class="optionblock" id="sectionfilter_drop">
+                                {% for s in sections %}
+                                <div class="option_item" data-cls="{{d.ClassId}}" hidden data-id="{{ s.id }}">{{s.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="my-auto {% if hassection == False %}col-5{%else%}col-4{% endif %}">
+                        <input type="date" value="{% now 'Y-m-d' %}" id="datefilter"
+                            class="search_input shadow br-30 form-control f-12" />
+                    </div>
+                    <div class="col-2 my-auto ps-0 text-center">
+                        <div class="bg-green br-30 shadow" style="padding: 3px;" onclick="load_data()">
+                            <i class="fas fa-search cl-w f-14 p-n"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="student_container" style="perspective: 1000px;">
+
+        </div>
+    </div>
+</div>
+
+<div id="student_temp" hidden class="bg-white shadow pd-10 br-10 mb-3 att_card">
+    <div class="row">
+        <div class="col-1 roll my-auto fwb"></div>
+        <div class="col-7 my-auto">
+            <div class="name f-14">Amit Pandey</div>
+        </div>
+        <div class="col-4 text-end my-auto">
+            <div class="custom_toggle" data-fun="mark_attendance" style="width: 84px;" onclick="click_toggle()">
+                <span></span>
+                <div class="pos">Present</div>
+                <div class="neg">Absent</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function change_class() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("sectionfilter_drop"));
+    }
+
+    function mark_attendance(){
+        var date = $("#datefilter").val();
+        var cls = $("#classfilter").attr("data-id");
+        var session = "{{activesessionid}}";
+
+        var id = event.target.parentElement.parentElement.parentElement.getAttribute("data-id");
+        var status = "A";
+        if(event.target.classList.contains("active")){
+            status = "P";
+        }
+
+        var data = new FormData();
+        data.append("classid", cls);
+        data.append("date", date);
+        data.append("sessionid", session);
+        data.append("studentcode", id);
+        data.append("status", status);
+        send_ajax_data("mark_individual_attendance", data);
+    }
+
+    function load_data() {
+        var date = document.getElementById("datefilter").value;
+        var cls = document.getElementById("classfilter").getAttribute("data-id");
+        var sec = $("#sectionfilter").attr("data-id");
+        var secvalue = $("#sectionfilter").val();
+        if(secvalue != "N/A" && sec == "" && document.getElementById("secdrop").hidden == false){
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        data.append("classid", cls);
+        data.append("date", date);
+        if(sec != ""){
+            data.append("sectionid", sec);
+        }
+        var list = load_ajax_data("get_student_attendance", data);
+
+        console.log(list);
+        var parent = document.getElementById("student_container");
+        var temp = document.getElementById("student_temp");
+        parent.innerHTML = "";
+
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.setAttribute("data-id", list[i]["studentcode"]);
+            clone.getElementsByClassName("name")[0].innerHTML = list[i]["fullname"];
+            clone.getElementsByClassName("roll")[0].innerHTML = list[i]["rollnumber"];
+
+            var status = list[i]["attendancestatus"];
+            if(status == "P"){
+                clone.getElementsByClassName("custom_toggle")[0].classList.add("active");
+            }
+        }
+    }
+</script>
+
+{% endblock %}

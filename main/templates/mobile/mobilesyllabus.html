@@ -1,0 +1,200 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .checkmark{
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 24px;
+    }
+
+    .syllabus_card > .syllabus_card{
+        padding-left: 20px;
+    }
+
+    .checkmark{
+        color: #00000031;
+    }
+
+    .checkmark.done{
+        color: var(--my_green);
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row">
+                    <div class="pe-0 {% if hassection == False %}col-5{%else%}col-3{% endif %} my-auto">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="classfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                            <div class="optionblock">
+                                {% for class in classes %}
+                                <div class="option_item" data-fun="change_class" data-id="{{ class.id }}">{{class.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3 my-auto pe-0" id="secdrop" {% if hassection == False %}hidden{% endif %}>
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="sectionfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                            <div class="optionblock" id="sectionfilter_drop">
+                                {% for s in sections %}
+                                <div class="option_item" data-cls="{{s.ClassId}}" hidden data-id="{{ s.id }}">{{s.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="{% if hassection == False %}col-5{%else%}col-4{% endif %} my-auto">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="" id="subjectfilter"
+                                class="class search_input shadow br-30 form-control f-12 OP" placeholder="Subject..." />
+                            <div class="optionblock">
+                                {% for s in subjects %}
+                                <div class="option_item" data-id="{{ s.id }}">{{s.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 my-auto ps-0 text-center">
+                        <div class="bg-green br-30 shadow" style="padding: 3px;" onclick="load_data()">
+                            <i class="fas fa-search cl-w f-14 p-n"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="card_container" style="perspective: 1000px;">
+            
+        </div>
+    </div>
+</div>
+
+<div id="card_temp" hidden class="shadow pd-10 br-10 mb-3 syllabus_card">
+    <div class="row pr">
+        <div class="col-1 my-auto">
+            <i class="fas fa-circle" style="font-size: 6px;"></i>
+        </div>
+        <div class="col-9 title mt-auto f-14"></div>
+        <div class="col-2 my-auto text-end">
+            <i class="fas fa-check-circle checkmark" onclick="mark_syllabus()"></i>
+        </div>
+    </div>
+</div>
+
+<script>
+    function change_class() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("sectionfilter_drop"));
+    }
+
+    function mark_syllabus(){
+        $(event.target).toggleClass("done");
+        
+        var id = event.target.parentElement.parentElement.parentElement.getAttribute("data-cardid");
+        
+        var data = new FormData();
+        if(event.target.classList.contains("done")){
+            data.append("status", "1");
+        }else{
+            data.append("status", "0");
+        }
+        data.append("sortid", id);
+        send_ajax_data("mark_chapter_done", data);
+		
+		//marking parent
+        var parent = event.target.parentElement.parentElement.parentElement;
+        var gpar = parent.parentElement;
+        var allchecks = gpar.getElementsByClassName("checkmark");
+
+        alldone = "1";
+        for(var i=0;i<allchecks.length;i++){
+            if(!allchecks[i].classList.contains("done")){
+                alldone = "0";
+            }
+        }
+
+        data = new FormData();
+        data.append("status", alldone);
+        data.append("sortid", gpar.getAttribute("data-cardid"));
+        send_ajax_data("mark_chapter_done", data);
+
+        load_data();
+    }
+
+    function load_data() {
+        var subject = document.getElementById("subjectfilter").getAttribute("data-id");
+        var cls = document.getElementById("classfilter").getAttribute("data-id");
+
+        if(cls == ""){
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        if(subject == ""){
+            show_toast("Please select the subject", "warning");
+            return;
+        }
+
+        var sec = $("#sectionfilter").attr("data-id");
+        var secvalue = $("#sectionfilter").val();
+        if(secvalue != "N/A" && sec == "" && "{{hassection}}" == "True"){
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        data.append("classid", cls);
+        data.append("subjectid", subject);
+        var list = load_ajax_data("get_syllabus", data);
+
+        var parent = document.getElementById("card_container");
+        var temp = document.getElementById("card_temp");
+        parent.innerHTML = "";
+
+        var cards = new Array();
+
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.setAttribute("data-cardid", list[i]["id"]);
+            clone.setAttribute("data-parentid", list[i]["parentid"]);
+            clone.getElementsByClassName("title")[0].innerHTML = list[i]["title"];
+
+            cards.push(clone);
+            var status = list[i]["completed"];
+
+            if(status == true){
+                clone.getElementsByClassName("checkmark")[0].classList.add("done");
+            }
+        }
+
+        //Arrange
+        for(var i=0;i<cards.length;i++){
+            var id = cards[i].getAttribute("data-cardid");
+            var pid = cards[i].getAttribute("data-parentid");
+
+            var pel = parent.querySelectorAll("[data-cardid='"+ pid +"']");
+            if(pel.length > 0){
+                pel = pel[0];
+
+                var newel = parent.querySelectorAll("[data-cardid='"+ id +"']");
+                pel.appendChild(newel[0]);
+                newel[0].className = "my-3 syllabus_card";
+                $(pel).find(".col-2").eq(0).find(".checkmark").remove();
+            }
+        }
+    }
+</script>
+
+{% endblock %}

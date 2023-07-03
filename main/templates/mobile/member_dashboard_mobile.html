@@ -1,0 +1,176 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% load tz %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+
+    .statcard {
+        opacity: 0;
+    }
+
+    @keyframes statanim {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0px);
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+    integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-4">
+            <div class="pr" style="width:100%;padding-bottom: 60%;">
+                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="br-10 shadow"
+                    style="width: 100%;height: 100%;object-fit: cover;object-position: top;position: absolute;top:0;left: 0;"
+                    id="photo">
+            </div>
+        </div>
+        <div class="col-8 my-auto">
+            <div class="fwb f-18 cl-w mb-1" id="name">Adi</div>
+            <div class="cl-w f-12 mt-2">
+                <div class="custom_toggle white" id="attendance_toggle" data-fun="toggle_attendance"
+                    onclick="click_toggle()">
+                    <span></span>
+                    <div class="neg">Absent</div>
+                    <div class="pos">Present</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12">
+            <div class="fwb ps-2">Payment History</div>
+            <hr>
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>For Month</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="pay_body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="pay_temp">
+        <td class="date"></td>
+        <td class="month"></td>
+        <th class="amount"></th>
+    </tr>
+</table>
+
+<script>
+    function toggle_attendance() {
+        if (!$("#attendance_toggle").hasClass("active")) {
+            ask_confirm("Are you sure you want to mark youself absent?", "mark_attendance", "revert_toggle");
+        } else {
+            mark_attendance();
+        }
+    }
+
+    function revert_toggle() {
+        $("#attendance_toggle").addClass("active");
+        hide_confirm();
+    }
+
+    function mark_attendance() {
+        hide_confirm();
+        var code = $("#USERID").val();
+        var data = new FormData();
+
+        var status = "A";
+        if (document.getElementById("attendance_toggle").classList.contains("active")) {
+            status = "P";
+        }
+
+        var lt = parseFloat("{{complatitude}}");
+        var lg = parseFloat("{{complongitude}}");
+        var rd = parseFloat("{{radius}}");
+
+        if (navigator.geolocation) {
+            if (granted == true) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    var dis = calculateDistance(lt, lg, latitude, longitude);
+                    if(dis > rd && status == 'P'){
+                        show_toast("Can't mark attendance. You are not at library", "warning");
+                        $("#attendance_toggle").removeClass("active");
+                        return;
+                    }
+                    var data = new FormData();
+                    data.append("membercode", code);
+                    data.append("latitude", latitude);
+                    data.append("longitude", longitude);
+                    data.append("status", status);
+                    send_ajax_data("mark_member_self_attendance", data);
+                });
+            } else {
+                show_toast("Please grant location permission", "warning");
+            }
+        }
+    }
+
+    function load_data() {
+        var code = $("#USERID").val();
+        var data = new FormData();
+        data.append("membercode", code);
+        var alldetail = load_ajax_data("get_member_dashboard", data);
+        console.log(alldetail);
+        var detail = alldetail.data;
+        var payments = alldetail.payments;
+
+        $("#name").html(detail[0]["fullname"]);
+        if (detail[0]["picture"] != "") {
+            document.getElementById("photo").src = "/static/uploads/" + detail[0]["picture"];
+        }
+
+        var status = detail[0]["attendancestatus"];
+
+        if (status == "P") {
+            $("#attendance_toggle").addClass("active");
+        }
+
+        var parent = document.getElementById("pay_body");
+        var temp = document.getElementById("pay_temp");
+        parent.innerHTML = "";
+        for (var i = 0; i < payments.length; i++) {
+            var row = payments[i];
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.getElementsByClassName("date")[0].innerHTML = format_date(row["documentdate"]);
+            clone.getElementsByClassName("month")[0].innerHTML = convert_month(row["monthyear"]);
+            clone.getElementsByClassName("amount")[0].innerHTML = INR + " " + add_commas(row["totalamount"]);
+        }
+    }
+
+    $(window).on("load", function () {
+        load_data();
+        ask_location_permission();
+    })
+</script>
+
+{% endblock %}

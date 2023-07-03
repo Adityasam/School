@@ -1,0 +1,184 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% load tz %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+    integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-stacked100@1.0.0"></script>
+
+<div class="container-fluid g-0">
+    <div class="row bg-light mt-2 g-0 pdy-10 pdx-10" style="border-radius: 20px;">
+        <div class="col-3 br">
+            <div class="pr" style="width: 100%;padding-bottom: 100%;">
+                <input value="{{student.0.photo}}" type="text" id="photopath" hidden/>
+                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="pa shadow" id="userphoto"
+                style="top:10px;left:10px;width: 80%;height: 80%;object-fit: cover;border-radius: 1000px;border: 2px solid var(--my_blue);">
+            </div>
+        </div>
+        <div class="col-9 ps-2 my-auto">
+            <div class="fwb" style="font-size: 18px;">{{student.0.fullname}}</div>
+            <div class="f-12">Class : {{student.0.classtitle}}-{{student.0.sectiontitle}}</div>
+        </div>
+    </div>
+    <div class="row bg-light mt-3 g-0 pdy-10 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" {% if remarks|length == 0%}hidden{% endif %}>
+            <span class="fwb f-20 di">Teacher Remarks</span>
+        </div>
+        <div class="col-12 pb-2 px-1 g-0" {% if remarks|length == 0%}hidden{% endif %}
+        style="overflow-x: scroll;white-space: nowrap;scroll-snap-type: x mandatory;">
+            {% for r in remarks %}
+            <a href="{% url 'main:discussion_page' r.sender %}">
+                <div class="di bg-white p-2 shadow w-100 br-10 me-3" 
+            style="overflow-x: hidden;white-space: normal;scroll-snap-align: center;">
+                <div class="row">
+                    <div class="col-7 f-16 fwb single_line">{{r.facultyname}}</div>
+                    <div class="col-5 text-end f-12">{{r.createddate|date:"d/m/Y"}}</div>
+                    <div class="col-12 f-12 mt-1">
+                       {{r.message}}
+                    </div>
+                </div>
+            </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div class="col-12 mt-2">
+            <span class="fwb f-20 di">Attendance : </span>
+            <span class="di ps-2">April - 2023</span>
+        </div>
+        <div class="col-6 my-auto br">
+            <div class="mb-2">
+                <i class="fas fa-circle cl-g f-12"></i>
+                <span>Present</span>
+                <span class="fwb ps-2" id="present">{{present}}</span>
+            </div>
+            <div>
+                <i class="fas fa-circle cl-r f-12"></i>
+                <span>Absent</span>
+                <span class="fwb ps-2" id="absent">{{absent}}</span>
+            </div>
+        </div>
+        <div class="col-6 mt-auto text-center">
+            <div class="p-3">
+                <canvas class="p-1 shadow" id="attendance_chart" style="border-radius: 1000px;"></canvas>
+            </div>
+        </div>
+        <hr>
+        <div class="col-12">
+            <span class="fwb f-20 di">Syllabus : </span>
+            <span class="di ps-2">2023-2024</span>
+        </div>
+        <div class="col-6 mt-auto text-center">
+            <div class="p-3">
+                <canvas class="p-1 shadow" id="syllabus_chart" style="border-radius: 1000px;"></canvas>
+            </div>
+        </div>
+        <div class="col-6 my-auto bl">
+            <div class="mb-2 ps-2">
+                <i class="fas fa-circle cl-g f-12"></i>
+                <span>Completed</span>
+                <span class="fwb ps-2" id="donesyllabus">{{donesyllabus}}%</span>
+            </div>
+            <div class="ps-2">
+                <i class="fas fa-circle cl-r f-12"></i>
+                <span>Pending</span>
+                <span class="fwb ps-2" id="pendingsyllabus">{{pendingsyllabus}}%</span>
+            </div>
+        </div>
+        <hr>
+        <div class="col-12 mb-3">
+            <span class="fwb f-20 di">Student Performance</span>
+        </div>
+        {% for mark in marks %}
+        <div class="col-4 text-center">
+            <div class="fwb mb-2" style="font-size: 20px;">{{mark.percent}}%</div>
+            <div class="f-12">{{mark.title}}</div>
+        </div>
+        {% endfor %}
+        <hr>
+        <div class="col-8 mb-3">
+            <span class="fwb f-20 di">Recent Payments</span>
+        </div>
+        <div class="col-4 text-end">
+            <a href="{% url 'main:parent_payment' %}">View All</a>
+        </div>
+        <div>
+            {% for p in payments %}
+            <div class="row mb-2">
+                <div class="col-8">
+                    <i class="fas fa-circle f-12 cl-b"></i>
+                    <span class="f-14">{{p.feetypetitle}} : {{p.monthyear}}</span>
+                    <div class="f-12">
+                        <i class="fas fa-circle f-12 cl-b" style="opacity: 0;"></i>
+                        <span>{{p.createddate}}</span>
+                    </div>
+                </div>
+                <div class="col-4 fwb text-end">&#8377 {{p.totalamount}}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    $(window).on("load", function () {
+        var canvas = document.getElementById("attendance_chart");
+        var label = ["Present", "Absent"];
+        var data = [parseInt($("#present").html()), parseInt($("#absent").html())];
+        draw_pie_chart(canvas, label, "Attendance", data);
+
+        var canvas2 = document.getElementById("syllabus_chart");
+        var label2 = ["Completed", "Pending"];
+        var data2 = [parseInt($("#donesyllabus").html()), parseInt($("#pendingsyllabus").html())];
+        draw_pie_chart(canvas2, label2, "Syllabus", data2);
+
+        var photo = $("#photopath").val();
+        if(photo != ""){
+            $("#userphoto").attr("src", "/static/uploads/"+photo);
+        }
+    })
+
+    function draw_pie_chart(canvas, lbl, title, ar) {
+        const ctx3 = canvas.getContext('2d');
+
+        const data3 = {
+            labels: lbl,
+            datasets: [{
+                label: title,
+                data: ar,
+                backgroundColor: ["#6AC977", "#C30101"],
+                borderWidth: 2
+            }]
+        };
+
+        const ops3 = {
+            cutout: 30,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    anchor: 'center',
+                    align: 'top',
+                    formatter: (value) => {
+                        return ((value / 100) * 100).toFixed(2) + '%';
+                    },
+                    color: 'white'
+                }
+            }
+        }
+
+        const config3 = new Chart(ctx3, {
+            plugins: [ChartDataLabels],
+            type: 'doughnut',
+            data: data3,
+            options: ops3
+        });
+    }
+</script>
+
+{% endblock %}

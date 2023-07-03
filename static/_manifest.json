@@ -1,0 +1,28 @@
+{
+    "version": "1.0",
+    "comment": "---Above version must be the same as data-pwa-version",
+    "lang": "en",
+    "name": "ARCH",
+    "scope": "/",
+    "display": "standalone",
+    "start_url": "/dashboard",
+    "short_name": "ARCH",
+    "description": "",
+    "orientation": "portrait",
+    "background_color": "#5840BA",
+    "theme_color": "#5840BA",
+    "generated": "true",
+    "gcm_sender_id": "340056779089",
+    "icons": [
+      {
+        "src": "img/logoblue72.png",
+        "sizes": "72x72",
+        "type": "image/png"
+      },
+      {
+        "src": "img/logoblue144.png",
+        "sizes": "144x144",
+        "type": "image/png"
+      }
+    ]
+  }

@@ -1,0 +1,60 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    tr.sunday {
+        background-color: var(--my_blue);
+        color: white;
+    }
+
+    tr.absent {
+        background-color: var(--my_red);
+        color: white;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="container" style="perspective: 1000px;">
+            
+        </div>
+    </div>
+</div>
+
+<div id="temp" hidden class="mb-3 shadow f-12 bt-white p-2 br-10">
+    <div class="row">
+        <div class="col-8 title fwb">Title</div>
+        <div class="col-4 date text-end">27/05/2023</div>
+    </div>
+    <div class="row pt-2">
+        <div class="col-12 desc">This is the first notice</div>
+    </div>
+</div>
+
+<script>
+    function load_data(){
+        var data = new FormData();
+        data.append("userid", $("#USERID").val());
+        var list = load_ajax_data("/get_user_notice", data);
+
+        var parent = document.getElementById("container");
+        var temp = document.getElementById("temp");
+
+        parent.innerHTML = "";
+        for(var i=0;i<list.length;i++){
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.getElementsByClassName("title")[0].innerHTML = list[i]["title"];
+            clone.getElementsByClassName("date")[0].innerHTML = format_date(list[i]["senddate"]);
+            clone.getElementsByClassName("desc")[0].innerHTML = list[i]["description"];
+        }
+    }
+
+    $(window).on("load", function(){
+        load_data();
+    })
+</script>
+
+{% endblock %}

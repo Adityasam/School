@@ -1,0 +1,78 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .userpic {
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        object-fit: cover;
+        border: 1px solid var(--my_blue);
+        border-radius: 100px;
+        position: absolute;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="user_container">
+            
+        </div>
+    </div>
+</div>
+
+<div id="user_temp" hidden class="bg-white shadow pd-10 br-10 mb-3">
+    <a href="">
+        <div class="row">
+            <div class="col-2 my-auto pe-0">
+                <div class="pr" style="width: 100%;padding-bottom: 100%;">
+                    <img src="{% static 'img/defaultuser.jpg' %}" class="shadow userpic" alt="User Picture">
+                </div>
+            </div>
+            <div class="col-10">
+                <div class="fwb name">Santosh Singh</div>
+                <div class="f-12 subject">Maths</div>
+            </div>
+        </div>
+    </a>
+</div>
+
+<script>
+    function load_data() {
+        var datefilter = $("#datefilter").val();
+        var data = new FormData();
+
+        var list = null;
+        if ("{{request.session.USERTYPE}}" == "P") {
+            list = load_ajax_data("get_parent_faculty", data);
+        } else if ("{{request.session.USERTYPE}}" == "F") {
+            list = load_ajax_data("get_discus_parent", data);
+        }
+        var parent = document.getElementById("user_container");
+        var temp = document.getElementById("user_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+
+            parent.appendChild(clone);
+
+            clone.getElementsByClassName("name")[0].innerHTML = list[i]["fullname"];
+            clone.getElementsByClassName("subject")[0].innerHTML = list[i]["allsubjects"];
+            clone.getElementsByTagName("a")[0].href = "discussion_page/"+list[i]["userid"];
+
+            if (list[i]["userphoto"] != "null" && list[i]["userphoto"] != "") {
+                clone.getElementsByClassName("userpic")[0].src = "/static/uploads/" + list[i]["userphoto"];
+            }
+        }
+    }
+
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

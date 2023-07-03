@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .day{
+        padding: 10px;
+        font-size: 20px;
+        border: 1px solid #00000030;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all ease-in-out 0.3s;
+    }
+
+    .day.today{
+        background-color: var(--my_blue);
+        color: white;
+    }
+
+    .day.item{
+        display: none;
+    }
+
+    .day.item.show{
+        display: block;
+    }
+
+    .day.head{
+        background-color: var(--my_green);
+        color: white;
+        font-weight: bold;
+    }
+
+    .day.sunday{
+        background-color: var(--my_red);
+        color: white;
+        font-weight: bold;
+    }
+
+    .day.item:hover{
+        box-shadow: 0px 0px 10px #00000030;
+    }
+
+    .dayoff{
+        background-color: #ff000034;
+    }
+
+    .changebtn{
+        border-radius: 100px;
+        font-size: 24px;
+        padding: 5px;
+        background-color: var(--my_green);
+        color: white;
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+    }
+
+    .eventtag{
+        padding: 5px 10px;
+        border-radius: 100px;
+        font-size: 10px;
+        display: inline-block;
+        color: white;
+    }
+
+    .eventtag.holiday{
+        background-color: var(--my_green);
+    }
+
+    .eventtag.event{
+        background-color: var(--my_blue);
+    }
+</style>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead">Academic Calendar</div>
+        <div class="col-1 text-end">
+            <i class="fas fa-caret-left changebtn text-center shadow" onclick="change_month(-1)"></i>
+        </div>
+        <div class="col-3 text-center my-auto" style="font-size: 24px;">
+            <span id="month_year" data-year="{%now 'Y'%}" data-month="{% now 'm' %}">{%now 'Y'%} - {% now 'F' %}</span>
+        </div>
+        <div class="col-1">
+            <i class="fas fa-caret-right changebtn text-center shadow" onclick="change_month(1)"></i>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-8">
+            <div class="mt-10">
+                <div>
+                    <div class="row g-0">
+                        <div class="col text-center p-1"><div class="day sunday" data-id="0">Sun</div></div>
+                        <div class="col text-center p-1"><div class="day head" data-id="1">Mon</div></div>
+                        <div class="col text-center p-1"><div class="day head" data-id="2">Tue</div></div>
+                        <div class="col text-center p-1"><div class="day head" data-id="3">Wed</div></div>
+                        <div class="col text-center p-1"><div class="day head" data-id="4">Thu</div></div>
+                        <div class="col text-center p-1"><div class="day head" data-id="5">Fri</div></div>
+                        <div class="col text-center p-1"><div class="day head" data-id="6">Sat</div></div>
+                    </div>
+                </div>
+                <div id="date_block">
+                    {% for j in rowrange %}
+                    <div class="row g-0">
+                        {% for i in colrange %}
+                        <div class="col text-center p-1">
+                            <div class="day item {% if i == 0 %}dayoff{% endif %}" onclick="click_day()"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-4 mt-10">
+            <div class="shadow p-4 br-10">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="f-20">Events</div>
+                    </div>
+                    <div class="col-4 my-auto text-end">
+                        <div class="mybtn blue shadow" onclick="newModal()">Add</div>
+                    </div>
+                </div>
+                <hr>
+                <div id="event_container">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Event temp-->
+<div id="event_temp" hidden class="row mb-3">
+    <div class="col-12 title my-auto">This is a title</div>
+    <div class="col-6 my-auto">
+        <div class="eventtag shadow">Holiday</div>
+    </div>
+    <div class="col-6 my-auto text-end">
+        <i class="fas fa-trash icon_btn_sm shadow bg-red text-center" onclick="delete_event()"></i>
+    </div>
+</div>
+
+<!-- New Modal -->
+<div class="modal fade" id="newModal" data-date="" tabindex="-1" aria-labelledby="newModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="newModalLabel">Add Event</h5>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-12 mb-20">
+                            <div class="fwb f-12">Title</div>
+                            <input type="text" class="form-control form-control-sm br-30 shadow" id="title" />
+                        </div>
+                        <div class="col-12 mb-20">
+                            <div class="fwb f-12">Repeat</div>
+                            <div id="event_repeat" data-id="">
+                                <div class="opbtn shadow me-2" data-id="W">Every Week</div>
+                                <div class="opbtn shadow me-2" data-id="M">Every Month</div>
+                                <div class="opbtn shadow" data-id="Y">Every Year</div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-20">
+                            <div class="fwb f-12">Type</div>
+                            <div id="event_type" data-id="">
+                                <div class="opbtn shadow me-2" data-id="H">Holiday</div>
+                                <div class="opbtn shadow me-2" data-id="E">Event</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-info" onclick="save_event()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var delid = "";
+    function delete_event(){
+        var id = event.target.parentElement.parentElement.getAttribute("data-id");
+        delete_item(id, "calendar", "1");
+        show_toast("Event deleted", "success");
+        load_events();
+    }
+
+    function click_day(){
+        $(".day").removeClass("today");
+        $(event.target).addClass("today");
+        load_events();
+    }
+
+    function save_event(){
+        var title = $("#title").val().trim();
+        var repeat = $("#event_repeat").attr("data-id");
+        var type = $("#event_type").attr("data-id");
+        var day = $("#newModal").attr("data-date");
+        var month = $("#month_year").attr("data-month");
+        var year = $("#month_year").attr("data-year");
+
+        var eventdate = year+"-"+("0"+month).slice(-2)+"-"+("0"+day).slice(-2);
+
+        var data = new FormData();
+        data.append("title", title);
+        data.append("eventdate", eventdate);
+        data.append("type", type);
+        data.append("repeat", repeat);
+        send_ajax_data("/save_calendar_event", data);
+
+        $("#newModal").modal("hide");
+        show_toast("Event saved", "success");
+        load_events();
+    }
+
+    function newModal(){
+        $("#title").val("");
+        $("#event_type").val("");
+        $("#event_type").attr("data-id", "");
+
+        $("#event_repeat").val("");
+        $("#event_repeat").attr("data-id", "");
+
+        $("#newModal").find(".opbtn").removeClass("active");
+
+        var day = $(".today").eq(0).html();
+        
+        if(day != "" && day != "undefined" && day != undefined){
+            $("#newModal").attr("data-date", day);
+            $("#newModal").modal("show");
+        }
+    }
+</script>
+
+<script>
+    var monthname = ["January", "February", "March", "April","May", "June", "July", "August", "September", "October", "November", "December"];
+    function set_date(){
+        $(".day").removeClass("today");
+        var month = parseInt($("#month_year").attr("data-month"))-1;
+        var year = parseInt($("#month_year").attr("data-year"));
+
+        $("#date_block").find(".day").removeClass("show");
+        var dayblocks = document.getElementById("date_block").getElementsByClassName("day");
+        var firstDay = new Date(year, month, 1);
+        var dayOfWeek = firstDay.getDay();
+
+        var tod = new Date().getDate();
+        var cmonth = new Date().getMonth();
+        var cyear = new Date().getFullYear();
+        
+        var newdate = new Date(year, month + 1, 0);
+  
+        var daysInMonth = newdate.getDate();
+
+        for(var i=0;i<daysInMonth;i++){
+            dayblocks[i+dayOfWeek].classList.add("show");
+            dayblocks[i+dayOfWeek].innerHTML = i+1;
+            if(i+1 == tod && month == cmonth && year == cyear){
+                dayblocks[i+dayOfWeek].classList.add("today");
+            }
+        }
+    }
+
+    function change_month(dir){
+        var month = parseInt($("#month_year").attr("data-month"));
+        var year = parseInt($("#month_year").attr("data-year"));
+
+        month += dir;
+        
+        if(month == 0){
+            month = 12;
+            year -= 1;
+        }
+
+        if(month == 13){
+            month = 1;
+            year += 1;
+        }
+
+        var monthtext = monthname[month-1];
+
+        $("#month_year").html(year+" - "+monthtext);
+        $("#month_year").attr("data-year", year);
+        $("#month_year").attr("data-month", month);
+
+        set_date();
+    }
+
+    function load_events(){
+        var currentdate = $(".today").eq(0).html();
+        var month = $("#month_year").attr("data-month");
+        var year = $("#month_year").attr("data-year");
+
+        var eventdate = year+"-"+("0"+month).slice(-2)+"-"+("0"+currentdate).slice(-2);
+        var data = new FormData();
+        data.append("date", eventdate);
+        var list = load_ajax_data("/load_calendar_events", data);
+        
+        var parent = document.getElementById("event_container");
+        var temp = document.getElementById("event_temp");
+
+        parent.innerHTML = "";
+        for(var i=0;i<list.length;i++){
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.setAttribute("data-id", list[i]["id"]);
+            clone.getElementsByClassName("title")[0].innerHTML = list[i]["title"];
+            if(list[i]["type"] == "H"){
+                clone.getElementsByClassName("eventtag")[0].classList.add("holiday");
+                clone.getElementsByClassName("eventtag")[0].innerHTML = "Holiday";
+            }else if(list[i]["type"] == "E"){
+                clone.getElementsByClassName("eventtag")[0].classList.add("event");
+                clone.getElementsByClassName("eventtag")[0].innerHTML = "Event";
+            }
+        }
+    }
+
+    $(window).on("load", function(){
+        set_date();
+        load_events();
+    })
+</script>
+
+{% endblock %}

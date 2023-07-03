@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .userimage {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        padding: 2px;
+        border: 1px solid var(--my_blue);
+        object-fit: cover;
+        object-position: top;
+    }
+</style>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead my-auto">Face Data Record</div>
+        <div class="col-3 my-auto" id="type_container">
+            <div class="status_btn shadow active" data-id="F" onclick="change_status()">
+                <div class="p-n">Faculty</div>
+            </div>
+            <div class="status_btn shadow" data-id="P" onclick="change_status()">
+                <div class="p-n">Student</div>
+            </div>
+        </div>
+        <div class="col-6 text-end my-auto">
+            
+        </div>
+    </div>
+    <div class="row mt-3" id="card_container">
+        <input type="file" accept="image/png, image/jpeg, image/jpg" hidden id="hiddenfile" onchange="add_image()">
+        <div class="col-12">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th style="width: 24px;">#</th>
+                        <th>Photos</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="mainbody">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="maintemp" style="vertical-align: middle;">
+        <th class="count"></th>
+        <td>
+            <div class="images di"></div>
+            <i class="fas fa-plus-circle f-16 shadow cur br-30" onclick="click_hidden_image()"></i>
+        </td>
+        <td class="userid"></td>
+        <td class="fullname"></td>
+        <td class="text-end">
+            <div class="bg-blue di pdx-10 py-1 br-30 cl-w shadow cur" onclick="save_faces()">Update</div>
+        </td>
+    </tr>
+</table>
+
+<div hidden id="image_temp" class="pr di me-2">
+    <i class="fas fa-trash cl-r pa cur" style="top:0;left:0" onclick="event.target.parentElement.remove();"></i>
+    <input type="file" accept="image/png, image/jpeg, image/jpg" hidden>
+    <img src="{% static 'img/defaultuser.jpg' %}" class="userimage shadow" alt="">
+</div>
+
+<script>
+    function save_faces() {
+        var parent = event.target.parentElement.parentElement;
+        var images = parent.getElementsByClassName("uimage");
+
+        var ddata = new FormData();
+        ddata.append("usercode", parent.getAttribute("data-code"));
+        send_ajax_data("/clear_old_face", ddata);
+
+        for (var i = 0; i < images.length; i++) {
+            var data = new FormData();
+            var file = images[i].getElementsByTagName("input")[0].files[0];
+            var ucode = parent.getAttribute("data-code") + "^" + (i + 1);
+            var imagefile = images[i].getElementsByTagName("input")[0];
+            console.log(file.name);
+            compress_and_save(file, ucode);
+        }
+
+        show_toast("Face data updated", "success");
+    }
+
+    function compress_and_save(file, ucode) {
+        compressImage(file, 512, 512, 80, function (dataURL) {
+            var newname = "compimage." + file.name.split(".").pop();
+            var compressedFile = dataURLtoFile(dataURL, newname);
+            console.log(ucode);
+            var data = new FormData();
+            data.append("file", compressedFile);
+            data.append("code", ucode);
+            var res = send_ajax_data("/encrypt_face", data);
+        }, ucode);
+    }
+</script>
+
+<script>
+    var imageparent = null;
+    function click_hidden_image() {
+        imageparent = event.target.parentElement.getElementsByClassName("images")[0];
+        document.getElementById("hiddenfile").click();
+    }
+
+    function add_image() {
+        var file = document.getElementById("hiddenfile").files;
+        if (file.length > 0) {
+            file = file[0];
+            var dt = new DataTransfer();
+            dt.items.add(file);
+
+            var temp = document.getElementById("image_temp");
+            var clone = clean_temp(temp);
+            imageparent.appendChild(clone);
+            clone.getElementsByTagName("img")[0].src = URL.createObjectURL(file);
+            clone.classList.add("uimage");
+            clone.getElementsByTagName("input")[0].files = dt.files;
+        }
+    }
+
+    function load_local() {
+        load_data();
+    }
+
+    function load_data() {
+        var type = document.getElementById("type_container").getElementsByClassName("status_btn active")[0];
+        type = type.getAttribute("data-id");
+        var data = new FormData();
+        data.append("type", type);
+        var list = load_ajax_data("/get_face_data", data);
+
+        var parent = document.getElementById("mainbody");
+        var temp = document.getElementById("maintemp");
+        var imagetemp = document.getElementById("image_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var mypics = list[i]["images"];
+
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.setAttribute("data-code", list[i]["usercode"]);
+            clone.getElementsByClassName("count")[0].innerHTML = i + 1;
+
+            if (mypics.length == 0 && list[i]["photo"] != "") {
+                var im = clean_temp(imagetemp);
+                let x = Math.floor((Math.random() * 10) + 1);
+                im.getElementsByTagName("img")[0].src = "/static/uploads/" + list[i]["photo"]+"?n="+x;
+                clone.getElementsByClassName("images")[0].appendChild(im);
+                im.classList.add("uimage");
+                url_to_file("/static/uploads/" + list[i]["photo"]+"?n="+x, im.getElementsByTagName("input")[0]);
+            }
+
+            for (var p = 0; p < mypics.length; p++) {
+                var im = clean_temp(imagetemp);
+                let x = Math.floor((Math.random() * 10) + 1);
+                im.getElementsByTagName("img")[0].src = "/static/FACES/" + mypics[p]+"?n="+x;
+                clone.getElementsByClassName("images")[0].appendChild(im);
+                im.classList.add("uimage");
+                url_to_file("/static/FACES/" + mypics[p]+"?n="+x, im.getElementsByTagName("input")[0]);
+            }
+            clone.getElementsByClassName("userid")[0].innerHTML = list[i]["usercode"];
+            clone.getElementsByClassName("fullname")[0].innerHTML = list[i]["fullname"];
+        }
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+<script>
+    function encode_file() {
+        var file = document.getElementById("imagefile").files[0];
+        compressImage(file, 512, 512, 80, function (dataURL) {
+            var newname = "compimage." + file.name.split(".").pop();
+            var compressedFile = dataURLtoFile(dataURL, newname);
+            var dt = new DataTransfer();
+            dt.items.add(compressedFile);
+            document.getElementById("imagefile").files = dt.files;
+
+            var data = new FormData();
+            data.append("file", document.getElementById("imagefile").files[0]);
+            var res = send_ajax_data("/encrypt_face", data);
+            console.log(res);
+        });
+    }
+
+    function recognize() {
+        var file = document.getElementById("testfile").files[0];
+        compressImage(file, 512, 512, 80, function (dataURL) {
+            var newname = "compimage." + file.name.split(".").pop();
+            var compressedFile = dataURLtoFile(dataURL, newname);
+            var dt = new DataTransfer();
+            dt.items.add(compressedFile);
+            document.getElementById("testfile").files = dt.files;
+
+            var data = new FormData();
+            data.append("file", document.getElementById("testfile").files[0]);
+            var res = send_ajax_data("/recognize_face", data);
+            console.log(res);
+        });
+
+    }
+</script>
+
+{% endblock %}

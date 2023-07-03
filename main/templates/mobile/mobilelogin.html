@@ -1,0 +1,451 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCH</title>
+
+    <link rel="icon" href="{% static 'img/bluelogo.png' %}" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
+    <script src="https://kit.fontawesome.com/f422f2e2ec.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+        integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{% static 'js/myjs.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            overflow: hidden;
+            font-family: Poppins !important;
+        }
+
+        .loginfield {
+            border: none;
+            outline: none;
+            background-color: transparent;
+            padding-left: 0px !important;
+        }
+
+        .loginfield:focus {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none;
+            background-color: transparent;
+            padding-left: 0px !important;
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        .loginbtn {
+            background-color: var(--my_orange);
+            padding: 7px 20px;
+            border-radius: 100px;
+            color: white;
+            display: inline-block;
+        }
+
+        .passwordcontainer>.eyeslash {
+            display: none;
+        }
+
+        .passwordcontainer>.eyeopen {
+            display: inline-block;
+        }
+
+        .passwordcontainer.show>.eyeopen {
+            display: none;
+        }
+
+        .passwordcontainer.show>.eyeslash {
+            display: inline-block;
+        }
+
+        #face_scan {
+            width: 80px;
+            height: 80px;
+            border-radius: 100%;
+            padding: 10px;
+            object-fit: cover;
+            border: 2px solid var(--my_blue);
+        }
+
+        #mycamera {
+            position: fixed;
+            height: 100vh;
+            width: 100vh;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            background-color: white;
+        }
+
+        #mycamera>video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #mycamera>.camera_close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+            padding: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 100px;
+            z-index: 20;
+            color: var(--my_red);
+            background-color: white;
+        }
+
+        .capturebtn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            padding: 14px;
+            width: 52px;
+            height: 52px;
+            border-radius: 100px;
+            background-color: var(--my_green);
+            color: white;
+        }
+
+        #scan_pop {
+            background-color: #00000080;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #scan_pop>div {
+            position: fixed;
+            height: 50vh;
+            width: 80vw;
+            top: 25vh;
+            left: 10vw;
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            background-color: white;
+        }
+
+        #scan_image {
+            border-radius: 20px;
+            width: 100%;
+            height: 80%;
+            object-fit: cover;
+        }
+
+        #img_close {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            background-color: var(--my_red);
+            color: white;
+            padding: 10px;
+            border-radius: 100px;
+            margin-top: -20px;
+            width: 32px;
+            font-size: 12px;
+            height: 32px;
+        }
+
+        @keyframes laser_anim{
+            0%{
+                top:0%;
+            }
+            50%{
+                top:80%;
+            }
+            100%{
+                top:0%;
+            }
+        }
+
+        #laser{
+            position: absolute;
+            width: 100%;
+            left: 50%;
+            top:50%;
+            transform: translateX(-50%);
+            height: 5px;
+            background-color: var(--my_blue);
+            filter: blur(3px);
+            animation: 2s linear 0s infinite laser_anim;
+        }
+    </style>
+
+</head>
+
+<body
+    style="background-size: cover;background-repeat: no-repeat;background-image: url('{% static 'img/mobileloginbg.jpg' %}');height:100vh;width:100vw;">
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-6">
+                <div class="di text-center" {% if compfaceid == False %}hidden{% endif %} style="margin-left: 10px;">
+                    <img src="{% static 'img/face.png' %}" class="shadow mb-2" onclick="ask_permission()" id="face_scan"
+                        alt="">
+                    <div>Face ID</div>
+                </div>
+            </div>
+            <div class="col-6 text-end">
+                <img src="{% static 'img/whitelogo.png' %}" style="width: 120px;" />
+            </div>
+            <div class="col-12 mt-5 ps-4">
+                <div style="font-weight: bold;font-size: 34px;color: var(--my_blue);">LOGIN</div>
+                <div class="f-12 mt-4" style="color:var(--my_blue)">Username</div>
+                <div style="border-bottom: 2px solid var(--my_blue);">
+                    <input type="text" class="form-control loginfield" id="username" />
+                </div>
+                <div class="mt-4">
+                    <div class="f-12" style="color:var(--my_blue)">Password</div>
+                    <div style="border-bottom: 2px solid var(--my_blue);" id="passblock" class="pr passwordcontainer">
+                        <input type="password" id="password" class="form-control loginfield" />
+                        <i class="fas fa-eye cl-o pa eyeopen" onclick="toggle_password()"
+                            style="top:50%;right: 10px;transform: translateY(-50%);"></i>
+                        <i class="fas fa-eye-slash cl-o pa eyeslash" onclick="toggle_password()"
+                            style="top:50%;right: 10px;transform: translateY(-50%);"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 text-end mt-5">
+                <div class="loginbtn shadow" onclick="login()">Login</div>
+            </div>
+            <div class="col-12 text-end mt-5 pt-2 pe-4">
+                <div class="di cl-b"
+                    style="font-size:40px;font-weight:bold;border-top: 2px solid var(--my_blue);line-height: 40px;">ARCH
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mycamera" hidden>
+        <i class="fas fa-times camera_close shadow text-center" onclick="close_camera()"></i>
+        <video id="camera-feed" autoplay style="width: 100vw;height: 100vh;transform: scaleX(-1);"></video>
+        <i class="fas fa-camera capturebtn shadow" onclick="capture()"></i>
+    </div>
+
+    <div id="scan_pop" hidden>
+        <div class="shadow">
+            <input type="file" id="facefile" hidden>
+            <img src="{% static 'img/defaultuser.jpg' %}" id="scan_image" alt="">
+            <i class="fas fa-times text-center shadow" id="img_close" onclick="close_image()"></i>
+            <div class="mt-3 text-center" style="height: 20%;position: relative;">
+                <div class="pa" 
+                style="bottom: 20px;font-size: 14px;width: 100%;left: 50%;transform: translateX(-50%);">
+                <span id="scan_message">Scanning...</span>
+                <div class="bg-blue cl-w br-30 shadow f-12 ms-2 di pdx-10 py-1" id="try_again" hidden
+                onclick="ask_permission()">Try Again</div>
+            </div>
+            </div>
+            <div id="laser"></div>
+        </div>
+    </div>
+</body>
+
+<script>
+    function dataurl_to_file(dataURL) {
+        const base64Data = dataURL.split(',')[1];
+        const decodedData = atob(base64Data);
+
+        const dataArray = new Uint8Array(decodedData.length);
+        for (let i = 0; i < decodedData.length; i++) {
+            dataArray[i] = decodedData.charCodeAt(i);
+        }
+
+        const file = new Blob([dataArray], { type: 'image/png' });
+        const fileName = "image.png";
+        const fileObject = new File([file], fileName, { lastModified: new Date() });
+
+        var dt = new DataTransfer();
+        dt.items.add(fileObject);
+        document.getElementById("facefile").files = dt.files;
+    }
+
+    function recognize() {
+        var file = document.getElementById("facefile").files[0];
+        compressImage(file, 512, 512, 80, function (dataURL) {
+            var newname = "compimage." + file.name.split(".").pop();
+            var compressedFile = dataURLtoFile(dataURL, newname);
+            var dt = new DataTransfer();
+            dt.items.add(compressedFile);
+            document.getElementById("facefile").files = dt.files;
+
+            var data = new FormData();
+            data.append("file", document.getElementById("facefile").files[0]);
+            var res = send_ajax_data("/recognize_face", data);
+            var result = res.result;
+
+            document.getElementById("laser").hidden = true;
+
+            if(result == "CANNOT"){
+                $("#scan_message").html("Face not recognized");
+                $("#try_again").attr("hidden", false);
+            }else if(result == "NOFACE"){
+                $("#scan_message").html("No face found");
+                $("#try_again").attr("hidden", false);
+            }else if(result == "FAILED"){
+                $("#scan_message").html("An error occured");
+                $("#try_again").attr("hidden", false);
+            }else {
+                $("#scan_message").html("Success : "+result);
+                $("#try_again").attr("hidden", true);
+                face_login(result);
+            }
+        });
+
+    }
+
+    function close_camera() {
+        mainstream.getTracks().forEach(function (track) {
+            track.stop();
+        });
+        document.getElementById("mycamera").hidden = true;
+    }
+
+    function close_image() {
+        document.getElementById("scan_pop").hidden = true;
+    }
+
+    var mainstream = null;
+    function capture() {
+        document.getElementById("mycamera").hidden = true;
+        document.getElementById("scan_pop").hidden = false;
+        $("#scan_message").html("Scanning...");
+        document.getElementById("laser").hidden = false;
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        var scanimage = document.getElementById("scan_image");
+        const videoElement = document.getElementById('camera-feed');
+        // Set canvas dimensions to match the video feed
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+
+        // Draw the current video frame onto the canvas
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+        // Convert the canvas image data to a data URL
+        const dataURL = canvas.toDataURL('image/png');
+
+        // Set the data URL as the source of the image element
+        scanimage.src = dataURL;
+        close_camera();
+
+        dataurl_to_file(dataURL);
+        recognize();
+    }
+
+    function ask_permission() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                mainstream = stream;
+
+                const videoElement = document.getElementById('camera-feed');
+                videoElement.srcObject = stream;
+                document.getElementById("scan_pop").hidden = true;
+                $("#mycamera").attr("hidden", false);
+                $("#try_again").attr("hidden", true);
+            })
+            .catch(function (error) {
+                // Access denied or error occurred
+                console.error('Error accessing camera:', error);
+            });
+    }
+</script>
+
+<script>
+    function face_login(userid){
+        var data = new FormData();
+        data.append("loginid", userid);
+        data.append("logintype", "F");
+        data.append("password", "");
+        data.append("from", "M");
+        var result = send_ajax_data("/VerifyLogin", data);
+
+        var res = result.status;
+        if (res == "BLOCKED")
+            alert("Your account is suspended. Please contact the administrator");
+        else if (res == "FAILED")
+            alert("Invalid userid or password");
+        else if (res == "SUCCESS") {
+            var homepage = result.homepage;
+
+            if (homepage == "") {
+                alert("You have no privileges");
+            } else {
+                window.open(homepage, "_self");
+            }
+        }
+    }
+
+    function login() {
+        if ($("#username").val().trim().length == 0) {
+            success_modal("Please enter a valid username", "I");
+            return;
+        }
+        if ($("#password").val().trim().length == 0) {
+            success_modal("Please enter a valid password to login", "I");
+            return;
+        }
+        var data = new FormData();
+        data.append('loginid', $('#username').val().toLowerCase());
+        data.append('password', $('#password').val());
+        data.append("logintype", "N");
+        data.append("from", "M");
+
+        var result = send_ajax_data("VerifyLogin", data);
+        res = result.status;
+        if (res == "BLOCKED")
+            alert("Your account is suspended. Please contact the administrator");
+        else if (res == "FAILED")
+            alert("Invalid userid or password");
+        else if (res == "SUCCESS") {
+            var homepage = result.homepage;
+
+            if (homepage == "") {
+                alert("You have no privileges");
+            } else {
+                window.open(homepage, "_self");
+            }
+        }
+    }
+
+    function toggle_password() {
+        $("#passblock").toggleClass("show");
+        if (document.getElementById("passblock").classList.contains("show")) {
+            document.getElementById("password").type = "text";
+        } else {
+            document.getElementById("password").type = "password";
+        }
+    }
+</script>
+
+</html>

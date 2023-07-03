@@ -1,0 +1,148 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .checkmark {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 24px;
+    }
+
+    .syllabus_card>.syllabus_card {
+        padding-left: 20px;
+    }
+
+    .checkmark {
+        color: #00000031;
+    }
+
+    .checkmark.done {
+        color: var(--my_green);
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row">
+                    <div class="col-5 my-auto fwb br" id="myclass">
+                        <span>Class : 2-A</span>
+                    </div>
+                    <div class="col-7 my-auto ps-2" id="totalper">
+                        00% Completed
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="card_container" style="perspective: 1000px;">
+
+        </div>
+    </div>
+</div>
+
+<div id="card_temp" hidden class="shadow pd-10 br-10 mb-3 syllabus_card">
+    <div class="row pr">
+        <div class="col-1 my-auto">
+            <i class="fas fa-circle" style="font-size: 6px;"></i>
+        </div>
+        <div class="col-9 title mt-auto f-14"></div>
+        <div class="col-2 my-auto text-end">
+            <i class="fas fa-check-circle checkmark"></i>
+        </div>
+    </div>
+</div>
+
+<script>
+    function load_data() {
+        var data = new FormData();
+        var listdata = load_ajax_data("get_parent_syllabus", data);
+
+        var list = listdata["syllabus"];
+        var std = listdata["student"];
+
+        var classtitle = std[0]["classtitle"];
+        var sectiontitle = std[0]["sectiontitle"];
+        if(sectiontitle != ""){
+            sectiontitle = " - "+sectiontitle;
+        }
+
+        $("#myclass").html("Class : "+classtitle+sectiontitle);
+
+        var parent = document.getElementById("card_container");
+        var temp = document.getElementById("card_temp");
+        parent.innerHTML = "";
+
+        var cards = new Array();
+
+        var alltotal = 0;
+        var alldone = 0;
+        for (var i = 0; i < list.length; i++) {
+            var totalchapter = parseInt(list[i]["totalchapter"]);
+            var donechapter = parseInt(list[i]["donechapter"]);
+            
+            alltotal += totalchapter;
+            alldone += donechapter;
+
+            var per = ((donechapter/totalchapter)*100).toFixed(2);
+
+            if(totalchapter == 0){
+                per = "0.00";
+            }
+            
+            parent.innerHTML += "<div class='fwb'>" + list[i]["title"] + " : " + per + "%" + "</div>";
+
+            var newdata = list[i]["data"];
+            
+            for (var j = 0; j < newdata.length; j++) {
+                var clone = clean_temp(temp);
+                parent.appendChild(clone);
+                
+                clone.setAttribute("data-cardid", newdata[j]["id"]);
+                clone.setAttribute("data-parentid", newdata[j]["parentid"]);
+                clone.getElementsByClassName("title")[0].innerHTML = newdata[j]["title"];
+
+                cards.push(clone);
+                var status = newdata[j]["completed"];
+
+                if (status == true) {
+                    clone.getElementsByClassName("checkmark")[0].classList.add("done");
+                }
+            }
+        }
+
+        var totalper = ((alldone/alltotal)*100).toFixed(2);
+        if(alltotal == 0){
+            totalper = "0.00";
+        }
+        $("#totalper").html(totalper+"% Completed");
+
+        //Arrange
+        for(var i=0;i<cards.length;i++){
+            var id = cards[i].getAttribute("data-cardid");
+            var pid = cards[i].getAttribute("data-parentid");
+
+            var pel = parent.querySelectorAll("[data-cardid='"+ pid +"']");
+            if(pel.length > 0){
+                pel = pel[0];
+
+                var newel = parent.querySelectorAll("[data-cardid='"+ id +"']");
+                pel.appendChild(newel[0]);
+                newel[0].className = "my-3 syllabus_card";
+                $(pel).find(".col-2").eq(0).find(".checkmark").remove();
+            }
+        }
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

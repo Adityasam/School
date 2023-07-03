@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+</style>
+
+<script src="https://cdn.tiny.cloud/1/tbzvhnmruukvg82zkjq3saaq2cw1k30j491zkkfzy2nfoz81/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead">Role Privileges</div>
+        <div class="col-9 my-auto text-end">
+        </div>
+    </div>
+
+    <div>
+        <table class="table f-12">
+            <thead>
+                <tr>
+                    <th style="width:20px">#</th>
+                    <th>Role</th>
+                    <th class="text-center" style="width:20%">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="container">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="temp">
+        <th class="count"></th>
+        <td class="title"></td>
+        <td class="text-center">
+            <i class="fas fa-lock-open cl-o cur" data-bs-toggle="tooltip" data-bs-placement="top" title="Privileges"
+            onclick="permissionModal()"></i>
+        </td>
+    </tr>
+</table>
+
+<!-- Permission Modal -->
+<div class="modal fade" id="permissionModal" style="width: 50%;left: 25%;" 
+data-id="" tabindex="-1" aria-labelledby="permissionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" style="width: 100%;">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-4 my-auto">
+                            <h5 class="modal-title fwb" id="permissionModalLabel">Privileges</h5>
+                        </div>
+                        <div class="col-7 my-auto">
+                            <input type="text" id="privsearch" onkeyup="search_privilege()"
+                            class="shadow br-30 form-control form-control-sm" placeholder="Search...">
+                        </div>
+                        <div class="col-1 my-auto">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table f-12">
+                                <thead>
+                                    <th>Title</th>
+                                    <th>Screen Type</th>
+                                    <th>Description</th>
+                                    <th>Permission</th>
+                                </thead>
+                                <tbody id="permission_body">
+                                    {% for p in perms %}
+                                    <tr style="vertical-align: middle;" class="privrow">
+                                        <td class="title">{{p.title}}</td>
+                                        <td>{% if p.desktop == True %}Desktop{% elif p.mobile == True %}Mobile{% endif %}</td>
+                                        <td class="desc">{{p.description}}</td>
+                                        <td style="width: 100px;">
+                                            <div class="custom_toggle shadow PERM_{{p.pagecode}}" 
+                                            data-code="{{p.pagecode}}" onclick="click_toggle()">
+                                                <span></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="save_permission()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function search_privilege(){
+        var srch = $("#privsearch").val().trim().toLowerCase();
+        var rows = document.getElementsByClassName("privrow");
+        for(var i=0;i<rows.length;i++){
+            var desc = rows[i].getElementsByClassName("desc")[0].innerHTML.trim().toLowerCase();
+            if(desc.includes(srch)){
+                rows[i].hidden = false;
+            }else{
+                rows[i].hidden = true;
+            }
+        }
+    }
+
+    function permissionModal(){
+        $("#permissionModal").find(".custom_toggle").removeClass("active");
+
+        var rolecode = event.target.parentElement.parentElement.getAttribute("data-id");
+        var data = new FormData();
+        data.append("rolecode", rolecode);
+        var list = load_ajax_data("load_role_privileges", data);
+
+        var privs = new Array();
+        for(var i=0;i<list.length;i++){
+            privs.push(".PERM_"+list[i]["privilegecode"]);
+        }
+
+        privs = privs.join(", ");
+
+        var items = document.getElementById("permission_body").getElementsByTagName("tr");
+        $("#permissionModal").find(privs).addClass("active");
+
+        $("#permissionModalLabel").attr("data-id", rolecode);
+        $("#permissionModal").modal("show");
+    }
+
+    function save_permission(){
+        var perms = new Array();
+        var items = document.getElementById("permission_body").getElementsByClassName("custom_toggle");
+        for(var i=0;i<items.length;i++){
+            if(items[i].classList.contains("active")){
+                perms.push(items[i].getAttribute("data-code"));
+            }
+        }
+
+        perms = perms.join("^");
+
+        var rolecode = $("#permissionModalLabel").attr("data-id");
+        var data = new FormData();
+        data.append("rolecode", rolecode);
+        data.append("codes", perms);
+        send_ajax_data("save_role_permissions", data);
+        $("#permissionModal").modal("hide");
+        show_toast("Privileges given", "success");
+    }
+</script>
+
+<script>
+    
+    function load_roles(){
+        var data = new FormData();
+        var list = load_ajax_data("load_roles", data);
+
+        var parent = document.getElementById("container");
+        var temp = document.getElementById("temp");
+
+        parent.innerHTML = "";
+        for(var i=0;i<list.length;i++){
+            var clone = clean_temp(temp);
+            parent.appendChild(clone);
+
+            clone.setAttribute("data-id", list[i]["rolecode"]);
+            clone.getElementsByClassName("count")[0].innerHTML = i+1;
+            clone.getElementsByClassName("title")[0].innerHTML = list[i]["title"];
+        }
+    }
+
+    $(window).on("load",function(){
+        load_roles();
+    })
+</script>
+
+{% endblock %}

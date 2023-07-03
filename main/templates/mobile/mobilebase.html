@@ -1,0 +1,228 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARCH</title>
+
+    <link rel="icon" href="{% static 'img/bluelogo.png' %}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/mystyle.css' %}?n=1">
+    <link rel="manifest" href="/static/_mobilemanifest.json" data-pwa-version="set_in_manifest_and_pwa_js">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+        integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+        <script src="https://kit.fontawesome.com/f422f2e2ec.js" crossorigin="anonymous"></script>
+    <script src="{% static 'js/location.js' %}"></script>
+    <script src="{% static 'js/myjs.js' %}"></script>
+    <script src="{% static 'js/banks.js' %}"></script>
+    <script src="{% static 'js/message.js' %}"></script>
+</head>
+
+<body>
+    <div class="container-fluid pr">
+        <!--Sidemenu-->
+        <div id="mobile_menu_container">
+            <i class="fas fa-bars cl-w pa" onclick="toggleMenu()"
+            style="font-size: 26px;left:calc(80vw + 10px);top:14px"></i>
+            <div id="mobilemenu" class="shadow">
+                <div class="row mb-3 pb-2" style="border-bottom: 1px solid white;">
+                    <div class="col-2 pe-0">
+                        <img src="{% static 'img/whitelogo_only.png' %}" class="mobilelogo" />
+                    </div>
+                    <div class="col-8 my-auto">
+                        <span class="fwb f-20 cl-w">ARCH</span>
+                    </div>
+                    <div class="col-2 my-auto text-end">
+                        <i class="fas fa-times f-20 cl-w" onclick="toggleMenu()"></i>
+                    </div>
+                </div>
+                <div>
+                    {% for m in menu %}
+                    {% with ur=m.pageurl ic=m.icon pagecode=request.session.PAGECODE %}
+                    <a href="{% url 'main:'|add:ur %}" style="text-decoration: none;">
+                    <div class="row cl-w mb-3 {% if pagecode == m.pagecode %}active_mobile_menu{% endif %}">
+                        <div class="col-2 my-auto pr">
+                        <img src="{% static 'img/'|add:ic %}" class="mobilemenuicon"/>
+                        </div>
+                        <div class="col-10 my-auto">
+                            <span class="f-14">{{m.title}}</span>
+                        </div>
+                    </div>
+                    </a>
+                    {% endwith %}
+                    {% endfor %}
+                    <a href="{% url 'main:logmeout' %}" style="text-decoration: none;">
+                    <div class="row cl-w mb-3">
+                        <div class="col-2 my-auto pr">
+                        <img src="{% static 'img/logout.png' %}" class="mobilemenuicon"/>
+                        </div>
+                        <div class="col-10 my-auto">
+                            <span class="f-14">Logout</span>
+                        </div>
+                    </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="main_content pdy-10">
+            <div class="row">
+                <div class="col-2"></div>
+                <div class="col-8 f-20 text-center my-auto cl-w" id="heading">{{pagename}}</div>
+                <div class="col-2 text-end my-auto">
+                    <a href="{% url 'main:discussion_board' %}">
+                        <div class="di pr" {% if compdiscussion == False %}hidden{% endif %}>
+                            <i class="fas fa-bell cl-w f-20"></i>
+                            <i class="fas fa-circle cl-g pa" {% if unread == "0"%}hidden{% endif %}
+                            style="top:0;right:10px;font-size: 8px;border: 2px solid white;border-radius: 100px;"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% block content %} {% endblock %}
+        </div>
+    </div>
+
+    <div id="toast" class="shadow success"></div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="successModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12 py-5 text-center">
+                                <div id="success_message"></div>
+                            </div>
+                            <div class="col-12 text-center">
+                                <div class="mybtn blue" onclick="dismiss_success()">Okay</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="confirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content br-30">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel">Alert</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row mb-5">
+                            <div class="col-12 text-center" style="font-size: 16px;" id="confirmMessage"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mybtn orange shadow" id="confirmNeg">No</div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <div class="mybtn green shadow" id="confirmPos">Yes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input id="PRIVILEGE" hidden value="{{request.session.PRIVILEGE}}"/>
+    <input id="USERID" hidden value="{{request.session.USERID}}"/>
+    <input id="SUPERADMIN" hidden value="{{request.session.SUPERADMIN}}"/>
+    <input id="EMPCODE" hidden value="{{request.session.EMPCODE}}"/>
+    <input id="HOMEPAGE" hidden value="{{request.session.HOMEPAGE}}"/>
+    <input id="USERTYPE" hidden value="{{request.session.USERTYPE}}"/>
+    <input id="COMPANY" hidden value="{{request.session.COMPANY}}"/>
+
+    <!--STatus temp-->
+    <div class="status_btn shadow" hidden id="status_temp" onclick="change_status()">
+        <div class="p-n">Active : </div>
+        <div class="p-n">546</div>
+    </div>
+    <input type="text" value="{% now 'Y-m-d' %}" id="currentdate" hidden />
+</body>
+
+<script src="{% static 'js/dropdown.js' %}"></script>
+
+<script>
+    function toggleMenu(){
+        $("#mobile_menu_container").toggleClass("active");
+    }
+
+    function ask_confirm(message, posfun, negfun) {
+        $("#confirmPos").on("click", function () {
+            window[posfun]();
+        })
+
+        $("#confirmNeg").on("click", function () {
+            window[negfun]();
+        })
+        $("#confirmMessage").html(message);
+        $("#confirmModal").modal("show");
+    }
+
+    function hide_confirm() {
+        $("#confirmModal").modal("hide");
+    }
+
+    function show_toast(message, type = "success") {
+        $("#toast").html(message);
+        $("#toast").removeClass("success");
+        $("#toast").removeClass("warning");
+
+        $("#toast").addClass(type);
+        $("#toast").addClass("show");
+
+        setTimeout(function () {
+            $("#toast").removeClass("show");
+        }, 2000);
+    }
+
+    function dismiss_success() {
+        $("#successModal").modal("hide");
+    }
+
+    function success_modal(message) {
+        $("#success_message").html(message);
+        $("#successModal").modal("show");
+    }
+
+    $(document).ready(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+</script>
+
+
+<script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/_service-worker.js')
+          .then(registration => {
+            console.log('Service worker registered:', registration);
+          })
+          .catch(error => {
+            console.log('Service worker registration failed:', error);
+          });
+      });
+    }
+  </script>
+
+</html>

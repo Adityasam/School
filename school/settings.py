@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 ROOT_URLCONF = 'school.urls'
 
@@ -65,7 +68,12 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'school.context_processor.get_active_session',
-                'school.context_processor.get_menu'
+                'school.context_processor.get_menu',
+                'school.context_processor.get_mobile_menu',
+                'school.context_processor.get_settings',
+                'school.context_processor.unread_message',
+                'school.context_processor.get_company',
+                'school.context_processor.get_company_detail',
             ],
         },
     },
@@ -115,7 +123,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

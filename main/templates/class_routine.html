@@ -28,19 +28,17 @@
                     class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
                 <div class="optionblock">
                     {% for class in classes %}
-                    <div class="option_item" data-fun="change_section" data-id="{{ class.id }}">{{class.Title}}</div>
+                    <div class="option_item" data-fun="load_section" data-id="{{ class.id }}">{{class.Title}}</div>
                     {% endfor %}
                 </div>
             </div>
         </div>
-        <div class="col-2 my-auto">
+        <div class="col-2 my-auto" {% if hassection == False %}hidden{% endif %}>
             <div class="custom_dropdown">
                 <input type="text" data-id="" id="sectionfilter"
                     class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
                 <div class="optionblock" id="sectionfilter_drop">
-                    {% for s in sections %}
-                    <div class="option_item" hidden data-cls="{{s.ClassId}}" data-id="{{ s.id }}">{{s.Title}}</div>
-                    {% endfor %}
+                    
                 </div>
             </div>
         </div>
@@ -271,19 +269,13 @@
         load_data();
     }
 
-    function change_section() {
-        var id = event.target.getAttribute("data-id");
-        $("#sectionfilter_drop").find(".option_item").attr("hidden", true);
-        $("#sectionfilter_drop").find("div[data-cls='" + id + "']").attr("hidden", false);
+    function load_section() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("sectionfilter_drop"));
+    }
 
-        var total = $("#sectionfilter_drop").find(".option_item").length;
-        var count = $("#sectionfilter_drop").find(".option_item[hidden]").length;
-
-        var active = total - count;
-        if (active == 0) {
-            $("#sectionfilter").val("No Section");
-            $("#sectionfilter").attr("data-id", "");
-        }
+    function change_section(){
+        
     }
 
     function edit_routine() {
@@ -356,14 +348,9 @@
             return;
         }
 
-        var secdrop = document.getElementById("sectionfilter_drop").getElementsByClassName("option_item");
-        var ac = 0;
-        for (var i = 0; i < secdrop.length; i++) {
-            if (secdrop[i].hidden == false) {
-                ac++;
-            }
-        }
-        if (sec == "" && ac != 0) {
+        var sectext = $("#sectionfilter").val();
+
+        if (sec == "" && sectext != "N/A" && "{{hassection}}" == "True") {
             show_toast("Please select the section", "warning");
             return;
         }
@@ -401,15 +388,9 @@
             return;
         }
 
-        var secdrop = document.getElementById("sectionfilter_drop").getElementsByClassName("option_item");
-        var ac = 0;
-        for (var i = 0; i < secdrop.length; i++) {
-            if (secdrop[i].hidden == false) {
-                ac++;
-            }
-        }
+        var sectext = $("#sectionfilter").val();
 
-        if (sec == "" && ac != 0) {
+        if (sec == "" && sectext != "N/A" && "{{hassection}}" == "True") {
             show_toast("Please select the section", "warning");
             return;
         }

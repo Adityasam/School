@@ -1,0 +1,148 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    tr.sunday {
+        background-color: var(--my_blue);
+        color: white;
+    }
+
+    tr.absent {
+        background-color: var(--my_red);
+        color: white;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row f-12" data-id="F" id="type">
+                    <div class="my-auto col-6 text-center">
+                        <div class="shadow mobile_status_btn active" data-fun="change_type" data-id="F">Faculty</div>
+                    </div>
+                    <div class="my-auto col-6 text-center">
+                        <div class="shadow mobile_status_btn" data-fun="change_type" data-id="S">Staff</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="student_container" style="perspective: 1000px;">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="main_body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="main_temp" style="vertical-align: middle;">
+        <th class="count">1</th>
+        <td>
+            <img src="{% static 'img/defaultuser.jpg' %}" alt="Picture" class="faculty_pic_mobile shadow p-n">
+        </td>
+        <td>
+            <div class="fwb f-16 name p-n"></div>
+            <div class="f-12 subject p-n"></div>
+        </td>
+        <th class="text-center">
+            <i class="fas fa-phone shadow contact_icon mobile" onclick="make_call()" data-id=""></i>
+        </th>
+    </tr>
+</table>
+
+<script>
+    function make_call(){
+        var id = event.target.getAttribute("data-id");
+        if(id != ""){
+            window.open("tel:"+id);
+        }
+    }
+
+    function open_profile(){
+        var id= event.target.getAttribute("data-id");
+        window.open("faculty_profile/"+id, "_self");
+    }
+
+    function change_type(){
+        load_data();
+    }
+
+    function load_data() {
+        var type = $("#type").attr("data-id");
+        console.log(type);
+        var data = new FormData();
+        
+        var parent = document.getElementById("main_body");
+        var temp = document.getElementById("main_temp");
+
+        parent.innerHTML = "";
+        
+        if (type == "F") {
+            data.append("status", "A");
+            data.append("search", "");
+            var list = load_ajax_data("get_faculty_list", data);
+
+            for(var i=0;i<list.length;i++){
+                var clone = clean_temp(temp);
+                parent.appendChild(clone);
+
+                $(clone).find("td,th").attr("data-id", list[i]["facultycode"]);
+                $(clone).find("td").on("click", function(){
+                    open_profile();
+                })
+                $(clone).find(".count").eq(0).html(i+1);
+                $(clone).find(".name").html(list[i]["fullname"]);
+                $(clone).find(".subject").html(list[i]["subjectname"]);
+                $(clone).find(".mobile").attr("data-id", list[i]["mobile"]);
+
+                if (list[i]["photo"] != "null" && list[i]["photo"] != "") {
+                    clone.getElementsByClassName("faculty_pic_mobile")[0].src = "/static/uploads/" + list[i]["photo"];
+                }
+            }
+        }
+        else if (type == "S") {
+            data.append("status", "A");
+            data.append("search", "");
+            var list = load_ajax_data("get_staff_list", data);
+
+            for(var i=0;i<list.length;i++){
+                var clone = clean_temp(temp);
+                parent.appendChild(clone);
+
+                $(clone).find("td,th").attr("data-id", list[i]["staffcode"]);
+                $(clone).on("click", function(){
+                    open_profile();
+                })
+                $(clone).find(".name").html(list[i]["fullname"]);
+                $(clone).find(".subject").html(list[i]["designationtitle"]);
+                $(clone).find(".mobile").attr("data-id", list[i]["mobile"]);
+
+                if (list[i]["photo"] != "null" && list[i]["photo"] != "") {
+                    clone.getElementsByClassName("faculty_pic_mobile")[0].src = "/static/uploads/" + list[i]["photo"];
+                }
+            }
+        }
+        
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

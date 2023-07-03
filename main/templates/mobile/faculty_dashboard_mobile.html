@@ -1,0 +1,251 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% load tz %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+
+    .statcard {
+        opacity: 0;
+    }
+
+    @keyframes statanim {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0px);
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+    integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-4">
+            <div class="pr" style="width:100%;padding-bottom: 60%;">
+                <img src="{% static 'img/defaultuser.jpg' %}" alt="" class="br-10 shadow"
+                style="width: 100%;height: 100%;object-fit: cover;object-position: top;position: absolute;top:0;left: 0;" id="photo">
+            </div>
+        </div>
+        <div class="col-8 my-auto">
+            <div class="fwb f-18 cl-w mb-1" id="name"></div>
+            <div class="cl-w f-12 mt-2">
+                <div class="custom_toggle white" id="attendance_toggle" data-fun="toggle_attendance"
+                    onclick="click_toggle()">
+                    <span></span>
+                    <div class="neg">Absent</div>
+                    <div class="pos">Present</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12">
+            <div class="row mb-5">
+                <div class="col-6">
+                    <a href="{% url 'main:faculty_routine_mobile' %}">
+                        <div class="bg-green cl-w shadow pd-10 br-10">
+                            <div class="fwb" style="font-size: 28px;" id="classes">0</div>
+                            <div class="f-12">Totday's Classes</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <div class="bg-orange cl-w shadow pd-10 br-10">
+                        <div class="fwb" style="font-size: 28px;" id="totalsyllabus">0%</div>
+                        <div class="f-12">Syllabus Done</div>
+                    </div>
+                </div>
+            </div>
+            <div id="chart_container" class="pb-3" style="overflow-x: scroll;scroll-snap-type: x mandatory;white-space: nowrap;">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="chart_temp" hidden style="width: 100%;display: inline-block;scroll-snap-align: start;vertical-align: top;">
+    <div class="row">
+        <div class="col-12 text-center mb-3 title">Class 5th - Maths</div>
+        <div class="col-6 my-auto f-12">
+            <div class="mb-2">
+                <i class="fas fa-circle cl-g pe-2"></i>
+                <span>Completed</span>
+            </div>
+            <div>
+                <i class="fas fa-circle pe-2" style="color: var(--my_gray);"></i>
+                <span>Pending</span>
+            </div>
+        </div>
+        <div class="col-6">
+            <canvas class="pd-2 shadow" style="border-radius: 1000px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggle_attendance() {
+        if (!$("#attendance_toggle").hasClass("active")) {
+            ask_confirm("Are you sure you want to mark youself absent?", "mark_attendance", "revert_toggle");
+        } else {
+            mark_attendance();
+        }
+    }
+
+    function revert_toggle() {
+        $("#attendance_toggle").addClass("active");
+        hide_confirm();
+    }
+
+    function mark_attendance() {
+        hide_confirm();
+        var code = $("#USERID").val();
+        var data = new FormData();
+
+        var status = "A";
+        if (document.getElementById("attendance_toggle").classList.contains("active")) {
+            status = "P";
+        }
+
+        if (navigator.geolocation) {
+            if (granted == true) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    var data = new FormData();
+                    data.append("facultycode", code);
+                    data.append("latitude", latitude);
+                    data.append("longitude", longitude);
+                    data.append("status", status);
+                    data.append("sessionid", "{{activesessionid}}");
+                    send_ajax_data("mark_self_attendance", data);
+                });
+            } else {
+                show_toast("Please grant location permission", "warning");
+            }
+        }
+    }
+
+    function load_data() {
+        var code = $("#USERID").val();
+        var data = new FormData();
+        data.append("code", code);
+        data.append("session", "{{activesessionid}}");
+        data.append("date", "{% now 'Y-m-d' %}");
+        data.append("day", (new Date()).getDay() + 1);
+        var alldetail = load_ajax_data("get_faculty_dashboard", data);
+        var detail = alldetail.data;
+        var syllabus = alldetail.syllabus;
+
+        $("#name").html(detail[0]["fullname"]);
+        if(detail[0]["photo"] != ""){
+            document.getElementById("photo").src = "/static/uploads/"+detail[0]["photo"];
+        }
+
+        var status = detail[0]["attendancestatus"];
+
+        if (status == "P") {
+            $("#attendance_toggle").addClass("active");
+        }
+
+        $("#classes").html(detail[0]["classes"]);
+
+        var totalchapter = 0;
+        var compchapter = 0;
+        for (var i = 0; i < syllabus.length; i++) {
+            var total = parseInt(syllabus[i]["totalsyllabus"]);
+            var comp = parseInt(syllabus[i]["completedsyllabus"]);
+
+            totalchapter += total;
+            compchapter += comp;
+
+            var piedata = new Array();
+            var per = ((comp/total)*100).toFixed();
+            if(isNaN(per)){
+                per = 0;
+            }
+            piedata.push(per);
+            piedata.push(100-per);
+            
+            draw_pie_chart(piedata, syllabus[i]["subjecttitle"], syllabus[i]["classtitle"]);
+        }
+
+        var totaper = ((compchapter/totalchapter)*100).toFixed();
+        if(isNaN(totaper)){
+            totaper = 0;
+        }
+        $("#totalsyllabus").html(totaper+"%");
+    }
+
+    $(window).on("load", function () {
+        load_data();
+        ask_location_permission();
+    })
+</script>
+
+<script>
+    function draw_pie_chart(ar, sub, cls) {
+        var parent = document.getElementById("chart_container");
+        var temp = document.getElementById("chart_temp");
+
+        var clone = clean_temp(temp);
+        parent.appendChild(clone);
+
+        clone.getElementsByClassName("title")[0].innerHTML = "Class "+cls+" - "+sub;
+
+        const ctx3 = clone.getElementsByTagName("canvas")[0].getContext('2d');
+
+        const data3 = {
+            labels: [
+                'Done',
+                'Pending'
+            ],
+            datasets: [{
+                label: 'Syllabus Summary',
+                data: ar,
+                backgroundColor: ["#6AC977", "#00000031"],
+                borderWidth: 2
+            }]
+        };
+
+        const ops3 = {
+            cutout: 30,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    anchor: 'center',
+                    align: 'top',
+                    formatter: (value) => {
+                        return ((value / 100) * 100).toFixed(2) + '%';
+                    },
+                    color: 'white'
+                }
+            }
+        }
+
+        const config3 = new Chart(ctx3, {
+            plugins: [ChartDataLabels],
+            type: 'doughnut',
+            data: data3,
+            options: ops3
+        });
+    }
+</script>
+
+{% endblock %}

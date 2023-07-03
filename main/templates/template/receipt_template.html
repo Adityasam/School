@@ -1,0 +1,127 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+        integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/f422f2e2ec.js" crossorigin="anonymous"></script>
+    <script src="{% static 'js/myjs.js' %}"></script>
+</head>
+
+<body style="position: relative;width:794px;height: 1000px;padding: 40px;" class="bg-white">
+    <div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <div class="fwb mb-2" style="font-size: 24px;">Naval’s Academy, Phulwaria</div>
+                    <a href="mailto:navals@gmail.com">
+                        <span>navals@gmail.com</span>
+                    </a>
+                    <div>+91 5546 45645</div>
+                </div>
+                <div class="col-12 my-5">
+                    <div class="f-16 fwb mb-3">Payment Details</div>
+                    <table class="f-14">
+                        <colgroup>
+                        <tr>
+                            <th>Receipt No:</th>
+                            <td style="padding-left: 20px;" id="receiptno">{{data.0.documentcode}}</td>
+                        </tr>
+                        <tr>
+                            <th>Preapred By</th>
+                            <td style="padding-left: 20px;" id="preparedby">{{data.0.fullname}}</td>
+                        </tr>
+                        <tr>
+                            <th>Student Code</th>
+                            <td style="padding-left: 20px;" id="studentcode">{{data.0.studentcode}}</td>
+                        </tr>
+                        <tr>
+                            <th>Student Name</th>
+                            <td style="padding-left: 20px;" id="studentname">{{data.0.fullname}}</td>
+                        </tr>
+                        <tr>
+                            <th>Date</th>
+                            <td style="padding-left: 20px;" id="documentdate">{{data.0.documentdate}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-12 mt-3 pt-3">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Discount</th>
+                                <th>Fine</th>
+                                <th>Net Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="item_body">
+                            {% for item in items %}
+                            <tr>
+                                <td>{{item.feetypetitle}} : {{item.monthyear}}</td>
+                                <td>{{item.amount}}</td>
+                                <td>{{item.discount}}</td>
+                                <td>{{item.fine}}</td>
+                                <td>{{item.totalamount}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th>Total</th>
+                                <th id="totalamount">{{data.0.totalamount}}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="col-12 mt-5">
+                    <span class="fwb">Amount in Words</span>
+                    <span id="words"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pa" style="bottom: 100px;left: 0px;width: 100%;padding-inline: 40px;">
+        <div class="row">
+            <div class="col-6">
+                <div>Cashier Signature</div>
+                <br>
+                <div>_________________</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+
+<script>
+    $(window).on("load", function () {
+        var total = parseFloat($("#totalamount").html().trim());
+        if(isNaN(total)){total = 0;}
+
+        $("#words").html(towords(total) + " only");
+        window.print();
+    })
+</script>

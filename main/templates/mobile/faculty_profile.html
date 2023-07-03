@@ -1,0 +1,157 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .profilepic {
+        border-radius: 1000px;
+        width: 100px;
+        height: 100px;
+        border: 2px solid var(--my_blue);
+        padding: 2px;
+        object-fit: cover;
+    }
+</style>
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12 text-center">
+            <div class="bg-white pd-10 br-30 shadow">
+                <img src="{% static 'img/defaultuser.jpg' %}" id="photo" class="profilepic shadow" />
+
+                <div class="fwb mt-3 f-20" id="facultyname">Aditya Nath Tiwari</div>
+                <div class="f-12" id="facultycode">FAC-00001</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px">
+        <div class="col-12 text-center fwb">Personal Details</div>
+        <hr>
+        <div class="col-12">
+            <table class="table f-14" style="vertical-align: middle;">
+                <tr>
+                    <th>
+                        <i class="fas fa-phone me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Mobile</span>
+                    </th>
+                    <td id="mobileno">+919892839884</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fab fa-whatsapp me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Whatsapp</span>
+                    </th>
+                    <td id="whatsapp">+919837398748</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-envelope me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Email</span>
+                    </th>
+                    <td id="emailid">aditya.ugp@gmail.com</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-calendar me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>DOB</span>
+                    </th>
+                    <td id="dateofbirth">23/01/1994</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-venus-mars me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Gender</span>
+                    </th>
+                    <td id="gender">Male</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-calendar me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Joining Date</span>
+                    </th>
+                    <td id="joiningdate">01/01/2023</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-id-card me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Aadhar No</span>
+                    </th>
+                    <td id="aadhar">7586 4545 3434</td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="fas fa-certificate me-2 text-center shadow table_icon_btn bg-orange" shadow></i>
+                        <span>Education</span>
+                    </th>
+                    <td id="education">BA</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px">
+        <div class="col-12 fwb text-center">Bank Details</div>
+        <hr>
+        <table class="table f-14" style="vertical-align: middle;">
+            <tr>
+                <th>Name In Bank</th>
+                <td id="nameinbank">Aditya Nath Tiwari</td>
+            </tr>
+            <tr>
+                <th>Bank Name</th>
+                <td id="bankname">Union Bank Of India</td>
+            </tr>
+            <tr>
+                <th>Account No</th>
+                <td id="accountno">0384956094849</td>
+            </tr>
+            <tr>
+                <th>IFSC</th>
+                <td id="ifsc">UBI02849495</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    function load_data() {
+        var facultycode = "{{facultycode}}";
+        if(facultycode == ""){
+            facultycode = $("#USERID").val();
+        }
+        var data = new FormData();
+        data.append("facultycode", facultycode);
+        var alldata = load_ajax_data("/get_faculty_detail", data);
+        var faculty = alldata.data[0];
+        var subjects = alldata.subjects;
+
+        if (faculty["photo"] != "") {
+            document.getElementById("photo").src = "/static/uploads/" + faculty["photo"];
+        }
+        $("#facultyname").html(faculty["fullname"]);
+        $("#facultycode").html(facultycode);
+        $("#mobileno").html(faculty["mobile"]);
+        $("#emailid").html(faculty["email"]);
+        $("#whatsapp").html(faculty["whatsapp"]);
+        $("#dateofbirth").html(format_date(faculty["dateofbirth"]));
+        if (faculty["gender"] == "M") {
+            $("#gender").html("Male");
+        }else if (faculty["gender"] == "F") {
+            $("#gender").html("Female");
+        }
+        $("#joiningdate").html(format_date(faculty["joiningdate"]));
+        $("#aadhar").html(faculty["aadharno"]);
+        $("#education").html(faculty["education"]);
+        $("#nameinbank").html(faculty["nameinbank"]);
+        $("#bankname").html(get_bank_name(faculty["bankcode"]));
+        $("#accountno").html(faculty["bankaccountno"]);
+        $("#ifsc").html(faculty["ifsc"]);
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

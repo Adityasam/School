@@ -1,0 +1,134 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row f-12" data-id="{{type}}" id="type">
+                    <div class="col my-auto">
+                        <input type="date" id="datefilter" value="{% now 'Y-m-d' %}" onchange="load_data()"
+                        class="form-control form-control-sm f-12 shadow br-30">
+                    </div>
+                    <div class="my-auto col text-center">
+                        <div class="shadow mobile_status_btn {% if type == 'F' %}active{% endif %}" data-fun="load_data" data-id="F">Faculty</div>
+                    </div>
+                    <div class="my-auto col text-center">
+                        <div class="shadow mobile_status_btn {% if type == 'S' %}active{% endif %}" data-fun="load_data" data-id="S">Staff</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="main_body">
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="main_temp" style="vertical-align: middle;">
+        <td>
+            <img src="{% static 'img/defaultuser.jpg' %}" alt="Picture" class="faculty_pic_mobile shadow">
+        </td>
+        <td class="name"></td>
+        <td>
+            <div class="custom_toggle" data-fun="mark_attendance" style="width: 84px;" onclick="click_toggle()">
+                <span></span>
+                <div class="pos">Present</div>
+                <div class="neg">Absent</div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<script>
+    function mark_attendance(){
+        var date = $("#datefilter").val();
+        
+        var id = event.target.parentElement.parentElement.getAttribute("data-id");
+        var status = "A";
+        if(event.target.classList.contains("active")){
+            status = "P";
+        }
+
+        var data = new FormData();
+        data.append("date", date);
+        data.append("facultycode", id);
+        data.append("status", status);
+        data.append("sessionid", "{{activesessionid}}");
+        send_ajax_data("/mark_faculty_attendance", data);
+    }
+
+    function load_data() {
+        var type = $("#type").attr("data-id");
+        var data = new FormData();
+        
+        var parent = document.getElementById("main_body");
+        var temp = document.getElementById("main_temp");
+
+        parent.innerHTML = "";
+        
+        if (type == "F") {
+            data.append("date", $("#datefilter").val());
+            var list = load_ajax_data("/get_faculty_list_attendance", data);
+
+            for(var i=0;i<list.length;i++){
+                var clone = clean_temp(temp);
+                parent.appendChild(clone);
+
+                $(clone).attr("data-id", list[i]["facultycode"]);
+                $(clone).find(".name").html(list[i]["fullname"]);
+                
+                if (list[i]["photo"] != "null" && list[i]["photo"] != "") {
+                    clone.getElementsByClassName("faculty_pic_mobile")[0].src = "/static/uploads/" + list[i]["photo"];
+                }
+
+                if(list[i]["status"] == "P"){
+                    clone.getElementsByClassName("custom_toggle")[0].classList.add("active");
+                }
+            }
+        }
+        else if (type == "S") {
+            data.append("date", $("#datefilter").val());
+            var list = load_ajax_data("/get_staff_list_attendance", data);
+
+            for(var i=0;i<list.length;i++){
+                var clone = clean_temp(temp);
+                parent.appendChild(clone);
+
+                $(clone).attr("data-id", list[i]["staffcode"]);
+                $(clone).find(".name").html(list[i]["fullname"]);
+
+                if (list[i]["photo"] != "null" && list[i]["photo"] != "") {
+                    clone.getElementsByClassName("faculty_pic_mobile")[0].src = "/static/uploads/" + list[i]["photo"];
+                }
+
+                if(list[i]["status"] == "P"){
+                    clone.getElementsByClassName("custom_toggle")[0].classList.add("active");
+                }
+            }
+        }
+        
+    }
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}

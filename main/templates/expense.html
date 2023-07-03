@@ -65,7 +65,7 @@
                 <div class="fwb remarks"></div>
             </div>
             <div class="col-1 text-end my-auto">
-                <i class="fas fa-eye mb-2 me-3 cur" style="color:var(--my_green)"></i>
+                <i class="fas fa-eye mb-2 me-3 cur" onclick="open_detail()" style="color:var(--my_green)"></i>
                 <br>
                 <i class="fas fa-edit me-3 cur" style="color:var(--my_green)" onclick="edit_expense()"></i>
             </div>
@@ -172,6 +172,70 @@
     </div>
 </div>
 
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" data-id="" tabindex="-1" aria-labelledby="detailModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="width:100%;">
+        <div class="modal-content" style="border-radius: 30px;">
+            <div class="modal-header">
+                <h5 class="modal-title fwb" id="detailModalLabel">Expense Detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid g-0">
+                    <div class="row">
+                        <div class="col-12 f-12">
+                            <div class="row">
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Expense Type</div>
+                                    <div id="expensetype_d"></div>
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Expense Date</div>
+                                    <div id="expensedate_d"></div>
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Amount</div>
+                                    <div id="amount_d"></div>
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Document No</div>
+                                    <div id="docno_d"></div>
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Invoice Copy</div>
+                                    <a id="invoice_d" style="color: var(--my_blue) !important;" target="_blank" href="">View Document</a>
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Session</div>
+                                    <div id="modalsession_d"></div>
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Payment Mode</div>
+                                    <div id="mode_d"></div>
+                                </div>
+                                <div class="col-4 mb-4">
+                                    <div class="mb-1 f-10">Referenece No</div>
+                                    <div id="refno_d"></div>
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <div class="mb-1 f-10">Remarks</div>
+                                    <div id="remarks_d"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deletebtn" onclick="start_delete()">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="submit_data()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     function start_delete(){
         $("#expenseModal").modal("hide");
@@ -184,6 +248,36 @@
         hide_confirm();
         load_data();
     }
+
+    function open_detail() {
+        var parent = event.target.parentElement.parentElement.parentElement.parentElement;
+        var id = parent.getAttribute("data-id");
+        $("#expenseModalLabel").html("EdExpense Detail : ");
+
+        var data = new FormData();
+        data.append("expensecode", id);
+        var detail = load_ajax_data("get_expense_detail", data);
+        detail = detail.data;
+
+        $("#modalfilter").attr("data-id", detail["sessionid"]);
+        $("#expensetype_d").html(detail["typetitle"]);
+        $("#expensedate_d").html(detail["documentdate"]);
+        $("#amount_d").html(INR+" "+detail["amount"]);
+        $("#docno_d").html(detail["documentno"]);
+        $("#mode_d").html(detail["modetitle"]);
+        $("#refno_d").html(detail["referenceno"]);
+        $("#remarks_d").html(detail["remarks"]);
+        $("#modalsession_d").html(detail["sessiontitle"]);
+
+        if (detail["invoicecopy"] != "") {
+            document.getElementById("invoice_d").setAttribute("href", "/static/uploads/"+detail["invoicecopy"]);
+        }else{
+            document.getElementById("invoice_d").setAttribute("href", "");
+        }
+
+        $("#detailModal").modal("show");
+    }
+
 
     function edit_expense() {
         var parent = event.target.parentElement.parentElement.parentElement.parentElement;

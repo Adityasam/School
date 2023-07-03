@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .main_card {
+        perspective: 500px;
+    }
+</style>
+
+<script src="{% static 'ckeditor/ckeditor.js'%}"></script>
+
+<div class="bg-light shadow br-30 pdx-30 pdy-20 main_block">
+    <div class="row">
+        <div class="col-3 fwb pagehead">Home Work</div>
+        <div class="col-2 my-auto">
+
+        </div>
+        <div class="col-3 my-auto">
+
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-2 br">
+            <div class="mb-4">
+                <div class="f-12">Section</div>
+                <div class="custom_dropdown">
+                    <input type="text" data-id="{{activesessionid}}" id="sessionfilter" value="{{activesession}}"
+                        class="class search_input shadow br-30 form-control f-12 OP" placeholder="Session..." />
+                    <div class="optionblock">
+                        {% for s in sessions %}
+                        <div class="option_item" data-fun="load_data" data-id="{{ s.id }}">
+                            {{s.Title}}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="f-12">Class</div>
+                <div class="custom_dropdown">
+                    <input type="text" data-id="" id="classfilter"
+                        class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
+                    <div class="optionblock">
+                        {% for class in classes %}
+                        <div class="option_item" data-fun="change_class" data-id="{{ class.id }}">{{class.Title}}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4" {% if hassection == False %}hidden{% endif %}>
+                <div class="f-12">Section</div>
+                <div class="custom_dropdown">
+                    <input type="text" data-id="" id="sectionfilter"
+                        class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
+                    <div class="optionblock" id="section_drop">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="f-12">Subject</div>
+                <div class="custom_dropdown">
+                    <input type="text" data-id="" id="subjectfilter"
+                        class="class search_input shadow br-30 form-control f-12 OP" placeholder="Subject..." />
+                    <div class="optionblock">
+                        {% for s in subjects %}
+                        <div class="option_item" data-id="{{ s.id }}">{{s.Title}}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="mb-5">
+                <div class="f-12">Date</div>
+                <input type="date" id="datefilter" class="form-control form-control-sm f-12 shadow br-30" value="{% now 'Y-m-d' %}">
+            </div>
+            <div class="mybtn blue db text-center shadow" onclick="load_data()">Load</div>
+        </div>
+
+        <div class="col">
+            <textarea id="tinyeditor" data-id=""></textarea>
+            <div class="text-end mt-20">
+                <div class="mybtn green shadow px-5" onclick="submit_data()">Save</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    CKEDITOR.replace('tinyeditor');
+</script>
+
+<script>
+    function change_class() {
+        var classid = event.target.getAttribute("data-id");
+        get_section(classid, document.getElementById("section_drop"));
+    }
+
+
+    function load_data(){
+        var data = new FormData();
+        var sessionid = $("#sessionfilter").attr("data-id");
+        var classid = $("#classfilter").attr("data-id");
+        var subjectid = $("#subjectfilter").attr("data-id");
+        var sectionid = $("#sectionfilter").attr("data-id");
+        var datefilter= $("#datefilter").val();
+
+        if(sessionid == ""){
+            show_toast("Please select the session", "warning");
+            return;
+        }
+
+        if(classid == ""){
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        if(sectionid == "" && "{{hassection}}" == "True" && $("#sectionfilter").val() != "N/A"){
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        if(subjectid == ""){
+            show_toast("Please select the subject", "warning");
+            return;
+        }
+
+        if(datefilter == ""){
+            show_toast("Please select the date", "warning");
+            return;
+        }
+
+        var data = new FormData();
+        data.append("sessionid", sessionid);
+        data.append("classid", classid);
+        data.append("subjectid", subjectid);
+        data.append("sectionid", sectionid);
+        data.append("date", datefilter);
+        var work = load_ajax_data("load_homework", data);
+        if(work.length > 0){
+            work = work[0];
+            CKEDITOR.instances["tinyeditor"].setData(work["work"]);
+        }else{
+            CKEDITOR.instances["tinyeditor"].setData("");;
+        }
+    }
+
+    function submit_data(){
+        var data = new FormData();
+        var sessionid = $("#sessionfilter").attr("data-id");
+        var classid = $("#classfilter").attr("data-id");
+        var sectionid = $("#sectionfilter").attr("data-id");
+        var subjectid = $("#subjectfilter").attr("data-id");
+        var datefilter= $("#datefilter").val();
+        var text = CKEDITOR.instances['tinyeditor'].getData();
+
+        if(sessionid == ""){
+            show_toast("Please select the session", "warning");
+            return;
+        }
+
+        if(classid == ""){
+            show_toast("Please select the class", "warning");
+            return;
+        }
+
+        if(sectionid == "" && "{{hassection}}" == "True" && $("#sectionfilter").val() != "N/A"){
+            show_toast("Please select the section", "warning");
+            return;
+        }
+
+        if(subjectid == ""){
+            show_toast("Please select the subject", "warning");
+            return;
+        }
+
+        if(datefilter == ""){
+            show_toast("Please select the date", "warning");
+            return;
+        }
+
+        if(text == ""){
+            show_toast("Please enter something in home work", "warning");
+            return;
+        }
+
+        data.append("sessionid", sessionid);
+        data.append("classid", classid);
+        data.append("subjectid", subjectid);
+        data.append("sectionid", sectionid);
+        data.append("date", datefilter);
+        data.append("text", text);
+        data.append("givenby", $("#USERID").val());
+        send_ajax_data("save_homework", data);
+
+        show_toast("Home Work Saved", "success");
+    }
+</script>
+
+{% endblock %}

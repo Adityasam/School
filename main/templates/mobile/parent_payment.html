@@ -1,0 +1,93 @@
+{% extends 'mobile/mobilebase.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid g-0">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="bg-white pd-10 br-30 shadow">
+                <div class="row">
+                    <div class="col-3 my-auto fwb">
+                        Session
+                    </div>
+                    <div class="col-7 my-auto">
+                        <div class="custom_dropdown">
+                            <input type="text" data-id="{{activesessionid}}" value="{{activesession}}"
+                                id="sessionfilter" class="class search_input shadow br-30 form-control f-12 OP"
+                                placeholder="Session..." />
+                            <div class="optionblock">
+                                {% for s in sessions %}
+                                <div class="option_item" data-id="{{ s.id }}">{{s.Title}}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 my-auto ps-0 text-center">
+                        <div class="bg-green br-30 shadow" style="padding: 3px;" onclick="load_data()">
+                            <i class="fas fa-search cl-w f-14 p-n"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bg-light mt-3 g-0 pdy-20 pdx-10" style="border-radius: 20px 20px 0px 0px;">
+        <div class="col-12" id="student_container" style="perspective: 1000px;">
+            <table class="table f-12">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Payment Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="main_body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<table hidden>
+    <tr id="row_temp">
+        <td>
+            <div class="desc"></div>
+            <div class="f-10 month"></div>
+        </td>
+        <td class="date"></td>
+        <th class="amount"></th>
+    </tr>
+</table>
+
+<script>
+    function load_data() {
+        var sessionid = $("#sessionfilter").attr("data-id");
+        var data = new FormData();
+        data.append("sessionid", sessionid);
+        var list = load_ajax_data("get_parent_payment", data);
+
+        var parent = document.getElementById("main_body");
+        var temp = document.getElementById("row_temp");
+
+        parent.innerHTML = "";
+        for (var i = 0; i < list.length; i++) {
+            var clone = clean_temp(temp);
+
+            parent.appendChild(clone);
+
+            clone.getElementsByClassName("desc")[0].innerHTML = list[i]["typetitle"];
+            clone.getElementsByClassName("month")[0].innerHTML = convert_monthyear(list[i]["monthyear"]);
+            clone.getElementsByClassName("date")[0].innerHTML = format_date(list[i]["documentdate"]);
+            clone.getElementsByClassName("amount")[0].innerHTML = INR + " " + list[i]["totalamount"];
+        }
+    }
+
+
+    $(window).on("load", function () {
+        load_data();
+    })
+</script>
+
+{% endblock %}
