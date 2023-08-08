@@ -410,7 +410,13 @@ function convert_monthyear(monthyear) {
   }
 }
 
-function get_section(classid, drop) {
+function get_principal(){
+  var data = new FormData();
+  var list = load_ajax_data("/get_principal", data);
+  return list;
+}
+
+function get_section(classid, drop, fun="") {
   var data = new FormData();
   data.append("classid", classid);
   var list = load_ajax_data("get_class_section", data);
@@ -432,7 +438,11 @@ function get_section(classid, drop) {
     div.className = "option_item";
     div.innerHTML = list[i]["title"];
     div.setAttribute("data-id", list[i]["id"]);
-    div.setAttribute("data-fun", "change_section");
+    if(fun!=""){
+      div.setAttribute("data-fun", fun);
+    }else{
+      div.setAttribute("data-fun", "change_section");
+    }
     div.onclick = function () {
       click_drop();
     };

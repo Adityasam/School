@@ -141,7 +141,7 @@
                                 <div class="col-4 mb-4">
                                     <div class="mb-1 f-10">Batch</div>
                                     <div class="custom_dropdown">
-                                        <input type="text" data-id="" id="batch"
+                                        <input type="text" data-id="" id="batch" data-mandatory="Please select batch"
                                             class="search_input shadow br-30 form-control f-12 OP"
                                             placeholder="Batch..." />
                                         <div class="optionblock">
@@ -179,12 +179,12 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-warning" id="block_btn" onclick="block_member()">Block</button>
-                <button type="button" class="btn btn-danger" id="deletebtn" onclick="start_delete()">Delete</button>
-                <button type="button" class="btn btn-primary" id="archivebtn" onclick="archive_member()">Archive</button>
-                <button type="button" class="btn btn-primary" id="unarchivebtn" onclick="unarchive()">Unarchive</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" onclick="submit_data()">Save</button>
+                <button type="button" class="btn btn-warning OLD BTN" id="block_btn" onclick="block_member()">Block</button>
+                <button type="button" class="btn btn-danger OLD BTN" id="deletebtn" onclick="start_delete()">Delete</button>
+                <button type="button" class="btn btn-primary OLD BTN" id="archivebtn" onclick="archive_member()">Archive</button>
+                <button type="button" class="btn btn-primary OLD BTN" id="unarchivebtn" onclick="unarchive()">Unarchive</button>
+                <button type="button" class="btn btn-secondary NEW OLD BTN" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success NEW OLD BTN" onclick="submit_data()">Save</button>
             </div>
         </div>
     </div>
@@ -421,6 +421,8 @@
         }
 
         set_drop_default();
+        $(".BTN").attr("hidden", true);
+        $(".OLD").attr("hidden", false);
         $("#studentModal").modal("show");
     }
 
@@ -436,6 +438,13 @@
 
         for (var i = 0; i < ops.length; i++) {
             data.append(ops[i].id, ops[i].getAttribute("data-id"));
+            if(ops[i].getAttribute("data-id") == ""){
+                var man = ops[i].getAttribute("data-mandatory");
+                if(man != "undefined" && man != null){
+                    show_toast(man, "warning");
+                    return;
+                }
+            }
         }
         for (var i = 0; i < inps.length; i++) {
             if (inps[i].value != "") {
@@ -482,6 +491,8 @@
         $("#studentModal").find(".opbtn").removeClass("active");
         $("#studentModal").find("input").val("");
         $("#studentModal").find("input").attr("data-id","");
+        $(".BTN").attr("hidden", true);
+        $(".NEW").attr("hidden", false);
         $("#studentModal").modal("show");
     }
 

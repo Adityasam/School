@@ -84,6 +84,7 @@ urlpatterns = [
     path("attendancemobile", views.attendancemobile, name="attendancemobile"),
     path("get_student_attendance", views.get_student_attendance, name="get_student_attendance"),
     path("mark_individual_attendance", views.mark_individual_attendance, name="mark_individual_attendance"),
+    path("mark_bulk_attendance", views.mark_bulk_attendance, name="mark_bulk_attendance"),
     path("mark_self_attendance", views.mark_self_attendance, name="mark_self_attendance"),
     path("get_faculty_dashboard", views.get_faculty_dashboard, name="get_faculty_dashboard"),
     path("print_report_card", views.print_report_card, name="print_report_card"),
@@ -192,4 +193,5 @@ urlpatterns = [
     path("block_unblock_user", views.block_unblock_user, name="block_unblock_user"),
     path("update_member_user", views.update_member_user, name="update_member_user"),
     path("student_payment_record", views.student_payment_record, name="student_payment_record"),
+    path("get_principal", views.get_principal, name="get_principal"),
 ]

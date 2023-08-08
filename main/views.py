@@ -2082,6 +2082,31 @@ def mark_individual_attendance(request):
     return JsonResponse({"status":"success"})
 
 @csrf_exempt
+def mark_bulk_attendance(request):
+    date = request.POST.get("date")
+    sessionid = request.POST.get("sessionid")
+    datastring = request.POST.get("datastring").split("#")
+
+    atype = "S"
+    if "type" in request.POST:
+        atype = request.POST.get("type")
+
+    for data in datastring[:-1]:
+        spl = data.split("^")
+        old = Attendance.objects.filter(StudentCode = spl[0], AttendanceDate = date, SessionId = sessionid)
+        old.delete()
+        att = Attendance()
+        att.StudentCode = spl[0]
+        att.AttendanceDate = date
+        att.SessionId = sessionid
+        att.Status = spl[1]
+        att.Type = atype
+        att.MarkedBy = request.session["USERID"]
+        att.save()
+
+    return JsonResponse({"status":"success"})
+
+@csrf_exempt
 def mark_faculty_attendance(request):
     date = request.POST.get("date")
     code = request.POST.get("facultycode")
@@ -2265,15 +2290,25 @@ def get_faculty_dashboard(request):
     return JsonResponse({"data":alldata, "syllabus":syllabus})
 
 @csrf_exempt
+def get_principal(request):
+    principal = []
+    with connection.cursor() as cursor:
+        cursor.execute("""select * from main_MyUser u
+                       where u.UserType = 'L' and u.Blocked = 0 and u.Deleted = 0""")
+        principal = parse_curser(cursor)
+    return JsonResponse(principal, safe=False)
+
+@csrf_exempt
 def get_student_attendance(request):
     cls = request.POST.get("classid")
     date = request.POST.get("date")
     sec = request.POST.get("sectionid")
-    
+
     alldata = []
     with connection.cursor() as cursor:
         cursor.execute("""select s.*,
-        (select a.Status from main_Attendance a where a.StudentCode = s.StudentCode and a.AttendanceDate = %s) as attendancestatus 
+        (select a.Status from main_Attendance a where a.StudentCode = s.StudentCode and
+                       strftime('%%Y-%%m-%%d', a.AttendanceDate) = %s) as attendancestatus 
         from main_Student s where s.Class = %s and (s.Section = %s or %s = '' or %s is null)""", [date, cls, sec, sec, sec])
 
         alldata = parse_curser(cursor)

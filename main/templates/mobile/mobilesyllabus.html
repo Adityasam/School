@@ -29,7 +29,7 @@
         <div class="col-12">
             <div class="bg-white pd-10 br-30 shadow">
                 <div class="row">
-                    <div class="pe-0 {% if hassection == False %}col-5{%else%}col-3{% endif %} my-auto">
+                    <div class="pe-2 col my-auto">
                         <div class="custom_dropdown">
                             <input type="text" data-id="" id="classfilter"
                                 class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
@@ -40,29 +40,27 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-3 my-auto pe-0" id="secdrop" {% if hassection == False %}hidden{% endif %}>
+                    <div class="col my-auto g-0" id="secdrop" {% if hassection == False %}hidden{% endif %}>
                         <div class="custom_dropdown">
                             <input type="text" data-id="" id="sectionfilter"
                                 class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
                             <div class="optionblock" id="sectionfilter_drop">
-                                {% for s in sections %}
-                                <div class="option_item" data-cls="{{s.ClassId}}" hidden data-id="{{ s.id }}">{{s.Title}}</div>
-                                {% endfor %}
+                                
                             </div>
                         </div>
                     </div>
-                    <div class="{% if hassection == False %}col-5{%else%}col-4{% endif %} my-auto">
+                    <div class="col-4 my-auto ps-2">
                         <div class="custom_dropdown">
                             <input type="text" data-id="" id="subjectfilter"
                                 class="class search_input shadow br-30 form-control f-12 OP" placeholder="Subject..." />
                             <div class="optionblock">
                                 {% for s in subjects %}
-                                <div class="option_item" data-id="{{ s.id }}">{{s.Title}}</div>
+                                <div class="option_item" data-fun="load_data" data-id="{{ s.id }}">{{s.Title}}</div>
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
-                    <div class="col-2 my-auto ps-0 text-center">
+                    <div class="col-2 my-auto ps-0 text-center" hidden>
                         <div class="bg-green br-30 shadow" style="padding: 3px;" onclick="load_data()">
                             <i class="fas fa-search cl-w f-14 p-n"></i>
                         </div>
@@ -135,23 +133,9 @@
         var subject = document.getElementById("subjectfilter").getAttribute("data-id");
         var cls = document.getElementById("classfilter").getAttribute("data-id");
 
-        if(cls == ""){
-            show_toast("Please select the class", "warning");
-            return;
-        }
-
-        if(subject == ""){
-            show_toast("Please select the subject", "warning");
-            return;
-        }
-
         var sec = $("#sectionfilter").attr("data-id");
         var secvalue = $("#sectionfilter").val();
-        if(secvalue != "N/A" && sec == "" && "{{hassection}}" == "True"){
-            show_toast("Please select the section", "warning");
-            return;
-        }
-
+        
         var data = new FormData();
         data.append("classid", cls);
         data.append("subjectid", subject);

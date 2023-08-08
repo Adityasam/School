@@ -7,33 +7,35 @@
         <div class="col-12">
             <div class="bg-white pd-10 br-30 shadow">
                 <div class="row">
-                    <div class="{% if hassection == False %}col-5{%else%}col-3{% endif %} my-auto pe-0">
+                    <div class="col my-auto pe-2">
                         <div class="custom_dropdown">
                             <input type="text" data-id="" id="classfilter"
                                 class="class search_input shadow br-30 form-control f-12 OP" placeholder="Class..." />
                             <div class="optionblock">
                                 {% for class in classes %}
-                                <div class="option_item" data-fun="change_class" data-id="{{ class.id }}">{{class.Title}}</div>
+                                <div class="option_item" data-fun="change_class" data-id="{{ class.id }}">
+                                    {{class.Title}}</div>
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
-                    <div class="col-3 my-auto pe-0" id="secdrop" {% if hassection == False %}hidden{% endif %}>
+                    <div class="col my-auto g-0" id="secdrop" {% if hassection == False %}hidden{% endif %}>
                         <div class="custom_dropdown">
                             <input type="text" data-id="" id="sectionfilter"
                                 class="class search_input shadow br-30 form-control f-12 OP" placeholder="Section..." />
                             <div class="optionblock" id="sectionfilter_drop">
                                 {% for s in sections %}
-                                <div class="option_item" data-cls="{{d.ClassId}}" hidden data-id="{{ s.id }}">{{s.Title}}</div>
+                                <div class="option_item" data-cls="{{d.ClassId}}" hidden data-id="{{ s.id }}">
+                                    {{s.Title}}</div>
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
-                    <div class="my-auto {% if hassection == False %}col-5{%else%}col-4{% endif %}">
-                        <input type="date" value="{% now 'Y-m-d' %}" id="datefilter"
+                    <div class="my-auto col-4 ps-2">
+                        <input type="date" value="{% now 'Y-m-d' %}" id="datefilter" onchange="load_data()"
                             class="search_input shadow br-30 form-control f-12" />
                     </div>
-                    <div class="col-2 my-auto ps-0 text-center">
+                    <div class="col-2 my-auto text-center" hidden>
                         <div class="bg-green br-30 shadow" style="padding: 3px;" onclick="load_data()">
                             <i class="fas fa-search cl-w f-14 p-n"></i>
                         </div>
@@ -49,6 +51,9 @@
         </div>
     </div>
 </div>
+
+<div class="bg-green di pdx-20 py-1 shadow br-30" onclick="mark_together()"
+    style="position: fixed;bottom: 20px;left: 50%;transform: translateX(-50%);">Save</div>
 
 <div id="student_temp" hidden class="bg-white shadow pd-10 br-10 mb-3 att_card">
     <div class="row">
@@ -66,20 +71,134 @@
     </div>
 </div>
 
+<!-- Confirma Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirm Attendance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body f-14">
+                <div class="container-fluid" id="confirm_container">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="confirm_attendance()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row my-2" id="confirm_temp" hidden>
+    <div class="col-8 name fwb single_line"></div>
+    <div class="col-4 status text-end my-auto">Absent</div>
+</div>
+
 <script>
     function change_class() {
         var classid = event.target.getAttribute("data-id");
-        get_section(classid, document.getElementById("sectionfilter_drop"));
+        get_section(classid, document.getElementById("sectionfilter_drop"), "load_data");
+        var count = document.getElementById("sectionfilter_drop").getElementsByClassName("option_item").length;
+        document.getElementById("student_container").innerHTML = "";
+        
+        if(document.getElementById("secdrop").hidden == true || count == 0){
+            load_data();
+        }
     }
 
-    function mark_attendance(){
+    function confirm_attendance(){
+        var date = $("#datefilter").val();
+        var cls = $("#classfilter").attr("data-id");
+        var session = "{{activesessionid}}";
+        var classname = $("#classfilter").val();
+        var sectionname = $("#sectionfilter").val();
+        var section = $("#sectionfilter").attr("data-id");
+
+        var data = new FormData();
+        data.append("classid", cls);
+        data.append("date", date);
+        data.append("sessionid", session);
+        data.append("datastring", datastring);
+        
+        send_ajax_data("/mark_bulk_attendance", data);
+
+        //sending notification
+        for(var i=0;i<absentstudent.length;i++){
+            var codesplit = absentstudent[i].split("^");
+            var code = codesplit[0];
+            var name = codesplit[1];
+            send_push(code, name + " absent", name+" has been marked absent today", "{% url 'main:parent_attendance' %}");
+        }
+
+        //To Principal
+        var title = "Class " + classname +" - " + sectionname + " attendance marked";
+        if(section == ""){
+            var title = "Class " + classname + " attendance marked";
+        }
+
+        var message = presentcount + " present and "+absentcount+" absent";
+        var principal = get_principal();
+        for(var i=0;i<principal.length;i++){
+            send_push(principal[i]["userid"], title, message, "{% url 'main:login' %}");
+        }
+
+        show_toast("Attendance Saved", "success");
+
+        $("#confirmModal").modal("hide");
+    }
+
+    var datastring = "";
+    var absentstudent = [];
+    var presentcount = 0, absentcount = 0;
+    function mark_together() {
+        presentcount = 0;
+        absentcount = 0;
+        absentstudent = [];
+        var cards = document.getElementById("student_container").getElementsByClassName("att_card");
+        datastring = "";
+
+        var confirm_container = document.getElementById("confirm_container");
+        var confirm_temp = document.getElementById("confirm_temp");
+        confirm_container.innerHTML = "";
+
+        for (var i = 0; i < cards.length; i++) {
+            var id = cards[i].getAttribute("data-id");
+            var status = "A";
+            if (cards[i].getElementsByClassName("custom_toggle")[0].classList.contains("active")) {
+                status = "P";
+            }
+
+            datastring += id + "^" + status + "#";
+
+            if (status == "A") {
+                absentcount++;
+                absentstudent.push(id+"^"+cards[i].getElementsByClassName("name")[0].innerHTML);
+                var clone = clean_temp(confirm_temp);
+                confirm_container.appendChild(clone);
+                clone.getElementsByClassName("name")[0].innerHTML = cards[i].getElementsByClassName("name")[0].innerHTML;
+            }else{
+                presentcount++;
+            }
+        }
+
+        if(confirm_container.innerHTML == ""){
+            confirm_container.innerHTML = "All Students Present";
+        }
+
+        $("#confirmModal").modal("show");
+    }
+
+    function mark_attendance() {
         var date = $("#datefilter").val();
         var cls = $("#classfilter").attr("data-id");
         var session = "{{activesessionid}}";
 
         var id = event.target.parentElement.parentElement.parentElement.getAttribute("data-id");
         var status = "A";
-        if(event.target.classList.contains("active")){
+        if (event.target.classList.contains("active")) {
             status = "P";
         }
 
@@ -89,7 +208,7 @@
         data.append("sessionid", session);
         data.append("studentcode", id);
         data.append("status", status);
-        send_ajax_data("mark_individual_attendance", data);
+        //send_ajax_data("mark_individual_attendance", data);
     }
 
     function load_data() {
@@ -97,20 +216,19 @@
         var cls = document.getElementById("classfilter").getAttribute("data-id");
         var sec = $("#sectionfilter").attr("data-id");
         var secvalue = $("#sectionfilter").val();
-        if(secvalue != "N/A" && sec == "" && document.getElementById("secdrop").hidden == false){
-            show_toast("Please select the section", "warning");
-            return;
-        }
+        // if(secvalue != "N/A" && sec == "" && document.getElementById("secdrop").hidden == false){
+        //     show_toast("Please select the section", "warning");
+        //     return;
+        // }
 
         var data = new FormData();
         data.append("classid", cls);
         data.append("date", date);
-        if(sec != ""){
+        if (sec != "") {
             data.append("sectionid", sec);
         }
         var list = load_ajax_data("get_student_attendance", data);
 
-        console.log(list);
         var parent = document.getElementById("student_container");
         var temp = document.getElementById("student_temp");
         parent.innerHTML = "";
@@ -124,7 +242,7 @@
             clone.getElementsByClassName("roll")[0].innerHTML = list[i]["rollnumber"];
 
             var status = list[i]["attendancestatus"];
-            if(status == "P"){
+            if (status == "P" || status == "") {
                 clone.getElementsByClassName("custom_toggle")[0].classList.add("active");
             }
         }

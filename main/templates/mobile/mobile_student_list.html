@@ -30,7 +30,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="my-auto col-5" {% if hassection == False%} hidden {% endif %}>
+                    <div class="my-auto col" id="secdrop" {% if hassection == False%} hidden {% endif %}>
                         <div class="custom_dropdown">
                             <input type="text" data-id="" class="search_input form-control f-12 br-30 shadow OP"
                                 placeholder="Section..." id="sectionfilter" />
@@ -39,7 +39,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-2 text-center my-auto ps-0">
+                    <div class="col-2 text-center my-auto ps-0" hidden>
                         <div class="bg-green br-30 shadow" style="padding: 5px;" onclick="load_data()">
                             <i class="fas fa-search cl-w f-14 p-n"></i>
                         </div>
@@ -99,7 +99,12 @@
 
     function change_class() {
         var classid = event.target.getAttribute("data-id");
-        get_section(classid, document.getElementById("section_drop"));
+        get_section(classid, document.getElementById("section_drop"), "load_data");
+        var count = document.getElementById("section_drop").getElementsByClassName("option_item").length;
+        document.getElementById("main_body").innerHTML = "";
+        if(document.getElementById("secdrop").hidden == true || count == 0){
+            load_data();
+        }
     }
 
     function load_data() {
